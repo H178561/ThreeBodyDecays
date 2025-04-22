@@ -1,9 +1,6 @@
 #include "ThreeBodyDecays.hh"
 //#include "ThreeBodyUtilities.hh"
 
-//#include <nlohmann/json.hpp>
-#include "json.hpp"
-
 #include <cmath>
 #include <complex>
 #include <fstream>
@@ -11,7 +8,6 @@
 #include <stdexcept>
 #include <unistd.h>    // Für getcwd()
 
-//using json = nlohmann::json;
 using complex = std::complex<double>;
 
 

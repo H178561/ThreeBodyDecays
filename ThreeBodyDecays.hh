@@ -1,8 +1,7 @@
 #ifndef THREEBODYDECAYS_HH
 #define THREEBODYDECAYS_HH
 
-//#include <nlohmann/json.hpp>
-#include "json.hpp" 
+
 
 #include <complex>
 #include <map>
@@ -12,7 +11,6 @@
 #include <vector>
 
 using complex = std::complex<double>;
-//using json = nlohmann::json;
 using MandelstamTuple = std::array<double, 3>;
 using MassTuple = std::array<double, 4>;
 using SpinTuple = std::array<int, 4>;
@@ -501,12 +499,9 @@ class ThreeBodyDecays {
     double cosθ12( MandelstamTuple σs, ThreeBodyMasses msq );
 
   protected:
-    //std::vector<std::vector<complex>> aligned_amplitude(const json& chain, std::vector<double> invariants, std::vector<double> masses);
     void A_test();
 
   private:
-    nlohmann::json decayDescription;
-    std::map<std::string, nlohmann::json> functions;
 };
 
 
