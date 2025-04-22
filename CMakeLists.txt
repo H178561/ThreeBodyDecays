@@ -13,10 +13,6 @@ add_library(ThreeBodyDecaysLib
     ThreeBodyDecays.cpp
 )
 
-# Main executable
-add_executable(ThreeBodyDecays
-    Test.cpp
-)
 target_link_libraries(ThreeBodyDecays ThreeBodyDecaysLib)
 
 # Try to find GTest, but make it optional
