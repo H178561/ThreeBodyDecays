@@ -13,7 +13,7 @@ add_library(ThreeBodyDecaysLib
     ThreeBodyDecays.cpp
 )
 
-target_link_libraries(ThreeBodyDecays ThreeBodyDecaysLib)
+#target_link_libraries(ThreeBodyDecays ThreeBodyDecaysLib)
 
 # Try to find GTest, but make it optional
 find_package(GTest QUIET)
