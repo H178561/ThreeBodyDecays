@@ -11,6 +11,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # Add source files
 add_library(ThreeBodyDecaysLib
     ThreeBodyDecays.cpp
+    OrientationAngles.cpp
+    ThreeBodyAmplitudeModel.cpp
 )
 
 #target_link_libraries(ThreeBodyDecays ThreeBodyDecaysLib)
@@ -26,6 +28,7 @@ if(GTEST_FOUND)
     # Test executable
     add_executable(ThreeBodyDecaysTest
         Tests/ThreeBodyDecaysTest.cpp
+        Tests/OrientationAnglesTest.cpp
     )
     target_link_libraries(ThreeBodyDecaysTest
         ThreeBodyDecaysLib
