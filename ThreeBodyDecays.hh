@@ -9,6 +9,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <functional>  // for std::function
 
 using complex = std::complex<double>;
 using MandelstamTuple = std::array<double, 3>;
@@ -57,7 +58,7 @@ class ThreeBodySystem {
 
   std::array<double, 4> ms;
   std::array<int, 4> two_js;
-    
+
     ThreeBodySystem(const std::array<double, 4>& ms_,
                     std::array<int, 4>& spins) :
         ms(ms_)
@@ -119,10 +120,10 @@ class DecayChain {
                 const std::array<int, 4>& two_js_, int two_j_,
                 LineshapeFunction Xlineshape_, HelicityFunction Hij_,
                 HelicityFunction HRk_ , ThreeBodySystem tbs_) :*/
-    DecayChain( int k_, int two_j_, LineshapeFunction Xlineshape_, 
-                HelicityFunction HRk_ , HelicityFunction Hij_, 
+    DecayChain( int k_, int two_j_, LineshapeFunction Xlineshape_,
+                HelicityFunction HRk_ , HelicityFunction Hij_,
                 ThreeBodySystem tbs_) :
-       
+
         k( k_ ),
         //ms( ms_ ),
         //two_js(  ),
@@ -379,45 +380,45 @@ class NoRecoupling {
   private:
       int two_λa_;
       int two_λb_;
-  
+
   public:
       NoRecoupling(int two_λa, int two_λb) : two_λa_(two_λa), two_λb_(two_λb) {}
-      
+
       int get_two_λa() const { return two_λa_; }
       int get_two_λb() const { return two_λb_; }
-      
+
       // Diese Methode implementiert exakt die Julia-Logik
       complex operator()(const std::array<int, 2>& two_ms, const std::array<int, 3>& two_js) const {
           // (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
-          return (two_λa_ == two_ms[0] && two_λb_ == two_ms[1]) ? 
+          return (two_λa_ == two_ms[0] && two_λb_ == two_ms[1]) ?
                  complex(1.0, 0.0) : complex(0.0, 0.0);
       }
   };
-  
+
   class ParityRecoupling {
     private:
         int two_λa_;
         int two_λb_;
         bool ηηηphaseisplus_;
-    
+
     public:
-        ParityRecoupling(int two_λa, int two_λb, bool ηηηphaseisplus) : 
+        ParityRecoupling(int two_λa, int two_λb, bool ηηηphaseisplus) :
             two_λa_(two_λa), two_λb_(two_λb), ηηηphaseisplus_(ηηηphaseisplus) {}
-        
+
         int get_two_λa() const { return two_λa_; }
         int get_two_λb() const { return two_λb_; }
         bool is_ηηηphaseisplus() const { return ηηηphaseisplus_; }
-        
+
         // Diese Methode implementiert exakt die Julia-Logik
         complex operator()(const std::array<int, 2>& two_ms, const std::array<int, 3>& two_js) const {
             // (cs.two_λa == two_λa) * (cs.two_λb == two_λb) && return 1
             if (two_λa_ == two_ms[0] && two_λb_ == two_ms[1])
                 return complex(1.0, 0.0);
-            
+
             // (cs.two_λa == -two_λa) * (cs.two_λb == -two_λb) && return 2 * cs.ηηηphaseisplus - 1
             if (two_λa_ == -two_ms[0] && two_λb_ == -two_ms[1])
                 return complex(2 * ηηηphaseisplus_ - 1, 0.0);
-            
+
             return complex(0.0, 0.0);
         }
     };
@@ -438,10 +439,10 @@ enum class RecouplingType {
 // In ThreeBodyDecays.hh
 // In ThreeBodyDecays.hh
 std::shared_ptr<DecayChain> createDecayChainLS(
-  int k, 
-  std::function<complex(double)> Xlineshape, 
+  int k,
+  std::function<complex(double)> Xlineshape,
   const std::string& jp,
-  const ThreeBodyParities& Ps, 
+  const ThreeBodyParities& Ps,
   std::shared_ptr<ThreeBodySystem> tbs,
   RecouplingType HRkType,
   const std::array<int, 2>& HRkParams = {0, 0},
@@ -454,10 +455,10 @@ std::shared_ptr<DecayChain> createDecayChainLS(
 /*
 // Überladung mit weniger Parametern
 std::shared_ptr<DecayChain> createDecayChainLS(
-  int k, 
-  std::function<complex(double)> Xlineshape, 
+  int k,
+  std::function<complex(double)> Xlineshape,
   const std::string& jp,
-  const ThreeBodyParities& Ps, 
+  const ThreeBodyParities& Ps,
   std::shared_ptr<ThreeBodySystem> tbs,
   RecouplingType recouplingType1, std::array<int, 2> param1,
   RecouplingType recouplingType2, std::array<int, 2> param2)
@@ -465,7 +466,7 @@ std::shared_ptr<DecayChain> createDecayChainLS(
   // Standardwerte für Parameter
   //std::array<int, 2> defaultParams = {0, 0};
   bool defaultParityPhase = true;
-  
+
   // Rufe die vollständige Funktion auf
   return createDecayChainLS(k, Xlineshape, jp, Ps, tbs,
                            recouplingType1, param1, defaultParityPhase,
@@ -473,8 +474,8 @@ std::shared_ptr<DecayChain> createDecayChainLS(
 }*/
 
 RecouplingLS createRecouplingFunction(
-  RecouplingType type, 
-  const std::array<int, 2>& params, 
+  RecouplingType type,
+  const std::array<int, 2>& params,
   bool parityPhase = true);  // Neuer Parameter für ParityRecoupling
 
 class ThreeBodyDecays {

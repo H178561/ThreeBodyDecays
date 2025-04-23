@@ -4,6 +4,7 @@
 #include <cmath>
 #include <complex>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <unistd.h>    // Für getcwd()
@@ -59,7 +60,7 @@ double getLogFactorial(int n) {
         }
         return vec;
     }();
-    
+
     if (n < 0 || n > MAX_FACT) {
         throw std::runtime_error("Factorial out of range");
     }
@@ -80,7 +81,7 @@ double jacobi_pols(int n, int a, int b, double z) {
         double sum = 0.0;
         for (int s = 0; s <= n; ++s) {
             double sign = (s % 2 == 0) ? 1.0 : -1.0;
-            double logterm = getLogFactorial(n+b) - getLogFactorial(s) - getLogFactorial(n-s) + 
+            double logterm = getLogFactorial(n+b) - getLogFactorial(s) - getLogFactorial(n-s) +
                              getLogFactorial(n+a) - getLogFactorial(n+a-s);
             double term = sign * std::exp(logterm) * std::pow((1-z)/2.0, s) * std::pow((1+z)/2.0, n-s);
             sum += term;
@@ -94,7 +95,7 @@ double jacobi_pols(int n, int a, int b, double z) {
     double res = 0.0;
 
     for (int s = 0; s <= n; ++s) {
-        double logs = getLogFactorial(n+b) - getLogFactorial(s) - getLogFactorial(n-s) + 
+        double logs = getLogFactorial(n+b) - getLogFactorial(s) - getLogFactorial(n-s) +
                       getLogFactorial(n+a) - getLogFactorial(n+a-s);
         double args = s * ls + (n-s) * lc;
         double sign = (s % 2 == 0) ? 1.0 : -1.0;
@@ -121,7 +122,7 @@ double wignerd_hat_doublearg(int two_j, int two_m1, int two_m2, double z) {
     // Compute j_minus_M, j_plus_M, j_minus_N, j_plus_N
     int two_am1 = std::abs(two_m1);
     int two_am2 = std::abs(two_m2);
-    
+
     int two_M, two_N;
     if (two_am1 > two_am2) {
         two_M = two_am1;
@@ -137,9 +138,9 @@ double wignerd_hat_doublearg(int two_j, int two_m1, int two_m2, double z) {
     int j_plus_N = (two_j + two_N) / 2;
 
     // Compute logarithm of gamma ratio
-    double log_gamma_ratio = 0.5 * (getLogFactorial(j_minus_M) + 
-                                    getLogFactorial(j_plus_M) - 
-                                    getLogFactorial(j_minus_N) - 
+    double log_gamma_ratio = 0.5 * (getLogFactorial(j_minus_M) +
+                                    getLogFactorial(j_plus_M) -
+                                    getLogFactorial(j_minus_N) -
                                     getLogFactorial(j_plus_N));
 
     // Compute the Jacobi polynomial
@@ -155,7 +156,7 @@ double wignerd_doublearg(int two_j, int two_m1, int two_m2, double z) {
     if (std::abs(z - 1.0) < 1e-10) {
         return (two_m1 == two_m2) ? 1.0 : 0.0;
     }
-    
+
     if (std::abs(z + 1.0) < 1e-10) {
         if (two_m1 == -two_m2) {
             return ((two_j - two_m2) % 4 == 0) ? 1.0 : -1.0;
@@ -168,9 +169,9 @@ double wignerd_doublearg(int two_j, int two_m1, int two_m2, double z) {
     // using either a recursive formula or the Jacobi polynomial approach
     // This is a placeholder for the actual computation
     double hat = wignerd_hat_doublearg(two_j, two_m1, two_m2, z);
-    double xi = std::pow(1.0 - z, std::abs(two_m1 - two_m2) / 4.0) * 
+    double xi = std::pow(1.0 - z, std::abs(two_m1 - two_m2) / 4.0) *
                 std::pow(1.0 + z, std::abs(two_m1 + two_m2) / 4.0);
-    
+
     return hat * xi;
 }
 
@@ -210,9 +211,7 @@ double scalar_product( std::vector<double> a, std::vector<double> b )
 {
     double product = 0;
     for ( int i = 0; i <= a.size() - 1; i++ ) {
-        for ( int i = 0; i <= b.size() - 1; i++ ) {
-            product = product + ( a[i] ) * ( b[i] );
-        }
+        product = product + ( a[i] ) * ( b[i] );
     }
     return product;
 }
@@ -673,79 +672,79 @@ void ThreeBodyDecays::A_test()
    36 │ cosζ_3(3)_for_3   1.0
    */
 
-   std::cout
-        << "cosζ_1(1)_for_0: " << cosζ110 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ110, 1.0 ) << "\n "
-        << "cosζ_2(1)_for_0: " << cosζ210 << std::setw( 20 )
-        << " real: -0.19649 " << approx_equal( cosζ210, -0.19649 )
-        << "cosζ_3(1)_for_0: " << cosζ310 << std::setw( 20 )
-        << " real: -0.792381 " << approx_equal( cosζ310, -0.792381 ) << "\n "
-        << "cosζ_1(2)_for_0: " << cosζ120 << std::setw( 20 )
-        << " real: -0.19649 " << approx_equal( cosζ120, -0.19649 ) << "\n "
-        << "cosζ_2(2)_for_0: " << cosζ220 << std::setw( 20 ) 
-        << " real: 1.0 " << approx_equal( cosζ220, 1.0 ) << "\n "
-        << "cosζ_3(2)_for_0: " << cosζ320 << std::setw( 20 )
-        << " real: -0.442439 " << approx_equal( cosζ320, -0.442439 ) << "\n "
-        << "cosζ_1(3)_for_0: " << cosζ130 << std::setw( 20 )
-        << " real: -0.792381 " << approx_equal( cosζ130, -0.792381 ) << "\n "  
-        << "cosζ_2(3)_for_0: " << cosζ230 << std::setw( 20 )
-        << " real: -0.442439 " << approx_equal( cosζ230, -0.442439 ) << "\n "
-        << "cosζ_3(3)_for_0: " << cosζ330 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ330, 1.0 ) << "\n "
-        << "cosζ_1(1)_for_1: " << cosζ111 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ111, 1.0 ) << "\n "
-        << "cosζ_2(1)_for_1: " << cosζ211 << std::setw( 20 )
-        << " real: 0.99797 " << approx_equal( cosζ211, 0.99797 ) << "\n "
-        << "cosζ_3(1)_for_1: " << cosζ311 << std::setw( 20 )
-        << " real: 0.989415 " << approx_equal( cosζ311, 0.989415 ) << "\n "
-        << "cosζ_1(2)_for_1: " << cosζ121 << std::setw( 20 )
-        << " real: 0.99797 " << approx_equal( cosζ121, 0.99797 ) << "\n "
-        << "cosζ_2(2)_for_1: " << cosζ221 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ221, 1.0 ) << "\n "
-        << "cosζ_3(2)_for_1: " << cosζ321 << std::setw( 20 )
-        << " real: 0.978166 " << approx_equal( cosζ321, 0.978166 ) << "\n "
-        << "cosζ_1(3)_for_1: " << cosζ131 << std::setw( 20 )
-        << " real: 0.989415 " << approx_equal( cosζ131, 0.989415 ) << "\n "
-        << "cosζ_2(3)_for_1: " << cosζ231 << std::setw( 20 )
-        << " real: 0.978166 " << approx_equal( cosζ231, 0.978166 ) << "\n "
-        << "cosζ_3(3)_for_1: " << cosζ331 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ331, 1.0 ) << "\n "
-        << "cosζ_1(1)_for_2: " << cosζ112 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ112, 1.0 ) << "\n "
-        << "cosζ_2(1)_for_2: " << cosζ212 << std::setw( 20 )
-        << " real: 0.951225 " << approx_equal( cosζ212, 0.951225 ) << "\n "
-        << "cosζ_3(1)_for_2: " << cosζ312 << std::setw( 20 )
-        << " real: 0.728673 " << approx_equal( cosζ312, 0.728673 ) << "\n "
-        << "cosζ_1(2)_for_2: " << cosζ122 << std::setw( 20 )
-        << " real: 0.951225 " << approx_equal( cosζ122, 0.951225 ) << "\n "
-        << "cosζ_2(2)_for_2: " << cosζ222 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ222, 1.0 ) << "\n "
-        << "cosζ_3(2)_for_2: " << cosζ322 << std::setw( 20 )
-        << " real: 0.904411 " << approx_equal( cosζ322, 0.904411 ) << "\n "
-        << "cosζ_1(3)_for_2: " << cosζ132 << std::setw( 20 )
-        << " real: 0.728673 " << approx_equal( cosζ132, 0.728673 ) << "\n "
-        << "cosζ_2(3)_for_2: " << cosζ232 << std::setw( 20 )
-        << " real: 0.904411 " << approx_equal( cosζ232, 0.904411 ) << "\n "
-        << "cosζ_3(3)_for_2: " << cosζ332 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ332, 1.0 ) << "\n "
-        << "cosζ_1(1)_for_3: " << cosζ113 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ113, 1.0 ) << "\n "
-        << "cosζ_2(1)_for_3: " << cosζ213 << std::setw( 20 )
-        << " real: 0.892623 " << approx_equal( cosζ213, 0.892623 ) << "\n "
-        << "cosζ_3(1)_for_3: " << cosζ313 << std::setw( 20 )
-        << " real: 0.95766 " << approx_equal( cosζ313, 0.95766 ) << "\n "
-        << "cosζ_1(2)_for_3: " << cosζ123 << std::setw( 20 )
-        << " real: 0.892623 " << approx_equal( cosζ123, 0.892623 ) << "\n "
-        << "cosζ_2(2)_for_3: " << cosζ223 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ223, 1.0 ) << "\n "
-        << "cosζ_3(2)_for_3: " << cosζ323 << std::setw( 20 )
-        << " real: 0.984616 " << approx_equal( cosζ323, 0.984616 ) << "\n "
-        << "cosζ_1(3)_for_3: " << cosζ133 << std::setw( 20 )
-        << " real: 0.95766 " << approx_equal( cosζ133, 0.95766 ) << "\n "
-        << "cosζ_2(3)_for_3: " << cosζ233 << std::setw( 20 )
-        << " real: 0.984616 " << approx_equal( cosζ233, 0.984616 ) << "\n "
-        << "cosζ_3(3)_for_3: " << cosζ333 << std::setw( 20 ) << " real: 1.0 "
-        << approx_equal( cosζ333, 1.0 ) << std::endl;
+std::cout
+      << "cosζ_1(1)_for_0: " << cosζ110 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ110, 1.0 ) << "\n "
+      << "cosζ_2(1)_for_0: " << cosζ210 << "                    "
+      << " real: -0.19649 " << approx_equal( cosζ210, -0.19649 )
+      << "cosζ_3(1)_for_0: " << cosζ310 << "                    "
+      << " real: -0.792381 " << approx_equal( cosζ310, -0.792381 ) << "\n "
+      << "cosζ_1(2)_for_0: " << cosζ120 << "                    "
+      << " real: -0.19649 " << approx_equal( cosζ120, -0.19649 ) << "\n "
+      << "cosζ_2(2)_for_0: " << cosζ220 << "                    "
+      << " real: 1.0 " << approx_equal( cosζ220, 1.0 ) << "\n "
+      << "cosζ_3(2)_for_0: " << cosζ320 << "                    "
+      << " real: -0.442439 " << approx_equal( cosζ320, -0.442439 ) << "\n "
+      << "cosζ_1(3)_for_0: " << cosζ130 << "                    "
+      << " real: -0.792381 " << approx_equal( cosζ130, -0.792381 ) << "\n "
+      << "cosζ_2(3)_for_0: " << cosζ230 << "                    "
+      << " real: -0.442439 " << approx_equal( cosζ230, -0.442439 ) << "\n "
+      << "cosζ_3(3)_for_0: " << cosζ330 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ330, 1.0 ) << "\n "
+      << "cosζ_1(1)_for_1: " << cosζ111 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ111, 1.0 ) << "\n "
+      << "cosζ_2(1)_for_1: " << cosζ211 << "                    "
+      << " real: 0.99797 " << approx_equal( cosζ211, 0.99797 ) << "\n "
+      << "cosζ_3(1)_for_1: " << cosζ311 << "                    "
+      << " real: 0.989415 " << approx_equal( cosζ311, 0.989415 ) << "\n "
+      << "cosζ_1(2)_for_1: " << cosζ121 << "                    "
+      << " real: 0.99797 " << approx_equal( cosζ121, 0.99797 ) << "\n "
+      << "cosζ_2(2)_for_1: " << cosζ221 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ221, 1.0 ) << "\n "
+      << "cosζ_3(2)_for_1: " << cosζ321 << "                    "
+      << " real: 0.978166 " << approx_equal( cosζ321, 0.978166 ) << "\n "
+      << "cosζ_1(3)_for_1: " << cosζ131 << "                    "
+      << " real: 0.989415 " << approx_equal( cosζ131, 0.989415 ) << "\n "
+      << "cosζ_2(3)_for_1: " << cosζ231 << "                    "
+      << " real: 0.978166 " << approx_equal( cosζ231, 0.978166 ) << "\n "
+      << "cosζ_3(3)_for_1: " << cosζ331 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ331, 1.0 ) << "\n "
+      << "cosζ_1(1)_for_2: " << cosζ112 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ112, 1.0 ) << "\n "
+      << "cosζ_2(1)_for_2: " << cosζ212 << "                    "
+      << " real: 0.951225 " << approx_equal( cosζ212, 0.951225 ) << "\n "
+      << "cosζ_3(1)_for_2: " << cosζ312 << "                    "
+      << " real: 0.728673 " << approx_equal( cosζ312, 0.728673 ) << "\n "
+      << "cosζ_1(2)_for_2: " << cosζ122 << "                    "
+      << " real: 0.951225 " << approx_equal( cosζ122, 0.951225 ) << "\n "
+      << "cosζ_2(2)_for_2: " << cosζ222 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ222, 1.0 ) << "\n "
+      << "cosζ_3(2)_for_2: " << cosζ322 << "                    "
+      << " real: 0.904411 " << approx_equal( cosζ322, 0.904411 ) << "\n "
+      << "cosζ_1(3)_for_2: " << cosζ132 << "                    "
+      << " real: 0.728673 " << approx_equal( cosζ132, 0.728673 ) << "\n "
+      << "cosζ_2(3)_for_2: " << cosζ232 << "                    "
+      << " real: 0.904411 " << approx_equal( cosζ232, 0.904411 ) << "\n "
+      << "cosζ_3(3)_for_2: " << cosζ332 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ332, 1.0 ) << "\n "
+      << "cosζ_1(1)_for_3: " << cosζ113 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ113, 1.0 ) << "\n "
+      << "cosζ_2(1)_for_3: " << cosζ213 << "                    "
+      << " real: 0.892623 " << approx_equal( cosζ213, 0.892623 ) << "\n "
+      << "cosζ_3(1)_for_3: " << cosζ313 << "                    "
+      << " real: 0.95766 " << approx_equal( cosζ313, 0.95766 ) << "\n "
+      << "cosζ_1(2)_for_3: " << cosζ123 << "                    "
+      << " real: 0.892623 " << approx_equal( cosζ123, 0.892623 ) << "\n "
+      << "cosζ_2(2)_for_3: " << cosζ223 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ223, 1.0 ) << "\n "
+      << "cosζ_3(2)_for_3: " << cosζ323 << "                    "
+      << " real: 0.984616 " << approx_equal( cosζ323, 0.984616 ) << "\n "
+      << "cosζ_1(3)_for_3: " << cosζ133 << "                    "
+      << " real: 0.95766 " << approx_equal( cosζ133, 0.95766 ) << "\n "
+      << "cosζ_2(3)_for_3: " << cosζ233 << "                    "
+      << " real: 0.984616 " << approx_equal( cosζ233, 0.984616 ) << "\n "
+      << "cosζ_3(3)_for_3: " << cosζ333 << "                    " << " real: 1.0 "
+      << approx_equal( cosζ333, 1.0 ) << std::endl;
 
         ThreeBodySpins spins = { 1, 0, 0, 1 }; // h0=1 bezieht sich auf den Spin des Elternteilchens
 
@@ -754,15 +753,15 @@ void ThreeBodyDecays::A_test()
         auto Xlineshape = [](double sigma) -> complex {
             return complex(2.2 / sigma, 0.0);
         };
-        
+
         // NoRecoupling-Funktionen erstellen
         HelicityFunction noRecoupling = [](const std::array<int, 2>& twoMs, const std::array<int, 3>& twoJs) -> complex {
             return complex(1.0, 0.0); // Einfache Implementierung von NoRecoupling
         };
-        
+
         // DecayChain erstellen
         // DecayChain erstellen
-        
+
         auto dc = createDecayChainLS(
             1,                // k-Wert
             Xlineshape,       // Lineshape-Funktion
@@ -782,11 +781,11 @@ void ThreeBodyDecays::A_test()
             noRecoupling,     // NoRecoupling-Funktion
             *std::make_shared<ThreeBodySystem>(ms, spins)  // ThreeBodySystem by value, not pointer
         );
-        
+
         // MandelstamTuple erstellen (σs)
         // Schon erstellt
         // auto σs = x2σs({ 0.3, 0.3 }, ms, 1);
-        
+
         // Berechnen Sie die Amplitude
         // Gehen wir davon aus, dass Sie für beide Teilchen Helizitätswerte von 1/2 verwenden möchten
         std::vector<int> two_λs = { 1, 1, 1, 1 }; // Für 1/2 Helizität verwenden wir 1 in doubled representation
@@ -801,13 +800,13 @@ void ThreeBodyDecays::A_test()
         Tensor4Dcomp result4dold = amplitude4dold(*dc, σs, refζs);
 
         // Print a summary of the Tensor4D instead of trying to stream it directly
-        std::cout << "Tensor4D dimensions: " 
-            << result4dold.size() << " x " 
+        std::cout << "Tensor4D dimensions: "
+            << result4dold.size() << " x "
             << (result4dold.empty() ? 0 : result4dold[0].size()) << " x "
             << (result4dold.empty() || result4dold[0].empty() ? 0 : result4dold[0][0].size()) << " x "
             << (result4dold.empty() || result4dold[0].empty() || result4dold[0][0].empty() ? 0 : result4dold[0][0][0].size())
             << std::endl;
-        
+
         std::cout << " Tensor4D result4dold 0000: " << result4dold[0][0][0][0] << std::endl;
         std::cout << "Tensor4D result4dold 0001: " << result4dold[0][0][0][1] << std::endl;
         std::cout << "Tensor4D result4dold 0002: " << result4dold[1][0][0][2] << std::endl;
@@ -822,8 +821,8 @@ void ThreeBodyDecays::A_test()
         Tensor4D result4d = amplitude4d(*dc, σs, refζs);
 
         // Print a summary of the Tensor4D instead of trying to stream it directly
-        std::cout << "Tensor4D dimensions: " 
-            << result4d.size() << " x " 
+        std::cout << "Tensor4D dimensions: "
+            << result4d.size() << " x "
             << (result4d.empty() ? 0 : result4d[0].size()) << " x "
             << (result4d.empty() || result4d[0].empty() ? 0 : result4d[0][0].size()) << " x "
             << (result4d.empty() || result4d[0].empty() || result4d[0][0].empty() ? 0 : result4d[0][0][0].size())
@@ -842,11 +841,11 @@ void ThreeBodyDecays::A_test()
         }
 
 
-        
+
         //dc = DecayChain(; k=1, two_j=2, Xlineshape=σ->2.2/σ,
         //    HRk=ParityRecoupling(2,0,true), Hij=NoRecoupling(0,0),
         //    tbs=ThreeBodySystem(ms, ThreeBodySpins(1,0,0; h0=1)))
-        
+
         auto dc2 = createDecayChainLS(
             1,                // k-Wert
             Xlineshape,       // Lineshape-Funktion
@@ -869,13 +868,13 @@ void ThreeBodyDecays::A_test()
                 }
             }
             std::cout << "\n";
-        } 
-        
+        }
+
 
         //dc = DecayChain(; k=3, two_j=2, Xlineshape=σ->2.2/σ,
 		//HRk=ParityRecoupling(2,0,true), Hij=ParityRecoupling(2,0, false),
 		//tbs=ThreeBodySystem(ms, ThreeBodySpins(1,0,0; h0=1)))
-        
+
         auto dc3 = createDecayChainLS(
             3,                // k-Wert
             Xlineshape,       // Lineshape-Funktion
@@ -911,28 +910,28 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
     const auto& tbs = dc.tbs;
     int two_j = dc.two_j;
     const auto& two_js = tbs.two_js;
-    
+
     // Get indices i, j from k (1-based indexing in result)
     auto [i, j] = ij_from_k(k);
     // Konvertieren zu 0-basierter Indexierung für Arrays
-    int i_idx = i-1; 
+    int i_idx = i-1;
     int j_idx = j-1;
     int k_idx = k-1;
-    
+
     // Überprüfen der Grenzen für sicheren Array-Zugriff
     if (i_idx < 0 || i_idx >= 3 || j_idx < 0 || j_idx >= 3 || k_idx < 0 || k_idx >= 3) {
-        std::cout << "Invalid indices in aligned_amplitude4d: i=" 
+        std::cout << "Invalid indices in aligned_amplitude4d: i="
                                            << i << ", j=" << j << ", k=" << k << std::endl;
         // Rückgabe eines leeren Tensors bei Fehler
         return Tensor4D();
     }
-    
+
     // Quadrierte Massen berechnen
-    std::array<double, 4> msq = {tbs.ms[0]*tbs.ms[0], 
-        tbs.ms[1]*tbs.ms[1], 
-        tbs.ms[2]*tbs.ms[2], 
+    std::array<double, 4> msq = {tbs.ms[0]*tbs.ms[0],
+        tbs.ms[1]*tbs.ms[1],
+        tbs.ms[2]*tbs.ms[2],
         tbs.ms[3]*tbs.ms[3]};
-    
+
     // cosθ und Wigner d-Matrix berechnen
     double cosθ = cosθij(σs, msq, k);
     std::cout << "cosθ: " << cosθ << std::endl;
@@ -940,8 +939,8 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
     std::cout << "cosθ: " << cosθ << std::endl;
     /*
     // Wigner d Test ok
-    std::cout << "d_θ dimensions: " 
-            << d_θ.size() << " x " 
+    std::cout << "d_θ dimensions: "
+            << d_θ.size() << " x "
             << (d_θ.empty() ? 0 : d_θ[0].size()) << std::endl;
 
     for (int i = 0; i < d_θ.size(); ++i) {
@@ -952,7 +951,7 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
     }
         */
 
-    
+
     // Spins
     std::array<int, 3> two_js_Hij = {two_j, two_js[i_idx], two_js[j_idx]};
     std::array<int, 3> two_js_HRk = {two_js[3], two_j, two_js[k_idx]};
@@ -964,16 +963,16 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
     int vrk_dim2 = two_js[k_idx] + 1;
     // VRk-Matrix initialisieren
     VRk.resize(vrk_dim1, std::vector<double>(vrk_dim2, 0.0));
-    
+
     for (int m1_idx = 0; m1_idx < vrk_dim1; m1_idx++) {
         int two_m1 = -two_j + 2 * m1_idx;
         for (int m2_idx = 0; m2_idx < vrk_dim2; m2_idx++) {
             int two_m2 = -two_js[k_idx] + 2 * m2_idx;
-            
+
             std::array<int, 2> two_ms = {two_m1, two_m2};
             complex amp = amplitude_recoupling(dc.HRk, two_ms, two_js_HRk);
             double phase_value = (((two_js[k_idx] - two_m2) % 4 == 0) ? 1.0 : -1.0);
-            
+
             VRk[m1_idx][m2_idx] = amp.real() * phase_value;
         }
     }
@@ -983,25 +982,25 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
     int two_m1 = -two_j + 2 * m1_idx;
     for (int m2_idx = 0; m2_idx < vrk_dim2; m2_idx++) {
         int two_m2 = -two_js[k_idx] + 2 * m2_idx;
-        
+
         std::array<int, 2> two_ms = {two_m1, two_m2};
-        
+
         // ALTERNATIVE 1: Verwenden Sie diese Zeile für 'No Recoupling' mit `-2, 0` statt `0, 0`
         // Diese Bedingung gibt das Julia-Muster zurück
-        bool matches = (two_m2 == 0 && (two_m1 == -2 || two_m1 == 2)); 
+        bool matches = (two_m2 == 0 && (two_m1 == -2 || two_m1 == 2));
         complex amp = matches ? complex(1.0, 0.0) : complex(0.0, 0.0);
         // ALTERNATIVE 2: Oder verwenden Sie RecouplingLS mit geeigneten Parametern
-        // complex amp = ls_coupling(two_js_HRk[1], two_ms[0], two_js_HRk[2], 
+        // complex amp = ls_coupling(two_js_HRk[1], two_ms[0], two_js_HRk[2],
         //                             two_ms[1], two_js_HRk[0], 2, 0);
-        
+
         double phase_value = (((two_js[k_idx] - two_m2) % 4 == 0) ? 1.0 : -1.0);
         VRk[m1_idx][m2_idx] = real(amp) * phase_value;
     }
 }*/
 
     std::cout << "values" << two_j << " " << two_js[0] << " " << two_js[1] << " " << two_js[2] << " " << two_js[3] << std::endl;
-    std::cout<< "VRk dimensions: " 
-            << VRk.size() << " x " 
+    std::cout<< "VRk dimensions: "
+            << VRk.size() << " x "
             << (VRk.empty() ? 0 : VRk[0].size()) << std::endl;
     for (int i = 0; i < VRk.size(); ++i) {
         for (int j = 0; j < VRk[0].size(); ++j) {
@@ -1009,20 +1008,20 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
         }
         std::cout << "\n";
     }
-    
+
     // Vij-Matrix berechnen
     std::vector<std::vector<double>> Vij;
     int vij_dim1 = two_js[i_idx] + 1;
     int vij_dim2 = two_js[j_idx] + 1;
-    
+
     // Vij-Matrix initialisieren
     Vij.resize(vij_dim1, std::vector<double>(vij_dim2, 0.0));
-    
+
     for (int m1_idx = 0; m1_idx < vij_dim1; m1_idx++) {
         int two_m1 = -two_js[i_idx] + 2 * m1_idx;
         for (int m2_idx = 0; m2_idx < vij_dim2; m2_idx++) {
             int two_m2 = -two_js[j_idx] + 2 * m2_idx;
-            
+
             std::array<int, 2> two_ms = {two_m1, two_m2};
             complex amp = amplitude_recoupling(dc.Hij, two_ms, two_js_Hij);
             double phase_value = phase(two_js[k_idx] - two_m2);
@@ -1030,8 +1029,8 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
         }
     }
 
-    std::cout<< "Vij dimensions: " 
-            << Vij.size() << " x " 
+    std::cout<< "Vij dimensions: "
+            << Vij.size() << " x "
             << (Vij.empty() ? 0 : Vij[0].size()) << std::endl;
     for (int i = 0; i < Vij.size(); ++i) {
         for (int j = 0; j < Vij[0].size(); ++j) {
@@ -1039,33 +1038,33 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
         }
         std::cout << "\n";
     }
-    
+
     // Δ-Verschiebungen berechnen
     int Δ_zk = (two_j - two_js[3] - two_js[k_idx]) / 2;
     int Δ_ij = (two_j - two_js[i_idx] + two_js[j_idx]) / 2;
-    
+
     // Lineshape berechnen
     double lineshape = dc.Xlineshape(σs[k_idx]).real();
-    
-    
+
+
     // Dimensionen für den Ergebnistensor
     std::vector<int> dims = {two_js[0] + 1, two_js[1] + 1, two_js[2] + 1, two_js[3] + 1};
-    
+
     // F0 mit Nullen initialisieren (Ergebnistensor)
     Tensor4D F0(dims[0], std::vector<std::vector<std::vector<double>>>(
                 dims[1], std::vector<std::vector<double>>(
                 dims[2], std::vector<double>(dims[3], 0.0))));
-    
+
     // Dimensionen für Berechnungstensor
     Tensor4D F(dims[i_idx], std::vector<std::vector<std::vector<double>>>(
               dims[j_idx], std::vector<std::vector<double>>(
               dims[k_idx], std::vector<double>(dims[3], 0.0))));
-    
+
     // Hilfsfunktion zum Begrenzen von Indizes
     auto pad = [](int idx, int max_size) {
         return std::max(0, std::min(idx, max_size - 1));
     };
-    
+
     // F berechnen (ähnlich @tullio in Julia)
     for (int _i = 0; _i < dims[i_idx]; _i++) {
         for (int _j = 0; _j < dims[j_idx]; _j++) {
@@ -1075,22 +1074,22 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
                     int vrk_idx2 = _k;
                     int d_idx1 = pad(_z + _k + Δ_zk, two_j + 1);
                     int d_idx2 = pad(_i - _j + Δ_ij, two_j + 1);
-                    
+
                     // Sicherstellung, dass alle Indizes innerhalb der Grenzen sind
                     if (vrk_idx1 < (int)VRk.size() && vrk_idx2 < (int)VRk[0].size() &&
                         d_idx1 < (int)d_θ.size() && d_idx2 < (int)d_θ[0].size() &&
                         _i < (int)Vij.size() && _j < (int)Vij[0].size()) {
-                        
-                        F[_i][_j][_k][_z] += 
-                            VRk[vrk_idx1][vrk_idx2] * 
-                            d_θ[d_idx1][d_idx2] * 
+
+                        F[_i][_j][_k][_z] +=
+                            VRk[vrk_idx1][vrk_idx2] *
+                            d_θ[d_idx1][d_idx2] *
                             Vij[_i][_j];
                     }
                 }
             }
         }
     }
-    
+
     // Normalisierung und Lineshape anwenden
     double d_norm = std::sqrt(two_j + 1.0);
     for (auto& dim1 : F) {
@@ -1103,7 +1102,7 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
         }
     }
     std::cout << d_norm << " " << lineshape << std::endl;
-    
+
     // Zurück zur ursprünglichen Reihenfolge permutieren
     for (int _0 = 0; _0 < dims[0]; _0++) {
         for (int _1 = 0; _1 < dims[1]; _1++) {
@@ -1114,11 +1113,11 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
                     int perm_j = (j_idx == 0) ? _0 : (j_idx == 1) ? _1 : (j_idx == 2) ? _2 : _3;
                     int perm_k = (k_idx == 0) ? _0 : (k_idx == 1) ? _1 : (k_idx == 2) ? _2 : _3;
                     int perm_z = 3; // Parent index is always last (3)
-                    
+
                     // Überprüfen der Grenzen für sicheren Array-Zugriff
-                    if (perm_i < dims[i_idx] && perm_j < dims[j_idx] && 
+                    if (perm_i < dims[i_idx] && perm_j < dims[j_idx] &&
                         perm_k < dims[k_idx] && _3 < dims[3]) {
-                        
+
                         F0[_0][_1][_2][_3] = F[perm_i][perm_j][perm_k][_3];
                     }
                 }
@@ -1126,18 +1125,18 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain& dc, const Mandel
         }
     }
 
-    
-    
+
+
     return F0;
 }
 
 // Helper function to calculate amplitude for recoupling
 /*
 complex ThreeBodyDecays::amplitude_recoupling(
-    const RecouplingLS& recoupling, 
-    const std::array<int, 2>& two_ms, 
+    const RecouplingLS& recoupling,
+    const std::array<int, 2>& two_ms,
     const std::array<int, 3>& two_js) {
-    
+
     // Da RecouplingLS ein std::function-Typ ist, können wir keinen dynamic_cast verwenden
     // Stattdessen rufen wir die Funktion direkt auf
     return recoupling(two_ms, two_js);
@@ -1146,24 +1145,24 @@ complex ThreeBodyDecays::amplitude_recoupling(
 
 // In ThreeBodyDecays.cpp
 complex ThreeBodyDecays::amplitude_recoupling(
-    const RecouplingLS& recoupling, 
-    const std::array<int, 2>& two_ms, 
+    const RecouplingLS& recoupling,
+    const std::array<int, 2>& two_ms,
     const std::array<int, 3>& two_js) {
-    
+
     // std::function mit std::bind erlaubt kein dynamic_cast, daher müssen wir einen
     // anderen Ansatz verwenden. Wir können versuchen, verschiedene Recoupling-Typen
     // durch Funktionspointer zu identifizieren
 
     // Versuche, den gespeicherten void* Pointer zurückzugewinnen und zu prüfen
     using FunctionType = complex (*)(const std::array<int, 2>&, const std::array<int, 3>&);
-    
-    
+
+
     // Direkte Verwendung der Funktion
     return recoupling(two_ms, two_js);
 }
 
 // Implementation of amplitude function that returns a Tensor4D
-Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain& dc, 
+Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain& dc,
                               const MandelstamTuple& σs,
                               const std::vector<int>& refζs) {
     int k = dc.k;
@@ -1173,24 +1172,24 @@ Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain& dc,
     const auto& ms = tbs.ms;
     //std::array<int, 4> two_js = {two_jst[0]*2, two_jst[1]*2, two_jst[2]*2, two_jst[3]*2};
 
-    std::cout << two_js[0] << " " 
-                                        << two_js[1] << " " 
-                                        << two_js[2] << " " 
+    std::cout << two_js[0] << " "
+                                        << two_js[1] << " "
+                                        << two_js[2] << " "
                                         << two_js[3] << std::endl;
-    
+
     // Calculate squared masses
-    std::array<double, 4> msq = {ms[0]*ms[0], 
-        ms[1]*ms[1], 
-        ms[2]*ms[2], 
+    std::array<double, 4> msq = {ms[0]*ms[0],
+        ms[1]*ms[1],
+        ms[2]*ms[2],
         ms[3]*ms[3] };
 
     // Get aligned amplitude
     auto F0 = aligned_amplitude4d(dc, σs);
 
-    
 
-    std::cout << "F0 dimensions: " 
-            << F0.size() << " x " 
+
+    std::cout << "F0 dimensions: "
+            << F0.size() << " x "
             << (F0.empty() ? 0 : F0[0].size()) << " x "
             << (F0.empty() || F0[0].empty() ? 0 : F0[0][0].size()) << " x "
             << (F0.empty() || F0[0].empty() || F0[0][0].empty() ? 0 : F0[0][0][0].size())
@@ -1207,7 +1206,7 @@ Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain& dc,
         std::cout << "\n";
     }
     std::cout << "ok" << std::endl;
-    
+
     // Calculate alignment rotations
     std::vector<Matrix2D> d_ζs(4);
     for (size_t l = 0; l < 4; ++l) {
@@ -1217,7 +1216,7 @@ Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain& dc,
         double _cosζ = _w->cos_zeta(σs, msq);
         d_ζs[l] = wignerd_doublearg_sign(_two_j, _cosζ, _w->is_positive());
     }
-    
+
     // Alias the d_ζs for clarity
     const auto& D1 = d_ζs[0];
     const auto& D2 = d_ζs[1];
@@ -1225,25 +1224,25 @@ Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain& dc,
     const auto& D0 = d_ζs[3];
     std::cout << "ok" << std::endl;
 
-    
+
     // Create a new tensor with the same dimensions as F0
     std::vector<int> dims;
     for (int i = 0; i < 4; i++) {
         dims.push_back(two_js[i] + 1);
     }
 
-    
+
     Tensor4D F(dims[0], std::vector<std::vector<std::vector<double>>>(
                dims[1], std::vector<std::vector<double>>(
                dims[2], std::vector<double>(dims[3], 0.0))));
 
-    std::cout << "F dimensions: " 
-        << F.size() << " x " 
+    std::cout << "F dimensions: "
+        << F.size() << " x "
         << (F.empty() ? 0 : F[0].size()) << " x "
         << (F.empty() || F[0].empty() ? 0 : F[0][0].size()) << " x "
         << (F.empty() || F[0].empty() || F[0][0].empty() ? 0 : F[0][0][0].size())
-        << std::endl;       
-    
+        << std::endl;
+
     // Calculate the tensor contraction (equivalent to @tullio in Julia)
     // @tullio F[_i, _j, _k, _z] = D0[_z, _z′] * F0[_i′, _j′, _k′, _z′] * D1[_i′, _i] * D2[_j′, _j] * D3[_k′, _k]
     for (int _i = 0; _i < dims[0]; ++_i) {
@@ -1253,21 +1252,21 @@ Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain& dc,
                     // Sum over all primed indices
                     for (int _i_prime = 0; _i_prime < dims[0]; ++_i_prime) {
                         if (_i_prime >= (int)D1.size() || _i >= (int)D1[0].size()) continue;
-                        
+
                         for (int _j_prime = 0; _j_prime < dims[1]; ++_j_prime) {
                             if (_j_prime >= (int)D2.size() || _j >= (int)D2[0].size()) continue;
-                            
+
                             for (int _k_prime = 0; _k_prime < dims[2]; ++_k_prime) {
                                 if (_k_prime >= (int)D3.size() || _k >= (int)D3[0].size()) continue;
-                                
+
                                 for (int _z_prime = 0; _z_prime < dims[3]; ++_z_prime) {
                                     if (_z_prime >= (int)D0.size() || _z >= (int)D0[0].size()) continue;
-                                    
-                                    F[_i][_j][_k][_z] += 
-                                        D0[_z][_z_prime] * 
-                                        F0[_i_prime][_j_prime][_k_prime][_z_prime] * 
-                                        D1[_i_prime][_i] * 
-                                        D2[_j_prime][_j] * 
+
+                                    F[_i][_j][_k][_z] +=
+                                        D0[_z][_z_prime] *
+                                        F0[_i_prime][_j_prime][_k_prime][_z_prime] *
+                                        D1[_i_prime][_i] *
+                                        D2[_j_prime][_j] *
                                         D3[_k_prime][_k];
                                 }
                             }
@@ -1381,29 +1380,29 @@ SpinParity::SpinParity(const std::string& jp) {
     if (jp.empty()) {
         throw std::invalid_argument("jp string cannot be empty");
     }
-    
+
     // Get the parity character (last character)
     p_ = jp.back();
-    
+
     // Parse the spin value (rest of the string)
     std::string spin_str = jp.substr(0, jp.size() - 1);
-    
+
     // Check if spin string is empty
     if (spin_str.empty()) {
         throw std::invalid_argument("Spin value cannot be empty");
     }
-    
+
     // Check if spin is a fraction
     size_t slash_pos = spin_str.find('/');
     if (slash_pos != std::string::npos) {
         // Handle fraction
         std::string num_str = spin_str.substr(0, slash_pos);
         std::string denom_str = spin_str.substr(slash_pos + 1);
-        
+
         if (num_str.empty() || denom_str.empty()) {
             throw std::invalid_argument("Invalid fraction format");
         }
-        
+
         try {
             int numerator = std::stoi(num_str);
             int denominator = std::stoi(denom_str);
@@ -1430,10 +1429,10 @@ SpinParity::SpinParity(const std::string& jp) {
 // In ThreeBodyDecays.cpp: Implementierung der Funktion aktualisieren
 // In ThreeBodyDecays.cpp
 std::shared_ptr<DecayChain> createDecayChainLS(
-    int k, 
-    std::function<std::complex<double>(double)> Xlineshape, 
+    int k,
+    std::function<std::complex<double>(double)> Xlineshape,
     const std::string& jp,
-    const ThreeBodyParities& Ps, 
+    const ThreeBodyParities& Ps,
     std::shared_ptr<ThreeBodySystem> tbs,
     RecouplingType HRkType,
     const std::array<int, 2>& HRkParams,
@@ -1445,13 +1444,13 @@ std::shared_ptr<DecayChain> createDecayChainLS(
     // Parse spin-parity
     SpinParity SP(jp);
     int two_j = SP.get_two_j();
-    
+
     // Create Hij recoupling function
     RecouplingLS Hij = createRecouplingFunction(HijType, HijParams, HijParityPhase);
-    
+
     // Create HRk recoupling function
     RecouplingLS HRk = createRecouplingFunction(HRkType, HRkParams, HRkParityPhase);
-    
+
     // Create and return the DecayChain
     return std::make_shared<DecayChain>(
         k,                // k-Wert
@@ -1467,15 +1466,15 @@ std::shared_ptr<DecayChain> createDecayChainLS(
 // In ThreeBodyDecays.cpp
 // In ThreeBodyDecays.cpp
 RecouplingLS createRecouplingFunction(
-    RecouplingType type, 
-    const std::array<int, 2>& params, 
+    RecouplingType type,
+    const std::array<int, 2>& params,
     bool parityPhase)  // Parameter für ParityRecoupling
 {
     switch(type) {
         case RecouplingType::NoRecoupling: {
             // NoRecoupling verwenden
             NoRecoupling noRecoupling(params[0], params[1]);
-            
+
             return [noRecoupling](const std::array<int, 2>& two_ms, const std::array<int, 3>& two_js) -> complex {
                 // Exakte Implementierung der Julia-Logik: (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
                 if (noRecoupling.get_two_λa() == two_ms[0] && noRecoupling.get_two_λb() == two_ms[1]) {
@@ -1489,27 +1488,27 @@ RecouplingLS createRecouplingFunction(
             int two_λa = params[0];
             int two_λb = params[1];
             bool ηηηphaseisplus = parityPhase;
-            
+
             return [two_λa, two_λb, ηηηphaseisplus](
-                const std::array<int, 2>& two_ms, 
+                const std::array<int, 2>& two_ms,
                 const std::array<int, 3>& two_js) -> complex {
-                
+
                 // Erste Bedingung: cs.two_λa == two_λa and cs.two_λb == two_λb
                 if (two_λa == two_ms[0] && two_λb == two_ms[1]) {
                     return complex(1.0, 0.0);
                 }
-                
+
                 // Zweite Bedingung: cs.two_λa == -two_λa and cs.two_λb == -two_λb
                 // Dies prüft, ob der Parameter gleich dem negativen des übergebenen Werts ist
                 if (two_λa == -two_ms[0] && two_λb == -two_ms[1]) {
                     // Exakt die Julia-Logik: 2 * ηηηphaseisplus - 1 (= 1 wenn true, -1 wenn false)
                     return complex(2 * ηηηphaseisplus - 1, 0.0);
                 }
-                
+
                 return complex(0.0, 0.0);
             };
         }
-        
+
         case RecouplingType::LSRecoupling: {
             // RecouplingLS mit den angegebenen Parametern
             // In einer realen Implementierung würden Sie hier jls_coupling verwenden
