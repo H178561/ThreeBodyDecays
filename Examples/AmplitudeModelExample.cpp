@@ -45,8 +45,8 @@ int main()
 
     // Create a model and add components (similar to Julia's collection)
     ThreeBodyAmplitudeModel model;
-    model.add(dc1, complex(1.0, 0.0));  // First chain with weight 1.0
-    model.add(dc2, complex(0.5, 0.25)); // Second chain with weight 0.5+0.25i
+    model.add(dc1, "1", complex(1.0, 0.0));  // First chain with weight 1.0
+    model.add(dc2, "2", complex(0.5, 0.25)); // Second chain with weight 0.5+0.25i
 
     std::cout << "Created amplitude model with " << model.size() << " decay chains" << std::endl;
 

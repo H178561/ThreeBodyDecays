@@ -46,6 +46,12 @@ public:
 private:
     // Store chains with their labels and coefficients
     std::vector<std::tuple<std::shared_ptr<DecayChain>, std::string, complex>> chains_;
+
+    // Helper method to generate all helicity combinations
+    void generateHelicityCombinations(
+        const std::array<int, 4> &two_js,
+        std::vector<int> current,
+        std::vector<std::vector<int>> &result) const;
 };
 
 #endif // THREEBODYAMPLITUDEMODEL_HH

@@ -131,7 +131,7 @@ TEST_F(ThreeBodyDecaysTest, DecayChainNoRecoupling) {
         Xlineshape,       // Lineshape function
         "2+",             // jp (Spin-parity)
         ThreeBodyParities{'+', '+', '+', '+'}, // Parities
-        std::make_shared<ThreeBodySystem>(ms, spins),  // ThreeBodySystem
+        ThreeBodySystem(ms, spins),  // ThreeBodySystem
         RecouplingType::NoRecoupling, {0,0} // NoRecoupling function
     );
 
@@ -169,7 +169,7 @@ TEST_F(ThreeBodyDecaysTest, DecayChainParityRecoupling) {
         Xlineshape,       // Lineshape function
         "2+",             // jp (Spin-parity)
         ThreeBodyParities{'+', '+', '+', '+'}, // Parities
-        std::make_shared<ThreeBodySystem>(ms, spins),  // ThreeBodySystem
+        ThreeBodySystem(ms, spins),  // ThreeBodySystem
         RecouplingType::NoRecoupling, {0,0}, false, // NoRecoupling for Hij
         RecouplingType::ParityRecoupling, {2,0}, true // ParityRecoupling for HRk
     );
@@ -202,7 +202,7 @@ TEST_F(ThreeBodyDecaysTest, DecayChainDoubleParityRecoupling) {
         Xlineshape,       // Lineshape function
         "2+",             // jp (Spin-parity)
         ThreeBodyParities{'+', '+', '+', '+'}, // Parities
-        std::make_shared<ThreeBodySystem>(ms, spins),  // ThreeBodySystem
+        ThreeBodySystem(ms, spins),  // ThreeBodySystem
         RecouplingType::ParityRecoupling, {2,0}, true, // ParityRecoupling for HRk
         RecouplingType::ParityRecoupling, {2,0}, false // ParityRecoupling for Hij
     );

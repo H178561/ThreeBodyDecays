@@ -9,6 +9,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <array>
 #include <functional>  // for std::function
 
 using complex = std::complex<double>;
@@ -439,39 +440,17 @@ enum class RecouplingType {
 // In ThreeBodyDecays.hh
 // In ThreeBodyDecays.hh
 std::shared_ptr<DecayChain> createDecayChainLS(
-  int k,
-  std::function<complex(double)> Xlineshape,
-  const std::string& jp,
-  const ThreeBodyParities& Ps,
-  std::shared_ptr<ThreeBodySystem> tbs,
-  RecouplingType HRkType,
-  const std::array<int, 2>& HRkParams = {0, 0},
-  bool HRkParityPhase = true,  // Default-Parameter
-  RecouplingType HijType = RecouplingType::NoRecoupling,  // Default-Parameter
-  const std::array<int, 2>& HijParams = {0, 0},  // Default-Parameter
-  bool HijParityPhase = true   // Default-Parameter
-);
-
-/*
-// Überladung mit weniger Parametern
-std::shared_ptr<DecayChain> createDecayChainLS(
-  int k,
-  std::function<complex(double)> Xlineshape,
-  const std::string& jp,
-  const ThreeBodyParities& Ps,
-  std::shared_ptr<ThreeBodySystem> tbs,
-  RecouplingType recouplingType1, std::array<int, 2> param1,
-  RecouplingType recouplingType2, std::array<int, 2> param2)
-{
-  // Standardwerte für Parameter
-  //std::array<int, 2> defaultParams = {0, 0};
-  bool defaultParityPhase = true;
-
-  // Rufe die vollständige Funktion auf
-  return createDecayChainLS(k, Xlineshape, jp, Ps, tbs,
-                           recouplingType1, param1, defaultParityPhase,
-                           recouplingType2, param2, defaultParityPhase);
-}*/
+    int k,
+    std::function<std::complex<double>(double)> Xlineshape,
+    const std::string& jp,
+    const ThreeBodyParities& Ps,
+    const ThreeBodySystem& tbs,  // Changed from shared_ptr to reference
+    RecouplingType HRkType = RecouplingType::NoRecoupling,
+    const std::array<int, 2>& HRkParams = {0, 0},
+    bool HRkParityPhase = false,
+    RecouplingType HijType = RecouplingType::NoRecoupling,
+    const std::array<int, 2>& HijParams = {0, 0},
+    bool HijParityPhase = false);
 
 RecouplingLS createRecouplingFunction(
   RecouplingType type,
