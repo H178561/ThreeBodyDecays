@@ -944,6 +944,66 @@ void ThreeBodyDecays::A_test()
     }
 }
 
+// Replace the placeholder CG_doublearg function with this implementation
+
+complex CG_doublearg(int two_j1, int two_m1, int two_j2, int two_m2, int two_j, int two_m) {
+    // Check if m = m1 + m2 (conservation of angular momentum projection)
+    if (two_m != two_m1 + two_m2) {
+        return complex(0.0, 0.0);
+    }
+
+    // Check triangle inequality for j values
+    if (two_j < std::abs(two_j1 - two_j2) || two_j > two_j1 + two_j2) {
+        return complex(0.0, 0.0);
+    }
+
+    // Convert doubled representation to standard form
+    double j1 = two_j1 / 2.0;
+    double m1 = two_m1 / 2.0;
+    double j2 = two_j2 / 2.0;
+    double m2 = two_m2 / 2.0;
+    double j = two_j / 2.0;
+    double m = two_m / 2.0;
+
+    // Check if m values are within valid range
+    if (std::abs(m1) > j1 || std::abs(m2) > j2 || std::abs(m) > j) {
+        return complex(0.0, 0.0);
+    }
+
+    // Calculate the normalization factor
+    double norm = std::sqrt((2.0 * j + 1.0) *
+                 std::exp(getLogFactorial(j1 + j2 - j) +
+                          getLogFactorial(j + j1 - j2) +
+                          getLogFactorial(j + j2 - j1) -
+                          getLogFactorial(j1 + j2 + j + 1.0)));
+
+    norm *= std::sqrt(std::exp(getLogFactorial(j1 + m1) +
+                              getLogFactorial(j1 - m1) +
+                              getLogFactorial(j2 + m2) +
+                              getLogFactorial(j2 - m2) +
+                              getLogFactorial(j + m) +
+                              getLogFactorial(j - m)));
+
+    // Calculate the sum for the coefficient
+    double sum = 0.0;
+    double max_k = std::min({j1 + j2 - j, j1 - m1, j2 + m2});
+
+    for (double k = 0.0; k <= max_k; k += 1.0) {
+        if (j - j2 + m1 + k >= 0.0 && j - j1 - m2 + k >= 0.0) {
+            double term = std::pow(-1.0, k) / (
+                std::exp(getLogFactorial(k) +
+                       getLogFactorial(j1 + j2 - j - k) +
+                       getLogFactorial(j1 - m1 - k) +
+                       getLogFactorial(j2 + m2 - k) +
+                       getLogFactorial(j - j2 + m1 + k) +
+                       getLogFactorial(j - j1 - m2 + k)));
+            sum += term;
+        }
+    }
+
+    return complex(norm * sum, 0.0);
+}
+
 // aligned_amplitude implementation that returns a Tensor4D
 // Korrigierte aligned_amplitude4d-Funktion
 Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain &dc, const MandelstamTuple &σs)
