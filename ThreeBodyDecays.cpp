@@ -809,8 +809,7 @@ void ThreeBodyDecays::A_test()
         Xlineshape,                            // Lineshape-Funktion
         "2+",                                  // jp (Spin-Parität, hier 2+)
         ThreeBodyParities{'+', '+', '+', '+'}, // Paritäten, ändern Sie diese entsprechend
-        tbs,                                   // ThreeBodySystem as reference
-        RecouplingType::NoRecoupling, {0, 0}   // NoRecoupling-Funktion
+        tbs                                    // ThreeBodySystem as reference
     );
 
     auto dchain = DecayChain(
@@ -891,13 +890,12 @@ void ThreeBodyDecays::A_test()
     //     tbs=ThreeBodySystem(ms, ThreeBodySpins(1,0,0; h0=1)))
 
     auto dc2 = createDecayChainLS(
-        1,                                           // k-Wert
-        Xlineshape,                                  // Lineshape-Funktion
-        "2+",                                        // jp (Spin-Parität, hier 2+)
-        ThreeBodyParities{'+', '+', '+', '+'},       // Paritäten, ändern Sie diese entsprechend
-        tbs,                                         // ThreeBodySystem as reference
-        RecouplingType::NoRecoupling, {0, 0}, false, // NoRecoupling-Funktion
-        RecouplingType::ParityRecoupling, {2, 0}, true);
+        1,                                     // k-Wert
+        Xlineshape,                            // Lineshape-Funktion
+        "2+",                                  // jp (Spin-Parität, hier 2+)
+        ThreeBodyParities{'+', '+', '+', '+'}, // Paritäten, ändern Sie diese entsprechend
+        tbs                                    // ThreeBodySystem as reference
+    );
     Tensor4D resultdc2 = amplitude4d(*dc2, σs, refζs);
 
     std::cout << "Tensor4D resultdc2 : " << std::endl;
@@ -921,13 +919,12 @@ void ThreeBodyDecays::A_test()
     // tbs=ThreeBodySystem(ms, ThreeBodySpins(1,0,0; h0=1)))
 
     auto dc3 = createDecayChainLS(
-        3,                                              // k-Wert
-        Xlineshape,                                     // Lineshape-Funktion
-        "2+",                                           // jp (Spin-Parität, hier 2+)
-        ThreeBodyParities{'+', '+', '+', '+'},          // Paritäten, ändern Sie diese entsprechend
-        tbs,                                            // ThreeBodySystem as reference
-        RecouplingType::ParityRecoupling, {2, 0}, true, // NoRecoupling-Funktion
-        RecouplingType::ParityRecoupling, {2, 0}, false);
+        3,                                     // k-Wert
+        Xlineshape,                            // Lineshape-Funktion
+        "2+",                                  // jp (Spin-Parität, hier 2+)
+        ThreeBodyParities{'+', '+', '+', '+'}, // Paritäten, ändern Sie diese entsprechend
+        tbs                                    // ThreeBodySystem as reference
+    );
     Tensor4D resultdc3 = amplitude4d(*dc3, σs, {3, 3, 3, 3});
 
     std::cout << "Tensor4D resultdc3 : " << std::endl;
@@ -1356,6 +1353,37 @@ Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain &dc,
     return F;
 }
 
+// Calculate amplitude for specific helicity values
+double ThreeBodyDecays::amplitude(const DecayChain &dc,
+                                  const MandelstamTuple &σs,
+                                  const std::vector<int> &two_λs,
+                                  const std::vector<int> &refζs)
+{
+    // Get full 4D tensor of amplitudes for all helicity combinations
+    Tensor4D F0 = amplitude4d(dc, σs, refζs);
+
+    // Calculate indices from helicity values
+    std::vector<int> indices(4);
+    for (int i = 0; i < 4; ++i)
+    {
+        // Match Julia's div(_two_j + _two_λ, 2) + 1, but adjust for 0-based indexing
+        indices[i] = (dc.tbs.two_js[i] + two_λs[i]) / 2;
+    }
+
+    // Check if indices are within bounds
+    if (indices[0] >= 0 && indices[0] < (int)F0.size() &&
+        indices[1] >= 0 && indices[1] < (int)F0[0].size() &&
+        indices[2] >= 0 && indices[2] < (int)F0[0][0].size() &&
+        indices[3] >= 0 && indices[3] < (int)F0[0][0][0].size())
+    {
+
+        return F0[indices[0]][indices[1]][indices[2]][indices[3]];
+    }
+
+    // Return 0 if indices are out of bounds
+    return 0.0;
+}
+
 // Implementation of cos_zeta for TrivialWignerRotation
 double TrivialWignerRotation::cos_zeta(const std::array<double, 3> &sigma,
                                        const std::array<double, 4> &ms2) const
@@ -1514,45 +1542,239 @@ SpinParity::SpinParity(const std::string &jp)
     }
 }
 
-// In ThreeBodyDecays.cpp: Implementierung der Funktion aktualisieren
-// In ThreeBodyDecays.cpp
+// Helper function for ls couplings
+std::vector<std::array<int, 2>> possible_ls(
+    const SpinParity &jp1,
+    const SpinParity &jp2,
+    const SpinParity &jp)
+{
+    std::vector<std::array<int, 2>> two_ls;
+
+    // Loop through possible s values (triangle rule)
+    for (int two_s = std::abs(jp1.get_two_j() - jp2.get_two_j());
+         two_s <= jp1.get_two_j() + jp2.get_two_j();
+         two_s += 2)
+    {
+
+        // Loop through possible l values (triangle rule)
+        for (int two_l = std::abs(jp.get_two_j() - two_s);
+             two_l <= jp.get_two_j() + two_s;
+             two_l += 2)
+        {
+
+            // Calculate combined parity (exactly like Julia's ⊗ operator)
+            int negative_count = 0;
+            if (jp1.get_p() == '-')
+                negative_count++;
+            if (jp2.get_p() == '-')
+                negative_count++;
+            if (jp.get_p() == '-')
+                negative_count++;
+
+            // Determine parity from orbital angular momentum l
+            // In Julia: (isodd(div(two_l, 2)) ? '-' : '+')
+            char expected_parity = ((two_l / 2) % 2 == 0) ? '+' : '-';
+
+            // If combined parity matches expected parity from l
+            if ((negative_count % 2 == 0 && expected_parity == '+') ||
+                (negative_count % 2 == 1 && expected_parity == '-'))
+            {
+                two_ls.push_back({two_l, two_s});
+            }
+        }
+    }
+
+    // Sort by the first element (l value)
+    std::sort(two_ls.begin(), two_ls.end(),
+              [](const std::array<int, 2> &a, const std::array<int, 2> &b)
+              {
+                  return a[0] < b[0];
+              });
+
+    return two_ls;
+}
+
+// Calculate possible ls couplings for i,j particles
+std::vector<std::array<int, 2>> possible_ls_ij(
+    const SpinParity &jp,
+    const std::array<int, 4> &two_js,
+    const ThreeBodyParities &Ps,
+    int k)
+{
+    auto [i, j] = ij_from_k(k);
+    i--;
+    j--; // Convert to 0-based indexing for array access
+
+    // Select parity based on i and j indices
+    char p_i, p_j;
+    switch (i)
+    {
+    case 0:
+        p_i = Ps.get_P1();
+        break;
+    case 1:
+        p_i = Ps.get_P2();
+        break;
+    case 2:
+        p_i = Ps.get_P3();
+        break;
+    default:
+        p_i = '+'; // Default value
+    }
+
+    switch (j)
+    {
+    case 0:
+        p_j = Ps.get_P1();
+        break;
+    case 1:
+        p_j = Ps.get_P2();
+        break;
+    case 2:
+        p_j = Ps.get_P3();
+        break;
+    default:
+        p_j = '+'; // Default value
+    }
+
+    // Create SpinParity objects for particles i and j
+    SpinParity jp_i(std::to_string(two_js[i] / 2) + p_i);
+    SpinParity jp_j(std::to_string(two_js[j] / 2) + p_j);
+
+    return possible_ls(jp_i, jp_j, jp);
+}
+
+// Calculate possible LS couplings for resonance and k particle
+std::vector<std::array<int, 2>> possible_ls_Rk(
+    const SpinParity &jp,
+    const std::array<int, 4> &two_js,
+    const ThreeBodyParities &Ps,
+    int k)
+{
+    k--; // Convert to 0-based indexing for array access
+
+    // Select parity for k
+    char p_k;
+    switch (k)
+    {
+    case 0:
+        p_k = Ps.get_P1();
+        break;
+    case 1:
+        p_k = Ps.get_P2();
+        break;
+    case 2:
+        p_k = Ps.get_P3();
+        break;
+    default:
+        p_k = '+'; // Default value
+    }
+
+    // Create SpinParity objects for particle k and the parent
+    SpinParity jp_k(std::to_string(two_js[k] / 2) + p_k);
+    SpinParity jp_0(std::to_string(two_js[3] / 2) + Ps.get_P0());
+
+    return possible_ls(jp, jp_k, jp_0);
+}
+
+// Implementation of possible_lsLS function matching Julia's implementation
+std::vector<LSCoupling> possible_lsLS(
+    const SpinParity &jp,
+    const std::array<int, 4> &two_js,
+    const ThreeBodyParities &Ps,
+    int k)
+{
+    // Get the list of possible (l,s) values
+    std::vector<std::array<int, 2>> lsv = possible_ls_ij(jp, two_js, Ps, k);
+
+    // Get the list of possible (L,S) values
+    std::vector<std::array<int, 2>> LSv = possible_ls_Rk(jp, two_js, Ps, k);
+
+    // Create the cartesian product (like Julia's Iterators.product)
+    std::vector<LSCoupling> result;
+    for (const auto &ls : lsv)
+    {
+        for (const auto &LS : LSv)
+        {
+            result.push_back(LSCoupling(ls, LS));
+        }
+    }
+
+    return result;
+}
+
+// Updated createDecayChainLS implementation that uses the LSCoupling structure
 std::shared_ptr<DecayChain> createDecayChainLS(
     int k,
     std::function<std::complex<double>(double)> Xlineshape,
     const std::string &jp,
     const ThreeBodyParities &Ps,
-    const ThreeBodySystem &tbs, // Changed from shared_ptr to reference
-    RecouplingType HRkType,
-    const std::array<int, 2> &HRkParams,
-    bool HRkParityPhase,
-    RecouplingType HijType,
-    const std::array<int, 2> &HijParams,
-    bool HijParityPhase)
+    const ThreeBodySystem &tbs)
 {
     // Parse spin-parity
     SpinParity SP(jp);
     int two_j = SP.get_two_j();
 
-    // Create Hij recoupling function
-    RecouplingLS Hij = createRecouplingFunction(HijType, HijParams, HijParityPhase);
+    RecouplingLS Hij;
+    RecouplingLS HRk;
 
-    // Create HRk recoupling function
-    RecouplingLS HRk = createRecouplingFunction(HRkType, HRkParams, HRkParityPhase);
+    // Calculate possible LS couplings
+    std::vector<LSCoupling> two_lsLS = possible_lsLS(SP, tbs.two_js, Ps, k);
+
+    if (two_lsLS.empty())
+    {
+        throw std::runtime_error("No possible LS couplings found for the given configuration");
+    }
+
+    // Sort by two_LS[0] (first element of LS)
+    std::sort(two_lsLS.begin(), two_lsLS.end(),
+              [](const LSCoupling &a, const LSCoupling &b)
+              {
+                  return a.two_LS[0] < b.two_LS[0];
+              });
+
+    // Use the first (smallest L) coupling
+    const auto &two_ls = two_lsLS[0].two_ls;
+    const auto &two_LS = two_lsLS[0].two_LS;
+
+    std::cout << "LS coupling: " << two_ls[0] << " " << two_ls[1] << std::endl;
+    std::cout << "L coupling: " << two_LS[0] << " " << two_LS[1] << std::endl;
+
+    HRk = createRecouplingFunction(RecouplingType::LSRecoupling, two_LS, false);
+    Hij = createRecouplingFunction(RecouplingType::LSRecoupling, two_ls, false);
 
     // Create and return the DecayChain
     return std::make_shared<DecayChain>(
-        k,          // k-Wert
+        k,          // k-value
         two_j,      // two_j
-        Xlineshape, // Lineshape-Funktion
-        HRk,        // Hij
-        Hij,        // HRk
-        tbs         // ThreeBodySystem as reference, no dereferencing needed
+        Xlineshape, // Lineshape function
+        HRk,        // HRk recoupling
+        Hij,        // Hij recoupling
+        tbs         // ThreeBodySystem
     );
 }
 
-// Hilfsfunktion zum Erstellen einer Recoupling-Funktion
-// In ThreeBodyDecays.cpp
-// In ThreeBodyDecays.cpp
+
+// Placeholder for CG_doublearg function
+complex CG_doublearg(int j1, int m1, int j2, int m2, int j, int m) {
+    // You need to implement the real CG coefficient computation.
+    return complex(1.0, 0.0);
+}
+
+// Helper functions
+int one(int /*x*/) { return 1; }
+int zero(int /*x*/) { return 0; }
+
+complex jls_coupling(int two_j1, int two_λ1, int two_j2, int two_λ2, int two_j, int two_l, int two_s) {
+    int T1 = one(two_λ1);
+    double sqrt_factor = std::sqrt(static_cast<double>(two_l * T1 + 1) / (two_j * T1 + 1));
+
+    complex cg1 = CG_doublearg(two_j1, two_λ1, two_j2, -two_λ2, two_s, two_λ1 - two_λ2);
+    complex cg2 = CG_doublearg(two_l, zero(two_λ1 - two_λ2), two_s, two_λ1 - two_λ2, two_j, two_λ1 - two_λ2);
+
+    return sqrt_factor * cg1 * cg2;
+}
+
 RecouplingLS createRecouplingFunction(
     RecouplingType type,
     const std::array<int, 2> &params,
@@ -1606,13 +1828,28 @@ RecouplingLS createRecouplingFunction(
 
     case RecouplingType::LSRecoupling:
     {
-        // RecouplingLS mit den angegebenen Parametern
-        // In einer realen Implementierung würden Sie hier jls_coupling verwenden
-        return [params](const std::array<int, 2> &two_ms, const std::array<int, 3> &two_js) -> complex
+        int two_l = 0; // You may need to pass two_l into the params or as part of two_js
+        int two_s = 0; // Same for two_s
+        two_l = params[0];
+        two_s = params[1];
+
+        return [two_l,two_s](const std::array<int, 2>& two_ms, const std::array<int, 3>& two_js) -> complex
         {
-            // Hier sollte die tatsächliche jls_coupling-Logik implementiert werden
-            // Dies ist nur ein Platzhalter
-            return complex(0.0, 0.0);
+            int two_j1 = two_js[0];
+            int two_j2 = two_js[1];
+            int two_j  = two_js[2];
+            int two_λ1 = two_ms[0];
+            int two_λ2 = two_ms[1];
+
+            // We assume that the λ1, λ2 are in two_ms, and j1, j2, j in two_js.
+            // You can adjust this if your ordering is different.
+
+
+
+            // For this example, I assume you encode two_l and two_s into params[0], params[1].
+
+
+            return jls_coupling(two_j1, two_λ1, two_j2, two_λ2, two_j, two_l, two_s);
         };
     }
     // Weitere Recoupling-Typen hier hinzufügen
@@ -1631,57 +1868,41 @@ RecouplingLS createRecouplingFunction(
     }
 }
 
-// Implementation of amplitude function for model calculation
-complex ThreeBodyDecays::amplitude(
-    const DecayChain &dc,
-    const std::array<double, 3> &σs,
-    const std::vector<int> &two_λs,
-    const std::vector<int> &refζs)
+
+
+std::shared_ptr<DecayChain> createDecayChainLScoupling(
+    int k,
+    std::function<std::complex<double>(double)> Xlineshape,
+    const std::string &jp,
+    const ThreeBodyParities &Ps,
+    const ThreeBodySystem &tbs,
+    RecouplingType HRkType,
+    const std::array<int, 2> &HRkParams,
+    bool HRkParityPhase,
+    RecouplingType HijType,
+    const std::array<int, 2> &HijParams,
+    bool HijParityPhase)
 {
-    // Debug information
-    if (debug)
-        std::cout << "Calculating amplitude with:" << std::endl;
-    if (debug)
-        std::cout << "  Mandelstam variables: " << σs[0] << ", " << σs[1] << ", " << σs[2] << std::endl;
-    if (debug)
-        std::cout << "  Helicities: ";
-    for (auto λ : two_λs)
-        if (debug)
-            std::cout << λ << " ";
-    if (debug)
-        std::cout << std::endl;
+    // Parse spin-parity
+    SpinParity SP(jp);
+    int two_j = SP.get_two_j();
 
-    // Get lineshape value (complex)
-    complex lineshapeValue = dc.Xlineshape(σs[dc.k - 1]);
+    RecouplingLS Hij;
+    RecouplingLS HRk;
 
-    // For debugging - let's implement a simple model to get non-zero results
-    // Calculate a basic amplitude based on the helicity configuration and lineshape
-    double helicityProduct = 1.0;
-    for (size_t i = 0; i < two_λs.size(); ++i)
-    {
-        helicityProduct *= (two_λs[i] == 0) ? 1.0 : two_λs[i] / 2.0;
-    }
+    // Auto-calculate LS couplings if requested
 
-    // Calculate angular factors based on cosθ
-    std::array<double, 4> msq = {
-        dc.tbs.ms[0] * dc.tbs.ms[0],
-        dc.tbs.ms[1] * dc.tbs.ms[1],
-        dc.tbs.ms[2] * dc.tbs.ms[2],
-        dc.tbs.ms[3] * dc.tbs.ms[3]};
+    // Use provided recoupling parameters
+    Hij = createRecouplingFunction(HijType, HijParams, HijParityPhase);
+    HRk = createRecouplingFunction(HRkType, HRkParams, HRkParityPhase);
 
-    double cosθ = cosθij(σs, msq, dc.k);
-    double angularFactor = (1.0 + cosθ * cosθ) / 2.0; // Simple angular distribution
-
-    // Combine factors to get non-zero amplitude
-    double realPart = std::real(lineshapeValue) * helicityProduct * angularFactor * 0.1;
-    double imagPart = std::imag(lineshapeValue) * helicityProduct * angularFactor * 0.1;
-
-    // Ensure we return a non-zero value for testing
-    if (std::abs(realPart) < 1e-10 && std::abs(imagPart) < 1e-10)
-    {
-        realPart = 0.01;
-        imagPart = 0.05;
-    }
-
-    return complex(realPart, imagPart);
+    // Create and return the DecayChain
+    return std::make_shared<DecayChain>(
+        k,          // k-value
+        two_j,      // two_j
+        Xlineshape, // Lineshape function
+        HRk,        // HRk recoupling
+        Hij,        // Hij recoupling
+        tbs         // ThreeBodySystem
+    );
 }

@@ -126,7 +126,7 @@ TEST_F(ThreeBodyDecaysTest, DecayChainNoRecoupling) {
     };
 
     // Create decay chain with NoRecoupling
-    auto dc = createDecayChainLS(
+    auto dc = createDecayChainLScoupling(
         1,                // k-value
         Xlineshape,       // Lineshape function
         "2+",             // jp (Spin-parity)
@@ -152,6 +152,20 @@ TEST_F(ThreeBodyDecaysTest, DecayChainNoRecoupling) {
             }
         }
     }
+
+    std::cout << "Tensor4D result4d : " << std::endl;
+    for (int i = 0; i < result4d.size(); ++i) {
+        for (int j = 0; j < result4d[0].size(); ++j) {
+            for (int k = 0; k < result4d[0][0].size(); ++k) {
+                for (int z = 0; z < result4d[0][0][0].size(); ++z) {
+                    std::cout << result4d[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+
 }
 
 // Test for decay chain with ParityRecoupling
@@ -164,7 +178,7 @@ TEST_F(ThreeBodyDecaysTest, DecayChainParityRecoupling) {
     };
 
     // Create decay chain with ParityRecoupling for HRk
-    auto dc2 = createDecayChainLS(
+    auto dc2 = createDecayChainLScoupling(
         1,                // k-value
         Xlineshape,       // Lineshape function
         "2+",             // jp (Spin-parity)
@@ -197,7 +211,7 @@ TEST_F(ThreeBodyDecaysTest, DecayChainDoubleParityRecoupling) {
     };
 
     // Create decay chain with ParityRecoupling for both HRk and Hij
-    auto dc3 = createDecayChainLS(
+    auto dc3 = createDecayChainLScoupling(
         3,                // k-value
         Xlineshape,       // Lineshape function
         "2+",             // jp (Spin-parity)

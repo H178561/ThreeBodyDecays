@@ -13,6 +13,8 @@ add_library(ThreeBodyDecaysLib
     ThreeBodyDecays.cpp
     OrientationAngles.cpp
     ThreeBodyAmplitudeModel.cpp
+    #Examples/AmplitureModelExample.cpp
+    #Examples/CombinedAmplitureModelExample.cpp
 )
 
 #target_link_libraries(ThreeBodyDecays ThreeBodyDecaysLib)
@@ -29,6 +31,7 @@ if(GTEST_FOUND)
     add_executable(ThreeBodyDecaysTest
         Tests/ThreeBodyDecaysTest.cpp
         Tests/OrientationAnglesTest.cpp
+        Tests/ThreeBodyAmplitudeModelTest.cpp
     )
     target_link_libraries(ThreeBodyDecaysTest
         ThreeBodyDecaysLib
@@ -44,3 +47,7 @@ if(GTEST_FOUND)
 else()
     message(STATUS "Google Test not found, test target will NOT be built")
 endif()
+
+# Füge das Beispiel hinzu
+add_executable(AmplitudeModelExample Examples/AmplitudeModelExample.cpp)
+target_link_libraries(AmplitudeModelExample ThreeBodyDecaysLib)

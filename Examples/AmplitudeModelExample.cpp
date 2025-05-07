@@ -27,7 +27,7 @@ int main()
     };
 
     // Create different decay chains in different channels
-    auto dc1 = createDecayChainLS(
+    auto dc1 = createDecayChainLScoupling(
         1,            // k-value (channel 1)
         breitWigner1, // First resonance
         "2+",         // Spin-parity 2+
@@ -35,7 +35,7 @@ int main()
         tbs,          // ThreeBodySystem
         RecouplingType::NoRecoupling, {0, 0});
 
-    auto dc2 = createDecayChainLS(
+    auto dc2 = createDecayChainLScoupling(
         2,            // k-value (channel 2)
         breitWigner2, // Second resonance
         "1-",         // Spin-parity 1-

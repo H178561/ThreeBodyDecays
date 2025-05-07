@@ -13,7 +13,7 @@ class ThreeBodyAmplitudeModelTest : public ::testing::Test
 protected:
     ThreeBodyAmplitudeModelTest()
         : tbs(nullptr),
-          conservingParities('+', '+', '+', '+') // Initialize this in constructor
+          conservingParities('-', '+', '-', '+') // Initialize this in constructor
     {
     }
 
@@ -265,27 +265,69 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
 
     // Create the model with the same coefficients
     ThreeBodyAmplitudeModel model;
-    model.add(Lambda1520, "Lambda1520", complex(1.0, 0.0));
-    model.add(Lambda1690, "Lambda1690", complex(0.5, 0.5)); // Using a phase to get imaginary component
-    model.add(Pc4312, "Pc4312", complex(0.0, 1.0));         // Pure imaginary coefficient
+    model.add(Lambda1520, "Lambda1520", complex(2.0, 0.0));
+    model.add(Lambda1690, "Lambda1690", complex(2.1, 0.0)); // Using a phase to get imaginary component
+    model.add(Pc4312, "Pc4312", complex(0.4, 0.0));         // Pure imaginary coefficient
 
     // Create the same point in phase space
     MandelstamTuple σs = decays->x2σs({0.3, 0.3}, ms, 1);
+    // σ1 = 4.501751135564419, σ2 = 21.495750373843414, σ3 = 16.258552559492166
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
 
     // Use the same helicity configuration
     std::vector<int> two_λs = {2, 1, 0, 1}; // Doubled representation
     std::vector<int> refζs = {1, 2, 3, 1};  // Reference frames
 
+
+
     // Calculate amplitude
     complex amp = model.amplitude(σs, two_λs, refζs);
+    Tensor4D amp2 = model.amplitude4d(σs, refζs);
+
+
+
+    double intensity_valued = model.intensity(σs);
+
+    ThreeBodyDecays tbd;
+    Tensor4D resultdc3 = tbd.amplitude4d(*Lambda1520, σs, refζs);
+    complex res = tbd.amplitude(*Lambda1520, σs, two_λs, refζs);
+    std::cout << "Tensor4D resultdc3 : " << res << std::endl;
+    // Verify tensor dimensions
+    std::cout << "Tensor4D resultdc3 : " << std::endl;
+        for (int i = 0; i < resultdc3.size(); ++i) {
+            for (int j = 0; j < resultdc3[0].size(); ++j) {
+                for (int k = 0; k < resultdc3[0][0].size(); ++k) {
+                    for (int z = 0; z < resultdc3[0][0][0].size(); ++z) {
+                        std::cout << resultdc3[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
+                    }
+                }
+            }
+            std::cout << "\n";
+        }
+
+    std::cout << "Tensor4D amp2 : " << std::endl;
+    for (int i = 0; i < amp2.size(); ++i) {
+        for (int j = 0; j < amp2[0].size(); ++j) {
+            for (int k = 0; k < amp2[0][0].size(); ++k) {
+                for (int z = 0; z < amp2[0][0][0].size(); ++z) {
+                    std::cout << amp2[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
 
     // Print result for comparison
     std::cout << "C++ amplitude: " << amp << std::endl;
-    std::cout << "Julia amplitude (expected): 0.006950537019492458 + 0.2532137019647289im" << std::endl;
+    std::cout << "Julia amplitude (expected): 0.00498673748367451 + 0.0004851614900810134im" << std::endl;
+    std::cout << "C++ intensity: " << intensity_valued << std::endl;
+    std::cout << "Julia intensity (expected): 2.5191201498154108" << std::endl;
+
+
 
     // Compare with expected Julia result
-    complex expected(0.006950537019492458, 0.2532137019647289);
-    expectNearComplex(expected, amp, 0.01); // Allow for small numerical differences
+    complex expected(0.00498673748367451, 0.0004851614900810134);
+    expectNearComplex(expected, amp, 0.0001); // Allow for small numerical differences
 }
 
 // Add a test case to verify we match the unpolarized intensity from Julia
@@ -307,6 +349,11 @@ TEST_F(ThreeBodyAmplitudeModelTest, UnpolarizedIntensityJuliaMatch)
 
     // Use the standard test point
     MandelstamTuple σs = decays->x2σs({0.3, 0.3}, ms, 1);
+
+    std::vector<int> refζs = {1, 2, 3, 1};
+
+    // Calculate amplitude tensor
+
 
     // Calculate intensity
     double intensity_value = model.intensity(σs);
