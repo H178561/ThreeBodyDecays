@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o"
+  "CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o.d"
   "CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o"
   "CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o.d"
   "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o"

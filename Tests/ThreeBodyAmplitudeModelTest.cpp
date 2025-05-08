@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../ThreeBodyAmplitudeModel.hh"
 #include "../ThreeBodyDecays.hh"
+#include "../ClebschGordan.hh"
 #include <iostream>
 #include <iomanip>
 #include <complex>
@@ -305,6 +306,20 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
             std::cout << "\n";
         }
 
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs, refζs);
+    // Verify tensor dimensions
+    std::cout << "Tensor4D resultdccomp : " << std::endl;
+        for (int i = 0; i < resultdccomp.size(); ++i) {
+            for (int j = 0; j < resultdccomp[0].size(); ++j) {
+                for (int k = 0; k < resultdccomp[0][0].size(); ++k) {
+                    for (int z = 0; z < resultdccomp[0][0][0].size(); ++z) {
+                        std::cout << resultdccomp[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
+                    }
+                }
+            }
+            std::cout << "\n";
+        }
+
     std::cout << "Tensor4D amp2 : " << std::endl;
     for (int i = 0; i < amp2.size(); ++i) {
         for (int j = 0; j < amp2[0].size(); ++j) {
@@ -328,6 +343,23 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
     // Compare with expected Julia result
     complex expected(0.00498673748367451, 0.0004851614900810134);
     expectNearComplex(expected, amp, 0.0001); // Allow for small numerical differences
+
+
+    auto cg = clebschgordan(2, 1, 0, 1, 2, 1);
+    std::cout << "C++ Clebsch-Gordan coefficient: " << cg << std::endl;
+
+    SpinParity j = SpinParity("3/2+");
+    ThreeBodySpins spins = {4, 2, 0, 2}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
+    std::vector<LSCoupling> two_lsLS = possible_lsLS(j, spins, conservingParities, 1);
+    std::cout << "two_lsLS: [" << two_lsLS.size() << "]" << std::endl;
+    for (size_t idx = 0; idx < two_lsLS.size(); ++idx) {
+        const auto &two_ls = two_lsLS[idx].two_ls;
+        const auto &two_LS = two_lsLS[idx].two_LS;
+        std::cout << "LS coupling " << idx << ": " << two_ls[0]
+                  << " " << two_ls[1] << ", L coupling: "
+                  << two_LS[0] << " " << two_LS[1] << std::endl;
+    }
+
 }
 
 // Add a test case to verify we match the unpolarized intensity from Julia
@@ -372,3 +404,5 @@ int main(int argc, char **argv)
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }*/
+
+

@@ -1,5 +1,5 @@
-CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyAmplitudeModelTest.cpp.o: \
- /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/ThreeBodyAmplitudeModelTest.cpp \
+CMakeFiles/ClebschGordanTest.dir/Tests/ClebschGordanTest.cpp.o: \
+ /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/ClebschGordanTest.cpp \
  /usr/include/stdc-predef.h /usr/include/gtest/gtest.h \
  /usr/include/c++/13/cstddef \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -274,8 +274,7 @@ CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyAmplitudeModelTest.cpp.o: \
  /usr/include/gtest/gtest-test-part.h \
  /usr/include/gtest/gtest-typed-test.h \
  /usr/include/gtest/gtest_pred_impl.h /usr/include/gtest/gtest_prod.h \
- /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/../ThreeBodyAmplitudeModel.hh \
- /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/../ThreeBodyDecays.hh \
+ /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/../ClebschGordan.hh \
  /usr/include/c++/13/complex /usr/include/c++/13/cmath \
  /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
@@ -297,6 +296,4 @@ CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyAmplitudeModelTest.cpp.o: \
  /usr/include/c++/13/tr1/modified_bessel_func.tcc \
  /usr/include/c++/13/tr1/poly_hermite.tcc \
  /usr/include/c++/13/tr1/poly_laguerre.tcc \
- /usr/include/c++/13/tr1/riemann_zeta.tcc \
- /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/../ThreeBodyDecays.hh \
- /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/../ClebschGordan.hh
+ /usr/include/c++/13/tr1/riemann_zeta.tcc

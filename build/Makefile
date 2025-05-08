@@ -153,6 +153,19 @@ ThreeBodyDecaysTest/fast:
 .PHONY : ThreeBodyDecaysTest/fast
 
 #=============================================================================
+# Target rules for targets named ClebschGordanTest
+
+# Build rule for target.
+ClebschGordanTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ClebschGordanTest
+.PHONY : ClebschGordanTest
+
+# fast build rule for target.
+ClebschGordanTest/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClebschGordanTest.dir/build.make CMakeFiles/ClebschGordanTest.dir/build
+.PHONY : ClebschGordanTest/fast
+
+#=============================================================================
 # Target rules for targets named AmplitudeModelExample
 
 # Build rule for target.
@@ -164,6 +177,30 @@ AmplitudeModelExample: cmake_check_build_system
 AmplitudeModelExample/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AmplitudeModelExample.dir/build.make CMakeFiles/AmplitudeModelExample.dir/build
 .PHONY : AmplitudeModelExample/fast
+
+ClebschGordan.o: ClebschGordan.cpp.o
+.PHONY : ClebschGordan.o
+
+# target to build an object file
+ClebschGordan.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysLib.dir/build.make CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o
+.PHONY : ClebschGordan.cpp.o
+
+ClebschGordan.i: ClebschGordan.cpp.i
+.PHONY : ClebschGordan.i
+
+# target to preprocess a source file
+ClebschGordan.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysLib.dir/build.make CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.i
+.PHONY : ClebschGordan.cpp.i
+
+ClebschGordan.s: ClebschGordan.cpp.s
+.PHONY : ClebschGordan.s
+
+# target to generate assembly for a file
+ClebschGordan.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysLib.dir/build.make CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.s
+.PHONY : ClebschGordan.cpp.s
 
 Examples/AmplitudeModelExample.o: Examples/AmplitudeModelExample.cpp.o
 .PHONY : Examples/AmplitudeModelExample.o
@@ -212,6 +249,30 @@ OrientationAngles.s: OrientationAngles.cpp.s
 OrientationAngles.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysLib.dir/build.make CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.s
 .PHONY : OrientationAngles.cpp.s
+
+Tests/ClebschGordanTest.o: Tests/ClebschGordanTest.cpp.o
+.PHONY : Tests/ClebschGordanTest.o
+
+# target to build an object file
+Tests/ClebschGordanTest.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClebschGordanTest.dir/build.make CMakeFiles/ClebschGordanTest.dir/Tests/ClebschGordanTest.cpp.o
+.PHONY : Tests/ClebschGordanTest.cpp.o
+
+Tests/ClebschGordanTest.i: Tests/ClebschGordanTest.cpp.i
+.PHONY : Tests/ClebschGordanTest.i
+
+# target to preprocess a source file
+Tests/ClebschGordanTest.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClebschGordanTest.dir/build.make CMakeFiles/ClebschGordanTest.dir/Tests/ClebschGordanTest.cpp.i
+.PHONY : Tests/ClebschGordanTest.cpp.i
+
+Tests/ClebschGordanTest.s: Tests/ClebschGordanTest.cpp.s
+.PHONY : Tests/ClebschGordanTest.s
+
+# target to generate assembly for a file
+Tests/ClebschGordanTest.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClebschGordanTest.dir/build.make CMakeFiles/ClebschGordanTest.dir/Tests/ClebschGordanTest.cpp.s
+.PHONY : Tests/ClebschGordanTest.cpp.s
 
 Tests/OrientationAnglesTest.o: Tests/OrientationAnglesTest.cpp.o
 .PHONY : Tests/OrientationAnglesTest.o
@@ -343,14 +404,21 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... AmplitudeModelExample"
+	@echo "... ClebschGordanTest"
 	@echo "... ThreeBodyDecaysLib"
 	@echo "... ThreeBodyDecaysTest"
+	@echo "... ClebschGordan.o"
+	@echo "... ClebschGordan.i"
+	@echo "... ClebschGordan.s"
 	@echo "... Examples/AmplitudeModelExample.o"
 	@echo "... Examples/AmplitudeModelExample.i"
 	@echo "... Examples/AmplitudeModelExample.s"
 	@echo "... OrientationAngles.o"
 	@echo "... OrientationAngles.i"
 	@echo "... OrientationAngles.s"
+	@echo "... Tests/ClebschGordanTest.o"
+	@echo "... Tests/ClebschGordanTest.i"
+	@echo "... Tests/ClebschGordanTest.s"
 	@echo "... Tests/OrientationAnglesTest.o"
 	@echo "... Tests/OrientationAnglesTest.i"
 	@echo "... Tests/OrientationAnglesTest.s"

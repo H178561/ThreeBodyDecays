@@ -372,6 +372,7 @@ CMakeFiles/ThreeBodyDecaysTest.dir/Tests/OrientationAnglesTest.cpp.o: /home/hvds
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
 CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyAmplitudeModelTest.cpp.o: /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/ThreeBodyAmplitudeModelTest.cpp \
+  /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.hh \
   /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyAmplitudeModel.hh \
   /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyDecays.hh \
   /usr/include/alloca.h \
@@ -1120,6 +1121,8 @@ CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyDecaysTest.cpp.o: /home/hvdsma
 /usr/include/c++/13/complex:
 
 /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyAmplitudeModel.hh:
+
+/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.hh:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
 

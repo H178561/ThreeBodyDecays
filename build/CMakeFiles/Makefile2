@@ -65,6 +65,7 @@ CMAKE_BINARY_DIR = /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build
 # The main recursive "all" target.
 all: CMakeFiles/ThreeBodyDecaysLib.dir/all
 all: CMakeFiles/ThreeBodyDecaysTest.dir/all
+all: CMakeFiles/ClebschGordanTest.dir/all
 all: CMakeFiles/AmplitudeModelExample.dir/all
 .PHONY : all
 
@@ -75,6 +76,7 @@ preinstall:
 # The main recursive "clean" target.
 clean: CMakeFiles/ThreeBodyDecaysLib.dir/clean
 clean: CMakeFiles/ThreeBodyDecaysTest.dir/clean
+clean: CMakeFiles/ClebschGordanTest.dir/clean
 clean: CMakeFiles/AmplitudeModelExample.dir/clean
 .PHONY : clean
 
@@ -85,12 +87,12 @@ clean: CMakeFiles/AmplitudeModelExample.dir/clean
 CMakeFiles/ThreeBodyDecaysLib.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysLib.dir/build.make CMakeFiles/ThreeBodyDecaysLib.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysLib.dir/build.make CMakeFiles/ThreeBodyDecaysLib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=3,4,5,6 "Built target ThreeBodyDecaysLib"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=5,6,7,8,9 "Built target ThreeBodyDecaysLib"
 .PHONY : CMakeFiles/ThreeBodyDecaysLib.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/ThreeBodyDecaysLib.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/ThreeBodyDecaysLib.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 0
 .PHONY : CMakeFiles/ThreeBodyDecaysLib.dir/rule
@@ -111,12 +113,12 @@ CMakeFiles/ThreeBodyDecaysLib.dir/clean:
 CMakeFiles/ThreeBodyDecaysTest.dir/all: CMakeFiles/ThreeBodyDecaysLib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysTest.dir/build.make CMakeFiles/ThreeBodyDecaysTest.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ThreeBodyDecaysTest.dir/build.make CMakeFiles/ThreeBodyDecaysTest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=7,8,9,10 "Built target ThreeBodyDecaysTest"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=10,11,12,13 "Built target ThreeBodyDecaysTest"
 .PHONY : CMakeFiles/ThreeBodyDecaysTest.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/ThreeBodyDecaysTest.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/ThreeBodyDecaysTest.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 0
 .PHONY : CMakeFiles/ThreeBodyDecaysTest.dir/rule
@@ -131,6 +133,32 @@ CMakeFiles/ThreeBodyDecaysTest.dir/clean:
 .PHONY : CMakeFiles/ThreeBodyDecaysTest.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/ClebschGordanTest.dir
+
+# All Build rule for target.
+CMakeFiles/ClebschGordanTest.dir/all: CMakeFiles/ThreeBodyDecaysLib.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClebschGordanTest.dir/build.make CMakeFiles/ClebschGordanTest.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClebschGordanTest.dir/build.make CMakeFiles/ClebschGordanTest.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=3,4 "Built target ClebschGordanTest"
+.PHONY : CMakeFiles/ClebschGordanTest.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/ClebschGordanTest.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 7
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/ClebschGordanTest.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 0
+.PHONY : CMakeFiles/ClebschGordanTest.dir/rule
+
+# Convenience name for target.
+ClebschGordanTest: CMakeFiles/ClebschGordanTest.dir/rule
+.PHONY : ClebschGordanTest
+
+# clean rule for target.
+CMakeFiles/ClebschGordanTest.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ClebschGordanTest.dir/build.make CMakeFiles/ClebschGordanTest.dir/clean
+.PHONY : CMakeFiles/ClebschGordanTest.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/AmplitudeModelExample.dir
 
 # All Build rule for target.
@@ -142,7 +170,7 @@ CMakeFiles/AmplitudeModelExample.dir/all: CMakeFiles/ThreeBodyDecaysLib.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/AmplitudeModelExample.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/AmplitudeModelExample.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles 0
 .PHONY : CMakeFiles/AmplitudeModelExample.dir/rule

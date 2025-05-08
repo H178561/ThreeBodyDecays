@@ -13,6 +13,7 @@ add_library(ThreeBodyDecaysLib
     ThreeBodyDecays.cpp
     OrientationAngles.cpp
     ThreeBodyAmplitudeModel.cpp
+    ClebschGordan.cpp
     #Examples/AmplitureModelExample.cpp
     #Examples/CombinedAmplitureModelExample.cpp
 )
@@ -38,6 +39,11 @@ if(GTEST_FOUND)
         ${GTEST_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
     )
+
+    # Add the CG test if GTest is found
+    add_executable(ClebschGordanTest Tests/ClebschGordanTest.cpp)
+    target_link_libraries(ClebschGordanTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
+    add_test(NAME ClebschGordanTest COMMAND ClebschGordanTest)
 
     # Enable testing
     enable_testing()

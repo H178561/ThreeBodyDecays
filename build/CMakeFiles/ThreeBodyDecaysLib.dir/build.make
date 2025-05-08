@@ -111,11 +111,26 @@ CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyAmplitudeModel.cpp -o CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.s
 
+CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o: CMakeFiles/ThreeBodyDecaysLib.dir/flags.make
+CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o: /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.cpp
+CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o: CMakeFiles/ThreeBodyDecaysLib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o -MF CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o.d -o CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o -c /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.cpp
+
+CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.cpp > CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.i
+
+CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.cpp -o CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.s
+
 # Object files for target ThreeBodyDecaysLib
 ThreeBodyDecaysLib_OBJECTS = \
 "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyDecays.cpp.o" \
 "CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o" \
-"CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o"
+"CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o" \
+"CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o"
 
 # External object files for target ThreeBodyDecaysLib
 ThreeBodyDecaysLib_EXTERNAL_OBJECTS =
@@ -123,9 +138,10 @@ ThreeBodyDecaysLib_EXTERNAL_OBJECTS =
 libThreeBodyDecaysLib.a: CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyDecays.cpp.o
 libThreeBodyDecaysLib.a: CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o
 libThreeBodyDecaysLib.a: CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o
+libThreeBodyDecaysLib.a: CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o
 libThreeBodyDecaysLib.a: CMakeFiles/ThreeBodyDecaysLib.dir/build.make
 libThreeBodyDecaysLib.a: CMakeFiles/ThreeBodyDecaysLib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libThreeBodyDecaysLib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library libThreeBodyDecaysLib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/ThreeBodyDecaysLib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ThreeBodyDecaysLib.dir/link.txt --verbose=$(VERBOSE)
 

@@ -60,5 +60,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/ThreeBodyDecaysLib.dir/DependInfo.cmake"
   "CMakeFiles/ThreeBodyDecaysTest.dir/DependInfo.cmake"
+  "CMakeFiles/ClebschGordanTest.dir/DependInfo.cmake"
   "CMakeFiles/AmplitudeModelExample.dir/DependInfo.cmake"
   )

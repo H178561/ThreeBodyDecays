@@ -374,6 +374,7 @@ CMakeFiles/ThreeBodyDecaysTest.dir/Tests/OrientationAnglesTest.cpp.o
 
 CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyAmplitudeModelTest.cpp.o
  /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Tests/ThreeBodyAmplitudeModelTest.cpp
+ /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.hh
  /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyAmplitudeModel.hh
  /home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyDecays.hh
  /usr/include/alloca.h
