@@ -456,6 +456,13 @@ std::shared_ptr<DecayChain> createDecayChainLS(
     const ThreeBodyParities &Ps,
     const ThreeBodySystem &tbs);
 
+    std::vector<std::shared_ptr<DecayChain>> createDecayChainsLS(
+    int k,
+    std::function<std::complex<double>(double)> Xlineshape,
+    const std::string &jp,
+    const ThreeBodyParities &Ps,
+    const ThreeBodySystem &tbs);
+
 // Version with explicit recoupling parameters (always disables autoCalculateLS)
 std::shared_ptr<DecayChain> createDecayChainLScoupling(
     int k,
@@ -516,7 +523,7 @@ class ThreeBodyDecays
 {
 public:
     std::vector<std::vector<complex>> aligned_amplitude(const DecayChain &dc, const MandelstamTuple &sigma);
-    double amplitude(const DecayChain &dc, const MandelstamTuple &σs, const std::vector<int> &two_λs, const std::vector<int> &refζs = {1, 2, 3, 1});
+    complex amplitude(const DecayChain &dc, const MandelstamTuple &σs, const std::vector<int> &two_λs, const std::vector<int> &refζs = {1, 2, 3, 1});
     Tensor4D aligned_amplitude4d(const DecayChain &dc, const MandelstamTuple &σs);
     Tensor4D amplitude4d(const DecayChain &dc, const MandelstamTuple &σs, const std::vector<int> &refζs);
     Tensor4Dcomp aligned_amplitude4dcomp(const DecayChain &dc, const MandelstamTuple &σs);

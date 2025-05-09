@@ -191,9 +191,8 @@ double CG_doublearg(int two_j1, int two_m1, int two_j2, int two_m2, int two_j, i
 }
 
 
-complex CG_0(int two_j1, int two_m1, int two_j2, int two_m2, int two_j, int two_m) {
-    return complex(0,0);
-}
+
+
 
 /*
 // Placeholder for CG_doublearg function

@@ -283,7 +283,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
 
     // Calculate amplitude
     complex amp = model.amplitude(σs, two_λs, refζs);
-    Tensor4D amp2 = model.amplitude4d(σs, refζs);
+    Tensor4Dcomp amp2 = model.amplitude4d(σs, refζs);
 
 
 
@@ -306,7 +306,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
             std::cout << "\n";
         }
 
-    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs, refζs);
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, refζs);
     // Verify tensor dimensions
     std::cout << "Tensor4D resultdccomp : " << std::endl;
         for (int i = 0; i < resultdccomp.size(); ++i) {

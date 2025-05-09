@@ -26,7 +26,7 @@ public:
     size_t size() const { return chains_.size(); }
 
     // Calculate amplitude tensor (for all helicity states)
-    Tensor4D amplitude4d(const MandelstamTuple &σs,
+    Tensor4Dcomp amplitude4d(const MandelstamTuple &σs,
                          const std::vector<int> &refζs) const;
 
     // Calculate specific amplitude (for specific helicity values)
