@@ -183,13 +183,13 @@ TEST_F(ThreeBodyAmplitudeModelTest, AmplitudeModelIntensity)
     MandelstamTuple σs = decays->x2σs({0.3, 0.3}, ms, 1);
 
     // Calculate intensity at this point
-    double intensity = model.intensity(σs);
+    double intensity = model.intensity(σs, 0);
 
     // The exact value depends on implementation details, but should be positive
     EXPECT_GT(intensity, 0.0);
-
+    std::cout << "test" << std::endl;
     // Calculate individual component intensities
-    auto componentIntensities = model.component_intensities(σs);
+    auto componentIntensities = model.component_intensities(σs, 0);
     EXPECT_EQ(componentIntensities.size(), 6);
 
     // Sum of individual intensities should be different from total due to interference
@@ -223,7 +223,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, SpecificHelicityAmplitude)
     std::vector<int> refζs = {1, 2, 3, 1};  // Reference frames
 
     ThreeBodyDecays tbd;
-    complex amp = model.amplitude(σs, two_λs, refζs);
+    complex amp = model.amplitude(σs, two_λs, 0, refζs);
     auto amp4d = tbd.amplitude4d(*Lambda1520, σs, refζs);
 
     std::cout << "Calculated amplitude: " << amp << std::endl;
@@ -279,53 +279,115 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
     std::vector<int> two_λs = {2, 1, 0, 1}; // Doubled representation
     std::vector<int> refζs = {1, 2, 3, 1};  // Reference frames
 
-
-
     // Calculate amplitude
-    complex amp = model.amplitude(σs, two_λs, refζs);
-    Tensor4Dcomp amp2 = model.amplitude4d(σs, refζs);
+    complex amp = model.amplitude(σs2, two_λs, 0, refζs);
+    std::cout << "amp " << amp << std::endl;
+    Tensor4Dcomp amp2 = model.amplitude4d(σs2, 0, refζs);
 
-
-
-    double intensity_valued = model.intensity(σs);
+    double intensity_valued = model.intensity(σs2, 0, refζs);
 
     ThreeBodyDecays tbd;
-    Tensor4D resultdc3 = tbd.amplitude4d(*Lambda1520, σs, refζs);
-    complex res = tbd.amplitude(*Lambda1520, σs, two_λs, refζs);
+    Tensor4D resultdc3 = tbd.amplitude4d(*Lambda1520, σs2, refζs);
+    complex res = tbd.amplitude(*Lambda1520, σs2, two_λs, 0, refζs);
     std::cout << "Tensor4D resultdc3 : " << res << std::endl;
     // Verify tensor dimensions
     std::cout << "Tensor4D resultdc3 : " << std::endl;
-        for (int i = 0; i < resultdc3.size(); ++i) {
-            for (int j = 0; j < resultdc3[0].size(); ++j) {
-                for (int k = 0; k < resultdc3[0][0].size(); ++k) {
-                    for (int z = 0; z < resultdc3[0][0][0].size(); ++z) {
-                        std::cout << resultdc3[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
-                    }
+    for (int i = 0; i < resultdc3.size(); ++i)
+    {
+        for (int j = 0; j < resultdc3[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdc3[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdc3[0][0][0].size(); ++z)
+                {
+                    std::cout << resultdc3[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
                 }
             }
-            std::cout << "\n";
         }
+        std::cout << "\n";
+    }
 
-    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, refζs);
+    Tensor4Dcomp resultdalignedccomp = tbd.aligned_amplitude4dcomp(*Lambda1520, σs2);
     // Verify tensor dimensions
-    std::cout << "Tensor4D resultdccomp : " << std::endl;
-        for (int i = 0; i < resultdccomp.size(); ++i) {
-            for (int j = 0; j < resultdccomp[0].size(); ++j) {
-                for (int k = 0; k < resultdccomp[0][0].size(); ++k) {
-                    for (int z = 0; z < resultdccomp[0][0][0].size(); ++z) {
-                        std::cout << resultdccomp[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
-                    }
+    std::cout << "Tensor4D resultdalignedccomp : " << std::endl;
+    for (int i = 0; i < resultdalignedccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdalignedccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdalignedccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdalignedccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << resultdalignedccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
                 }
             }
-            std::cout << "\n";
         }
+        std::cout << "\n";
+    }
 
-    std::cout << "Tensor4D amp2 : " << std::endl;
-    for (int i = 0; i < amp2.size(); ++i) {
-        for (int j = 0; j < amp2[0].size(); ++j) {
-            for (int k = 0; k < amp2[0][0].size(); ++k) {
-                for (int z = 0; z < amp2[0][0][0].size(); ++z) {
-                    std::cout << amp2[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 0, refζs);
+    // Tensor4Dcomp resultl1690 = tbd.amplitude4dcomp(*Lambda1690, σs2, refζs);
+    // Tensor4Dcomp resultpc4312 = tbd.amplitude4dcomp(*Pc4312, σs2, refζs);
+    Tensor4Dcomp resultl1690 = tbd.amplitude4dcomp(*Lambda1690, σs2, 0, refζs);
+    Tensor4Dcomp resultpc4312 = tbd.amplitude4dcomp(*Pc4312, σs2, 0, refζs);
+    // Verify tensor dimensions
+    std::cout << "\nTensor4D Lambda1520 : " << std::endl;
+    for (int i = 0; i < resultdccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << resultdccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    std::cout << "\nTensor4D Lambda1690 : " << std::endl;
+    for (int i = 0; i < resultl1690.size(); ++i)
+    {
+        for (int j = 0; j < resultl1690[0].size(); ++j)
+        {
+            for (int k = 0; k < resultl1690[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultl1690[0][0][0].size(); ++z)
+                {
+                    std::cout << resultl1690[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\nTensor4D Pc4312 : " << std::endl;
+    for (int i = 0; i < resultpc4312.size(); ++i)
+    {
+        for (int j = 0; j < resultpc4312[0].size(); ++j)
+        {
+            for (int k = 0; k < resultpc4312[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultpc4312[0][0][0].size(); ++z)
+                {
+                    std::cout << resultpc4312[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    std::cout << "\nTensor4D ampall : " << std::endl;
+    for (int i = 0; i < amp2.size(); ++i)
+    {
+        for (int j = 0; j < amp2[0].size(); ++j)
+        {
+            for (int k = 0; k < amp2[0][0].size(); ++k)
+            {
+                for (int z = 0; z < amp2[0][0][0].size(); ++z)
+                {
+                    std::cout << amp2[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
                 }
             }
         }
@@ -338,12 +400,9 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
     std::cout << "C++ intensity: " << intensity_valued << std::endl;
     std::cout << "Julia intensity (expected): 2.5191201498154108" << std::endl;
 
-
-
     // Compare with expected Julia result
     complex expected(0.00498673748367451, 0.0004851614900810134);
     expectNearComplex(expected, amp, 0.0001); // Allow for small numerical differences
-
 
     auto cg = clebschgordan(2, 1, 0, 1, 2, 1);
     std::cout << "C++ Clebsch-Gordan coefficient: " << cg << std::endl;
@@ -352,14 +411,14 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
     ThreeBodySpins spins = {4, 2, 0, 2}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
     std::vector<LSCoupling> two_lsLS = possible_lsLS(j, spins, conservingParities, 1);
     std::cout << "two_lsLS: [" << two_lsLS.size() << "]" << std::endl;
-    for (size_t idx = 0; idx < two_lsLS.size(); ++idx) {
+    for (size_t idx = 0; idx < two_lsLS.size(); ++idx)
+    {
         const auto &two_ls = two_lsLS[idx].two_ls;
         const auto &two_LS = two_lsLS[idx].two_LS;
         std::cout << "LS coupling " << idx << ": " << two_ls[0]
                   << " " << two_ls[1] << ", L coupling: "
                   << two_LS[0] << " " << two_LS[1] << std::endl;
     }
-
 }
 
 // Add a test case to verify we match the unpolarized intensity from Julia
@@ -375,34 +434,501 @@ TEST_F(ThreeBodyAmplitudeModelTest, UnpolarizedIntensityJuliaMatch)
 
     // Create the model using values from the tutorial
     ThreeBodyAmplitudeModel model;
-    model.add(Lambda1520, "Lambda1520", complex(1.0, 0.0));
-    model.add(Lambda1690, "Lambda1690", complex(0.5, 0.0));
-    model.add(Pc4312, "Pc4312", complex(0.0, 1.0));
+    model.add(Lambda1520, "Lambda1520", complex(2.0, 0.0));
+    model.add(Lambda1690, "Lambda1690", complex(2.1, 0.0));
+    model.add(Pc4312, "Pc4312", complex(0.4, 0.0));
 
     // Use the standard test point
-    MandelstamTuple σs = decays->x2σs({0.3, 0.3}, ms, 1);
+    MandelstamTuple σs = {4.501751135564419, 21.495750373843414, 16.258552559492166};
 
     std::vector<int> refζs = {1, 2, 3, 1};
 
     // Calculate amplitude tensor
 
-
     // Calculate intensity
-    double intensity_value = model.intensity(σs);
+    double intensity_value = model.intensity(σs, 0, refζs);
 
     // Compare with the expected value from Julia (10.029598796534886)
     std::cout << "C++ unpolarized intensity: " << intensity_value << std::endl;
-    std::cout << "Julia unpolarized intensity: 10.029598796534886" << std::endl;
+    std::cout << "Julia unpolarized intensity: 2.5191201498154108" << std::endl;
 
     // Allow a small tolerance for numerical differences
-    EXPECT_NEAR(intensity_value, 10.029598796534886, 0.1);
+    EXPECT_NEAR(intensity_value, 2.5191201498154108, 1e-6);
+    ThreeBodySystem tbs2(ms, spins);
+    ThreeBodySpins sp = tbs2.get_two_js();
+    std::cout << sp[0] << " " << sp[1] << " " << sp[2] << " " << sp[3] << std::endl;
 }
 
-/*
-int main(int argc, char **argv)
+TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520aligned_amplitude)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}*/
+    // Test the Clebsch-Gordan coefficient calculation
+    ThreeBodyDecays tbd;
+    int k = 1;
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
+    ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
+    auto Lambda1520 = createDecayChainLS(
+        1, createBW(1.5195, 0.0156), "3/2+", conservingParities, *tbs);
 
+    Tensor4Dcomp resultdalignedccomp = tbd.aligned_amplitude4dcomp(*Lambda1520, σs2);
+    // Verify tensor dimensions
 
+    std::cout << "resultdalignedccomp dimensions: "
+              << resultdalignedccomp.size() << " x "
+              << (resultdalignedccomp.empty() ? 0 : resultdalignedccomp[0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() ? 0 : resultdalignedccomp[0][0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() || resultdalignedccomp[0][0].empty() ? 0 : resultdalignedccomp[0][0][0].size())
+              << std::endl;
+
+    std::cout << "Tensor4D resultdalignedccomp : " << std::endl;
+    for (int i = 0; i < resultdalignedccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdalignedccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdalignedccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdalignedccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << i << j << k << z << resultdalignedccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    double prec = 1e-5;
+
+    /*
+    juliares dimensions: 3 x 2 x 1 x 2
+    Tensor4D juliares :
+    0000 Λ1520 aligned amplitude: -0.0016689984410686244 + 1.8041314291331854e-5im
+    0001 Λ1520 aligned amplitude: -0.020276773169024702 + 0.00021918512837087678im
+    0100 Λ1520 aligned amplitude: -0.03046088324379168 + 0.0003292719481756626im
+    0101 Λ1520 aligned amplitude: -0.18420114996408743 + 0.0019911527521853517im
+    1000 Λ1520 aligned amplitude: 0.028675687616797618 - 0.00030997458121258183im
+    1001 Λ1520 aligned amplitude: 0.2604997644839328 - 0.0028159152268970385im
+    1100 Λ1520 aligned amplitude: 0.2604997644839328 - 0.0028159152268970385im
+    1101 Λ1520 aligned amplitude: -0.028675687616797618 + 0.00030997458121258183im
+    2000 Λ1520 aligned amplitude: -0.18420114996408743 + 0.0019911527521853517im
+    2001 Λ1520 aligned amplitude: 0.03046088324379168 - 0.0003292719481756626im
+    2100 Λ1520 aligned amplitude: 0.020276773169024702 - 0.00021918512837087678im
+    2101 Λ1520 aligned amplitude: -0.0016689984410686244 + 1.8041314291331854e-5im
+    */
+    // Expected values from the Julia tutorial
+    Tensor4Dcomp juliares(3, std::vector<std::vector<std::vector<complex>>>(
+                                 2, std::vector<std::vector<complex>>(
+                                        1, std::vector<complex>(2, complex(0.0, 0.0)))));
+    juliares[0][0][0][0] = complex(-0.0016689984410686244, 1.8041314291331854e-5);
+    juliares[0][0][0][1] = complex(-0.020276773169024702, 0.00021918512837087678);
+    juliares[0][1][0][0] = complex(-0.03046088324379168, 0.0003292719481756626);
+    juliares[0][1][0][1] = complex(-0.18420114996408743, 0.0019911527521853517);
+
+    juliares[1][0][0][0] = complex(0.028675687616797618, -0.00030997458121258183);
+    juliares[1][0][0][1] = complex(0.2604997644839328, -0.0028159152268970385);
+    juliares[1][1][0][0] = complex(0.2604997644839328, -0.0028159152268970385);
+    juliares[1][1][0][1] = complex(-0.028675687616797618, 0.00030997458121258183);
+
+    juliares[2][0][0][0] = complex(-0.18420114996408743, 0.0019911527521853517);
+    juliares[2][0][0][1] = complex(0.03046088324379168, -0.0003292719481756626);
+    juliares[2][1][0][0] = complex(0.020276773169024702, -0.00021918512837087678);
+    juliares[2][1][0][1] = complex(-0.0016689984410686244, 1.8041314291331854e-5);
+
+    // Compare the results with the expected values
+    for (int i = 0; i < resultdalignedccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdalignedccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdalignedccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdalignedccomp[0][0][0].size(); ++z)
+                {
+                    EXPECT_NEAR(resultdalignedccomp[i][j][k][z].real(), juliares[i][j][k][z].real(), prec);
+                    EXPECT_NEAR(resultdalignedccomp[i][j][k][z].imag(), juliares[i][j][k][z].imag(), prec);
+                }
+            }
+        }
+    }
+    // Print result for comparison
+}
+TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520amplitude)
+{
+    std::vector<int> refζs = {1, 2, 3, 1};
+    ThreeBodyDecays tbd;
+    int k = 1;
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
+    ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
+    auto Lambda1520 = createDecayChainLS(
+        1, createBW(1.5195, 0.0156), "3/2+", conservingParities, *tbs);
+
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 0, refζs);
+    // Verify tensor dimensions
+    std::cout << "Tensor4D resultdccomp : " << std::endl;
+    for (int i = 0; i < resultdccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << i << j << k << z << resultdccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    /*
+    Tensor4D resultdccomp :
+    1111 Λ1520 amplitude: -0.004505248601342691 + 4.870022881828725e-5im
+1112 Λ1520 amplitude: -0.03738349707522119 + 0.0004041030856873157im
+1211 Λ1520 amplitude: -0.030172068189441334 + 0.0003261499541465571im
+1212 Λ1520 amplitude: -0.18150395401937452 + 0.001961996967166934im
+2111 Λ1520 amplitude: 0.052868248572712745 - 0.0005714880643758189im
+2112 Λ1520 amplitude: 0.2566853533985421 - 0.002774682720302358im
+2211 Λ1520 amplitude: 0.2566853533985421 - 0.002774682720302358im
+2212 Λ1520 amplitude: -0.052868248572712745 + 0.0005714880643758189im
+3111 Λ1520 amplitude: -0.18150395401937452 + 0.001961996967166934im
+3112 Λ1520 amplitude: 0.030172068189441334 - 0.0003261499541465571im
+3211 Λ1520 amplitude: 0.03738349707522119 - 0.0004041030856873157im
+3212 Λ1520 amplitude: -0.004505248601342691 + 4.870022881828725e-5im */
+
+    EXPECT_NEAR(resultdccomp[0][0][0][0].real(), -0.004505, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][0][0][0].imag(), 4.87002e-05, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][0][0][1].real(), -0.037383, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][0][0][1].imag(), 0.000404103, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][1][0][0].real(), -0.030172, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][1][0][0].imag(), 0.000326149, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][1][0][1].real(), -0.181504, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][1][0][1].imag(), 0.001962, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][0][0][0].real(), 0.052868, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][0][0][0].imag(), -0.000571488, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][0][0][1].real(), 0.256685, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][0][0][1].imag(), -0.00277468, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][1][0][0].real(), 0.256685, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][1][0][0].imag(), -0.00277468, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][1][0][1].real(), -0.052868, 1e-5);
+    EXPECT_NEAR(resultdccomp[1][1][0][1].imag(), 0.000571488, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][0][0][0].real(), -0.181504, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][0][0][0].imag(), 0.001962, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][0][0][1].real(), 0.030172, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][0][0][1].imag(), -0.000326149, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][1][0][0].real(), 0.037383, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][1][0][0].imag(), -0.000404103, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][1][0][1].real(), -0.004505, 1e-5);
+    EXPECT_NEAR(resultdccomp[2][1][0][1].imag(), 4.87002e-05, 1e-5);
+    // Print result for comparison
+}
+
+TEST_F(ThreeBodyAmplitudeModelTest, Lambda1690aligned_amplitude)
+{
+    // Test the Clebsch-Gordan coefficient calculation
+    ThreeBodyDecays tbd;
+    int k = 1;
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
+    ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
+    auto Lambda1690 = createDecayChainLS(
+        1, createBW(1.685, 0.050), "1/2+", conservingParities, *tbs);
+
+    Tensor4Dcomp resultdalignedccomp = tbd.aligned_amplitude4dcomp(*Lambda1690, σs2);
+    // Verify tensor dimensions
+
+    std::cout << "resultdalignedccomp dimensions: "
+              << resultdalignedccomp.size() << " x "
+              << (resultdalignedccomp.empty() ? 0 : resultdalignedccomp[0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() ? 0 : resultdalignedccomp[0][0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() || resultdalignedccomp[0][0].empty() ? 0 : resultdalignedccomp[0][0][0].size())
+              << std::endl;
+
+    std::cout << "Tensor4D resultdalignedccomp : " << std::endl;
+    for (int i = 0; i < resultdalignedccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdalignedccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdalignedccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdalignedccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << i << j << k << z << resultdalignedccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    /*
+    0000 Λ1690 aligned amplitude: -0.0 + 0.0im
+    0001 Λ1690 aligned amplitude: -0.018950450900958035 + 0.0009603310614203887im
+    0100 Λ1690 aligned amplitude: -0.0 + 0.0im
+    0101 Λ1690 aligned amplitude: 0.3458645964592334 - 0.017526997999221142im
+    1000 Λ1690 aligned amplitude: -0.013399992338610148 + 0.0006790566057144318im
+    1001 Λ1690 aligned amplitude: 0.2445632015286727 - 0.01239345913909232im
+    1100 Λ1690 aligned amplitude: 0.2445632015286727 - 0.01239345913909232im
+    1101 Λ1690 aligned amplitude: 0.013399992338610148 - 0.0006790566057144318im
+    2000 Λ1690 aligned amplitude: 0.3458645964592334 - 0.017526997999221142im
+    2001 Λ1690 aligned amplitude: -0.0 + 0.0im
+    2100 Λ1690 aligned amplitude: 0.018950450900958035 - 0.0009603310614203887im
+    2101 Λ1690 aligned amplitude: 0.0 - 0.0im
+    */
+
+    double prec = 1e-6;
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), -0.018950, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), 0.000960331, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), 0.345865, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), -0.017527, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), -0.013400, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), 0.000679056, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.244563, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), -0.012393, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.244563, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), -0.012393, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), 0.013400, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), -0.000679056, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), 0.345865, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), -0.017527, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), 0.018950, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), -0.000960331, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.0, prec);
+}
+
+TEST_F(ThreeBodyAmplitudeModelTest, Lambda1690amplitude)
+{
+    // Test the Clebsch-Gordan coefficient calculation
+    ThreeBodyDecays tbd;
+    std::vector<int> refζs = {1, 2, 3, 1};
+    int k = 1;
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
+    ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
+    auto Lambda1690 = createDecayChainLS(
+        1, createBW(1.685, 0.050), "1/2+", conservingParities, *tbs);
+
+    Tensor4Dcomp resultdalignedccomp = tbd.amplitude4dcomp(*Lambda1690, σs2, 0, refζs);
+    // Verify tensor dimensions
+
+    std::cout << "amplitude dimensions: "
+              << resultdalignedccomp.size() << " x "
+              << (resultdalignedccomp.empty() ? 0 : resultdalignedccomp[0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() ? 0 : resultdalignedccomp[0][0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() || resultdalignedccomp[0][0].empty() ? 0 : resultdalignedccomp[0][0][0].size())
+              << std::endl;
+
+    std::cout << "Tensor4D amplitude4dcomp : " << std::endl;
+    for (int i = 0; i < resultdalignedccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdalignedccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdalignedccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdalignedccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << i << j << k << z << resultdalignedccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    /*
+    0000 Λ1690 amplitude: 0.0 + 0.0im
+    0001 Λ1690 amplitude: 0.013418926938380392 - 0.0006800161335056153im
+    0100 Λ1690 amplitude: 0.0 + 0.0im
+    0101 Λ1690 amplitude: 0.3461233466166077 - 0.017540110395046056im
+    1000 Λ1690 amplitude: 0.009488614234375609 - 0.0004808440193180771im
+    1001 Λ1690 amplitude: 0.24474616551958514 - 0.012402731003097718im
+    1100 Λ1690 amplitude: 0.24474616551958514 - 0.012402731003097718im
+    1101 Λ1690 amplitude: -0.009488614234375609 + 0.0004808440193180771im
+    2000 Λ1690 amplitude: 0.3461233466166077 - 0.017540110395046056im
+    2001 Λ1690 amplitude: 0.0 + 0.0im
+    2100 Λ1690 amplitude: -0.013418926938380392 + 0.0006800161335056153im
+    2101 Λ1690 amplitude: 0.0 + 0.0im
+    */
+
+    double prec = 1e-6;
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), 0.0134189, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), -0.000680016, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), 0.346123, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), -0.0175401, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), 0.00948861, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), -0.000480844, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.244746, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), -0.0124027, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.244746, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), -0.0124027, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), -0.00948861, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), 0.000480844, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), 0.346123, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), -0.0175401, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), -0.0134189, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), 0.000680016, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.0, prec);
+}
+
+TEST_F(ThreeBodyAmplitudeModelTest, Pc4312aligned_amplitude)
+{
+    // Test the Clebsch-Gordan coefficient calculation
+    ThreeBodyDecays tbd;
+    int k = 1;
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
+    ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
+    auto Pc4312 = createDecayChainLS(
+        3, createBW(4.312, 0.015), "1/2+", conservingParities, *tbs);
+
+    Tensor4Dcomp resultdalignedccomp = tbd.aligned_amplitude4dcomp(*Pc4312, σs2);
+    // Verify tensor dimensions
+
+    std::cout << "resultdalignedccomp dimensions: "
+              << resultdalignedccomp.size() << " x "
+              << (resultdalignedccomp.empty() ? 0 : resultdalignedccomp[0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() ? 0 : resultdalignedccomp[0][0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() || resultdalignedccomp[0][0].empty() ? 0 : resultdalignedccomp[0][0][0].size())
+              << std::endl;
+
+    std::cout << "Tensor4D resultdalignedccomp : " << std::endl;
+    for (int i = 0; i < resultdalignedccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdalignedccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdalignedccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdalignedccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << i << j << k << z << resultdalignedccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    /*
+    0000 Pc4312 aligned amplitude: 0.21454237236042922 + 0.005943400512576101im
+    0001 Pc4312 aligned amplitude: 0.1225800405096077 + 0.0033957966791401807im
+    0100 Pc4312 aligned amplitude: 0.0 + 0.0im
+    0101 Pc4312 aligned amplitude: -0.0 + 0.0im
+    1000 Pc4312 aligned amplitude: -0.0866771778824653 - 0.0024011908593507803im
+    1001 Pc4312 aligned amplitude: 0.15170436634790885 + 0.004202618805750164im
+    1100 Pc4312 aligned amplitude: 0.15170436634790885 + 0.004202618805750164im
+    1101 Pc4312 aligned amplitude: 0.0866771778824653 + 0.0024011908593507803im
+    2000 Pc4312 aligned amplitude: -0.0 + 0.0im
+    2001 Pc4312 aligned amplitude: 0.0 + 0.0im
+    2100 Pc4312 aligned amplitude: -0.1225800405096077 - 0.0033957966791401807im
+    2101 Pc4312 aligned amplitude: 0.21454237236042922 + 0.005943400512576101im
+        */
+
+    double prec = 1e-6;
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].real(), 0.21454237236042922, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].imag(), 0.005943400512576101, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), 0.1225800405096077, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), 0.0033957966791401807, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), -0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), -0.0866771778824653, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), -0.0024011908593507803, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.15170436634790885, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), 0.004202618805750164, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.15170436634790885, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), 0.004202618805750164, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), 0.0866771778824653, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), 0.0024011908593507803, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].real(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].imag(), 0.0, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), -0.1225800405096077, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), -0.0033957966791401807, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.21454237236042922, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.005943400512576101, prec);
+}
+
+TEST_F(ThreeBodyAmplitudeModelTest, Pc4312amplitude)
+{
+    // Test the Clebsch-Gordan coefficient calculation
+    ThreeBodyDecays tbd;
+    std::vector<int> refζs = {1, 2, 3, 1};
+    int k = 1;
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
+    ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
+    auto Pc4312 = createDecayChainLS(
+        3, createBW(4.312, 0.015), "1/2+", conservingParities, *tbs);
+
+    Tensor4Dcomp resultdalignedccomp = tbd.amplitude4dcomp(*Pc4312, σs2, 0, refζs);
+    // Verify tensor dimensions
+
+    std::cout << "amplitude dimensions: "
+              << resultdalignedccomp.size() << " x "
+              << (resultdalignedccomp.empty() ? 0 : resultdalignedccomp[0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() ? 0 : resultdalignedccomp[0][0].size()) << " x "
+              << (resultdalignedccomp.empty() || resultdalignedccomp[0].empty() || resultdalignedccomp[0][0].empty() ? 0 : resultdalignedccomp[0][0][0].size())
+              << std::endl;
+
+    std::cout << "Tensor4D amplitude4dcomp : " << std::endl;
+    for (int i = 0; i < resultdalignedccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdalignedccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdalignedccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdalignedccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << i << j << k << z << resultdalignedccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+
+    /*
+    0000 Pc4312 amplitude: 0.03499308671589973 + 0.000969402581111097im
+    0001 Pc4312 amplitude: -0.020706036681630652 - 0.0005736128843596291im
+    0100 Pc4312 amplitude: 0.2097534985277497 + 0.005810735832500719im
+    0101 Pc4312 amplitude: -0.12411490503472947 - 0.003438316552976656im
+    1000 Pc4312 amplitude: -0.13367674223749584 - 0.0037032051505382487im
+    1001 Pc4312 amplitude: 0.11250633990784316 + 0.003116728089279148im
+    1100 Pc4312 amplitude: 0.11250633990784314 + 0.0031167280892791475im
+    1101 Pc4312 amplitude: 0.13367674223749584 + 0.003703205150538248im
+    2000 Pc4312 amplitude: -0.12411490503472947 - 0.003438316552976656im
+    2001 Pc4312 amplitude: -0.20975349852774966 - 0.005810735832500719im
+    2100 Pc4312 amplitude: 0.020706036681630666 + 0.0005736128843596288im
+    2101 Pc4312 amplitude: 0.03499308671589972 + 0.0009694025811110974im
+    */
+
+    double prec = 1e-6;
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].real(), 0.034993, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].imag(), 0.000969402, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), -0.020706, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), -0.000573613, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].real(), 0.209753, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].imag(), 0.00581074, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), -0.124115, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), -0.00343832, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), -0.133677, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), -0.00370321, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.112506, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), 0.00311673, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.112506, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), 0.00311673, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), 0.133677, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), 0.00370321, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), -0.124115, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), -0.00343832, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].real(), -0.209753, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].imag(), -0.00581074, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), 0.020706, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), 0.000573613, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.034993, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.000969403, prec);
+}
