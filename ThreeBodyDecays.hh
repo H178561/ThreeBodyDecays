@@ -456,7 +456,7 @@ std::shared_ptr<DecayChain> createDecayChainLS(
     const ThreeBodyParities &Ps,
     const ThreeBodySystem &tbs);
 
-    std::vector<std::shared_ptr<DecayChain>> createDecayChainsLS(
+std::vector<std::shared_ptr<DecayChain>> createDecayChainsLS(
     int k,
     std::function<std::complex<double>(double)> Xlineshape,
     const std::string &jp,

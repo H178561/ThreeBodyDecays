@@ -27,9 +27,12 @@ public:
 
     // Calculate amplitude tensor (for all helicity states)
     Tensor4Dcomp amplitude4d(const MandelstamTuple &σs,
-                         const std::vector<int> &refζs) const;
+                             const std::vector<int> &refζs) const;
 
     // Calculate specific amplitude (for specific helicity values)
+    complex amplitudes(const MandelstamTuple &σs,
+                       const std::vector<int> &two_λs,
+                       const std::vector<int> &refζs) const;
     complex amplitude(const MandelstamTuple &σs,
                       const std::vector<int> &two_λs,
                       const std::vector<int> &refζs) const;

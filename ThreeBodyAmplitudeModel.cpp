@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <algorithm>
 #include <numeric>
+#include <iostream>
+#include <array>
 
 void ThreeBodyAmplitudeModel::add(std::shared_ptr<DecayChain> chain,
                                   const std::string &label,
@@ -43,7 +45,7 @@ void ThreeBodyAmplitudeModel::clear()
 }
 
 Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
-                                              const std::vector<int> &refζs) const
+                                                  const std::vector<int> &refζs) const
 {
     if (chains_.empty())
     {
@@ -90,11 +92,11 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
 
     // Initialize result tensor with zeros
     Tensor4Dcomp result(first_amp.size(),
-                    std::vector<std::vector<std::vector<complex>>>(
-                        first_amp[0].size(),
-                        std::vector<std::vector<complex>>(
-                            first_amp[0][0].size(),
-                            std::vector<complex>(first_amp[0][0][0].size(), 0.0))));
+                        std::vector<std::vector<std::vector<complex>>>(
+                            first_amp[0].size(),
+                            std::vector<std::vector<complex>>(
+                                first_amp[0][0].size(),
+                                std::vector<complex>(first_amp[0][0][0].size(), 0.0))));
 
     // Sum all amplitudes with coefficients (similar to Julia sum)
     for (const auto &[chain, label, coef] : chains_)
@@ -111,6 +113,7 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
                 {
                     for (size_t l = 0; l < result[i][j][k].size(); ++l)
                     {
+                        std::cout << i << " " << j << " " << k << " " << l << " " << chain_amp[i][j][k][l] << " " << coef_mag << " " << " endres " << chain_amp[i][j][k][l] * coef_mag << std::endl;
                         result[i][j][k][l] += chain_amp[i][j][k][l] * coef_mag;
                     }
                 }
@@ -124,6 +127,34 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
 complex ThreeBodyAmplitudeModel::amplitude(const MandelstamTuple &σs,
                                            const std::vector<int> &two_λs,
                                            const std::vector<int> &refζs) const
+{
+    Tensor4Dcomp F0 = amplitude4d(σs, refζs);
+
+    // Calculate indices from helicity values
+    std::vector<int> indices(4);
+    for (int i = 0; i < 4; ++i)
+    {
+        // Match Julia's div(_two_j + _two_λ, 2) + 1, but adjust for 0-based indexing
+        indices[i] = (two_λs[i]);
+    }
+
+    // Check if indices are within bounds
+    if (indices[0] >= 0 && indices[0] < (int)F0.size() &&
+        indices[1] >= 0 && indices[1] < (int)F0[0].size() &&
+        indices[2] >= 0 && indices[2] < (int)F0[0][0].size() &&
+        indices[3] >= 0 && indices[3] < (int)F0[0][0][0].size())
+    {
+
+        return F0[indices[0]][indices[1]][indices[2]][indices[3]];
+    }
+
+    // Return 0 if indices are out of bounds
+    return 0.0;
+}
+
+complex ThreeBodyAmplitudeModel::amplitudes(const MandelstamTuple &σs,
+                                            const std::vector<int> &two_λs,
+                                            const std::vector<int> &refζs) const
 {
     if (chains_.empty())
     {
