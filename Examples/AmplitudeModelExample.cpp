@@ -59,14 +59,14 @@ int main()
               << σs[0] << ", " << σs[1] << ", " << σs[2] << std::endl;
 
     // Calculate intensity at this kinematic point
-    double intensity = model.intensity(σs);
+    double intensity = model.intensity(σs, 0);
     std::cout << "Intensity at this point: " << intensity << std::endl;
 
     // Calculate amplitude for specific helicity configuration
     std::vector<int> two_λs = {1, 1, 1, 1}; // For 1/2 helicity we use 1 in doubled representation
     std::vector<int> refζs = {1, 2, 3, 1};  // Reference frames
 
-    complex amp = model.amplitude(σs, two_λs, refζs);
+    complex amp = model.amplitude(σs, two_λs, 0, refζs);
     std::cout << "Amplitude for specific helicities: "
               << std::real(amp) << " + " << std::imag(amp) << "i" << std::endl;
 

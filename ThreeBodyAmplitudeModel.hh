@@ -27,24 +27,27 @@ public:
 
     // Calculate amplitude tensor (for all helicity states)
     Tensor4Dcomp amplitude4d(const MandelstamTuple &σs,
-                             const std::vector<int> &refζs) const;
+                             const int &k_amp,
+                             const std::vector<int> &refζs = {-1, -1, -1, -1}) const;
 
     // Calculate specific amplitude (for specific helicity values)
     complex amplitudes(const MandelstamTuple &σs,
                        const std::vector<int> &two_λs,
-                       const std::vector<int> &refζs) const;
+                       const int &k_amp,
+                       const std::vector<int> &refζs = {-1, -1, -1, -1}) const;
     complex amplitude(const MandelstamTuple &σs,
                       const std::vector<int> &two_λs,
-                      const std::vector<int> &refζs) const;
+                      const int &k_amp,
+                      const std::vector<int> &refζs = {-1, -1, -1, -1}) const;
 
     // Calculate total intensity (probability density)
-    double intensity(const MandelstamTuple &σs) const;
+    double intensity(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs = {-1, -1, -1, -1}) const;
 
     // Calculate individual component intensities
-    std::vector<double> component_intensities(const MandelstamTuple &σs) const;
+    std::vector<double> component_intensities(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs = {-1, -1, -1, -1}) const;
 
     // Calculate interference terms
-    std::vector<std::vector<double>> interference_terms(const MandelstamTuple &σs) const;
+    std::vector<std::vector<double>> interference_terms(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs = {-1, -1, -1, -1}) const;
 
 private:
     // Store chains with their labels and coefficients

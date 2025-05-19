@@ -183,13 +183,12 @@ TEST_F(ThreeBodyAmplitudeModelTest, AmplitudeModelIntensity)
     MandelstamTuple σs = decays->x2σs({0.3, 0.3}, ms, 1);
 
     // Calculate intensity at this point
-    double intensity = model.intensity(σs, 0);
+    double intensity = model.intensity(σs, 1);
 
     // The exact value depends on implementation details, but should be positive
     EXPECT_GT(intensity, 0.0);
-    std::cout << "test" << std::endl;
     // Calculate individual component intensities
-    auto componentIntensities = model.component_intensities(σs, 0);
+    auto componentIntensities = model.component_intensities(σs, 1);
     EXPECT_EQ(componentIntensities.size(), 6);
 
     // Sum of individual intensities should be different from total due to interference

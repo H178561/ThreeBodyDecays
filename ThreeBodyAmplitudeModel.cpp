@@ -45,6 +45,7 @@ void ThreeBodyAmplitudeModel::clear()
 }
 
 Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
+                                                  const int &k_amp,
                                                   const std::vector<int> &refζs) const
 {
     if (chains_.empty())
@@ -56,7 +57,7 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
 
     // Get dimensions from the first chain
     auto &[first_chain, first_label, first_coef] = chains_[0];
-    auto first_amp = tbd.amplitude4dcomp(*first_chain, σs, refζs);
+    auto first_amp = tbd.amplitude4dcomp(*first_chain, σs, k_amp, refζs);
 
     // Skip computation if there's only one chain
     if (chains_.size() == 1)
@@ -101,7 +102,7 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
     // Sum all amplitudes with coefficients (similar to Julia sum)
     for (const auto &[chain, label, coef] : chains_)
     {
-        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, refζs);
+        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_amp, refζs);
         double coef_mag = std::abs(coef);
 
         // Add to result
@@ -126,9 +127,10 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
 
 complex ThreeBodyAmplitudeModel::amplitude(const MandelstamTuple &σs,
                                            const std::vector<int> &two_λs,
+                                           const int &k_amp,
                                            const std::vector<int> &refζs) const
 {
-    Tensor4Dcomp F0 = amplitude4d(σs, refζs);
+    Tensor4Dcomp F0 = amplitude4d(σs, k_amp, refζs);
 
     // Calculate indices from helicity values
     std::vector<int> indices(4);
@@ -154,6 +156,7 @@ complex ThreeBodyAmplitudeModel::amplitude(const MandelstamTuple &σs,
 
 complex ThreeBodyAmplitudeModel::amplitudes(const MandelstamTuple &σs,
                                             const std::vector<int> &two_λs,
+                                            const int &k_amp,
                                             const std::vector<int> &refζs) const
 {
     if (chains_.empty())
@@ -167,24 +170,21 @@ complex ThreeBodyAmplitudeModel::amplitudes(const MandelstamTuple &σs,
     // Sum amplitudes with coefficients (like Julia's sum)
     for (const auto &[chain, label, coef] : chains_)
     {
-        result += coef * tbd.amplitude(*chain, σs, two_λs, refζs);
+        result += coef * tbd.amplitude(*chain, σs, two_λs, k_amp, refζs);
     }
 
     return result;
 }
 
-double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs) const
+double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs) const
 {
     if (chains_.empty())
     {
         return 0.0;
     }
 
-    // Default reference frames
-    std::vector<int> refζs = {1, 2, 3, 1};
-
     // Get the 4D amplitude tensor
-    auto amp = amplitude4d(σs, refζs);
+    auto amp = amplitude4d(σs, k_amp, refζs);
 
     // Sum squared amplitudes (similar to Julia's sum(abs2, ...))
     double total_intensity = 0.0;
@@ -207,19 +207,18 @@ double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs) const
     return total_intensity;
 }
 
-std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const MandelstamTuple &σs) const
+std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs) const
 {
     std::vector<double> result;
     result.reserve(chains_.size());
 
     // Default reference frames
-    std::vector<int> refζs = {1, 2, 3, 1};
     ThreeBodyDecays tbd;
 
     // Calculate intensity for each component separately
     for (const auto &[chain, label, coef] : chains_)
     {
-        auto chain_amp = tbd.amplitude4d(*chain, σs, refζs);
+        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_amp, refζs);
 
         // Sum squared amplitudes for this chain
         double chain_intensity = 0.0;
@@ -231,7 +230,8 @@ std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const Mandels
                 {
                     for (const auto &val : dim3)
                     {
-                        chain_intensity += val * val * std::norm(coef);
+                        chain_intensity += val.real() * val.real() +
+                                           val.imag() * val.imag();
                     }
                 }
             }
@@ -243,7 +243,7 @@ std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const Mandels
     return result;
 }
 
-std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(const MandelstamTuple &σs) const
+std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs) const
 {
     size_t n = chains_.size();
     std::vector<std::vector<double>> result(n, std::vector<double>(n, 0.0));
@@ -254,14 +254,13 @@ std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(con
     }
 
     // Default reference frames
-    std::vector<int> refζs = {1, 2, 3, 1};
     ThreeBodyDecays tbd;
 
     // Calculate all amplitudes once
-    std::vector<Tensor4D> amplitudes;
+    std::vector<Tensor4Dcomp> amplitudes;
     for (const auto &[chain, label, coef] : chains_)
     {
-        amplitudes.push_back(tbd.amplitude4d(*chain, σs, refζs));
+        amplitudes.push_back(tbd.amplitude4dcomp(*chain, σs, k_amp, refζs));
     }
 
     // Calculate interference terms
@@ -289,15 +288,15 @@ std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(con
                             if (i == j)
                             {
                                 // Diagonal terms
-                                interference_term += amplitudes[i][d1][d2][d3][d4] *
-                                                     amplitudes[j][d1][d2][d3][d4] *
+                                interference_term += amplitudes[i][d1][d2][d3][d4].real() *
+                                                     amplitudes[j][d1][d2][d3][d4].real() *
                                                      std::norm(coef_i);
                             }
                             else
                             {
                                 // Off-diagonal terms
-                                interference_term += 2 * amplitudes[i][d1][d2][d3][d4] *
-                                                     amplitudes[j][d1][d2][d3][d4] *
+                                interference_term += 2 * amplitudes[i][d1][d2][d3][d4].real() *
+                                                     amplitudes[j][d1][d2][d3][d4].real() *
                                                      std::abs(coef_i) * std::abs(coef_j);
                             }
                         }
