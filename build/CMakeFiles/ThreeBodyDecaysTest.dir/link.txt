@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyDecaysTest.cpp.o CMakeFiles/ThreeBodyDecaysTest.dir/Tests/OrientationAnglesTest.cpp.o CMakeFiles/ThreeBodyDecaysTest.dir/Tests/ThreeBodyAmplitudeModelTest.cpp.o -o ThreeBodyDecaysTest  libThreeBodyDecaysLib.a /usr/lib/x86_64-linux-gnu/libgtest.a 

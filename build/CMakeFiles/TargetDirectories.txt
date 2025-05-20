@@ -1,7 +1,0 @@
-/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles/ThreeBodyDecaysLib.dir
-/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles/ThreeBodyDecaysTest.dir
-/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles/ClebschGordanTest.dir
-/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles/AmplitudeModelExample.dir
-/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles/test.dir
-/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles/edit_cache.dir
-/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/build/CMakeFiles/rebuild_cache.dir
