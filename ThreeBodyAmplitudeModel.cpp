@@ -114,7 +114,7 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
                 {
                     for (size_t l = 0; l < result[i][j][k].size(); ++l)
                     {
-                        std::cout << i << " " << j << " " << k << " " << l << " " << chain_amp[i][j][k][l] << " " << coef_mag << " " << " endres " << chain_amp[i][j][k][l] * coef_mag << std::endl;
+                        //std::cout << i << " " << j << " " << k << " " << l << " " << chain_amp[i][j][k][l] << " " << coef_mag << " " << " endres " << chain_amp[i][j][k][l] * coef_mag << std::endl;
                         result[i][j][k][l] += chain_amp[i][j][k][l] * coef_mag;
                     }
                 }

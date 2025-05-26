@@ -63,7 +63,7 @@ public:
         // Initialisiere spins_ mit verdoppelten Werten
         for (int i = 0; i < 4; ++i)
         {
-            two_js[i] = spins[i] * 2;
+            two_js[i] = spins[i];//2;
         }
     }
 
@@ -95,12 +95,18 @@ public:
     SpinParity(const std::string &jp);
 
     // Getters
-    int get_two_j() const { return two_j_; }
+    int get_two_j() const {
+        return two_j_; // Now properly returns the doubled value
+    }
+    int get_j() const {
+        return two_j_ / 2; // Returns the original j value
+    }
     char get_p() const { return p_; }
 
 private:
     int two_j_; // 2 * j
     char p_;    // '+' or '-'
+    std::string str; // Store the original string for parsing
 };
 
 class DecayChain
@@ -464,11 +470,10 @@ std::vector<std::shared_ptr<DecayChain>> createDecayChainsLS(
     const ThreeBodySystem &tbs);
 
 // Version with explicit recoupling parameters (always disables autoCalculateLS)
-std::shared_ptr<DecayChain> createDecayChainLScoupling(
+std::shared_ptr<DecayChain> createDecayChainCoupling(
     int k,
     std::function<std::complex<double>(double)> Xlineshape,
     const std::string &jp,
-    const ThreeBodyParities &Ps,
     const ThreeBodySystem &tbs,
     RecouplingType HRkType = RecouplingType::NoRecoupling,
     const std::array<int, 2> &HRkParams = {0, 0},

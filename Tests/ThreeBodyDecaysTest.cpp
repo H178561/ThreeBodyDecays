@@ -132,11 +132,11 @@ TEST_F(ThreeBodyDecaysTest, DecayChainNoRecoupling)
     };
 
     // Create decay chain with NoRecoupling
-    auto dc = createDecayChainLScoupling(
+    auto dc = createDecayChainCoupling(
         1,                                     // k-value
         Xlineshape,                            // Lineshape function
         "2+",                                  // jp (Spin-parity)
-        ThreeBodyParities{'+', '+', '+', '+'}, // Parities
+        //ThreeBodyParities{'+', '+', '+', '+'}, // Parities
         ThreeBodySystem(ms, spins),            // ThreeBodySystem
         RecouplingType::NoRecoupling, {0, 0}   // NoRecoupling function
     );
@@ -191,11 +191,11 @@ TEST_F(ThreeBodyDecaysTest, DecayChainParityRecoupling)
     };
 
     // Create decay chain with ParityRecoupling for HRk
-    auto dc2 = createDecayChainLScoupling(
+    auto dc2 = createDecayChainCoupling(
         1,                                             // k-value
         Xlineshape,                                    // Lineshape function
         "2+",                                          // jp (Spin-parity)
-        ThreeBodyParities{'+', '+', '+', '+'},         // Parities
+        //ThreeBodyParities{'+', '+', '+', '+'},         // Parities
         ThreeBodySystem(ms, spins),                    // ThreeBodySystem
         RecouplingType::NoRecoupling, {0, 0}, false,   // NoRecoupling for Hij
         RecouplingType::ParityRecoupling, {2, 0}, true // ParityRecoupling for HRk
@@ -227,11 +227,11 @@ TEST_F(ThreeBodyDecaysTest, DecayChainDoubleParityRecoupling)
     };
 
     // Create decay chain with ParityRecoupling for both HRk and Hij
-    auto dc3 = createDecayChainLScoupling(
+    auto dc3 = createDecayChainCoupling(
         3,                                              // k-value
         Xlineshape,                                     // Lineshape function
         "2+",                                           // jp (Spin-parity)
-        ThreeBodyParities{'+', '+', '+', '+'},          // Parities
+        //ThreeBodyParities{'+', '+', '+', '+'},          // Parities
         ThreeBodySystem(ms, spins),                     // ThreeBodySystem
         RecouplingType::ParityRecoupling, {2, 0}, true, // ParityRecoupling for HRk
         RecouplingType::ParityRecoupling, {2, 0}, false // ParityRecoupling for Hij

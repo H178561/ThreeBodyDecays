@@ -18,6 +18,8 @@ add_library(ThreeBodyDecaysLib
     #Examples/CombinedAmplitureModelExample.cpp
 )
 
+set_target_properties(ThreeBodyDecaysLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 #target_link_libraries(ThreeBodyDecays ThreeBodyDecaysLib)
 
 # Try to find GTest, but make it optional

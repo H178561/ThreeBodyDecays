@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/AmplitudeModelExample.dir/Examples/AmplitudeModelExample.cpp.o -o AmplitudeModelExample  libThreeBodyDecaysLib.a 

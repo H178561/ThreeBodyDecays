@@ -931,3 +931,28 @@ TEST_F(ThreeBodyAmplitudeModelTest, Pc4312amplitude)
     EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.034993, prec);
     EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.000969403, prec);
 }
+
+TEST_F(ThreeBodyAmplitudeModelTest, SpinParityConstructor)
+{
+    // Test integer spins
+    SpinParity sp1("0+");
+    EXPECT_EQ(sp1.get_two_j(), 0);
+
+    SpinParity sp2("1+");
+    EXPECT_EQ(sp2.get_two_j(), 2);
+
+    SpinParity sp3("2-");
+    EXPECT_EQ(sp3.get_two_j(), 4);
+
+    // Test half-integer spins
+    SpinParity sp4("1/2+");
+    EXPECT_EQ(sp4.get_two_j(), 1);
+
+    SpinParity sp5("3/2-");
+    EXPECT_EQ(sp5.get_two_j(), 3);
+
+    SpinParity sp6("5/2+");
+    EXPECT_EQ(sp6.get_two_j(), 5);
+
+
+}

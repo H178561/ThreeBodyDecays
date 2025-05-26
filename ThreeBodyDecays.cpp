@@ -14,6 +14,7 @@
 using complex = std::complex<double>;
 bool debug = false;
 bool debugls = false;
+bool div2 = false;
 
 // Kallen function implementation
 double Kallen(double x, double y, double z)
@@ -299,7 +300,7 @@ double min_scalar_product(std::vector<double> v1, std::vector<double> v2)
 // Helper function to get indices i and j from k
 std::pair<int, int> ij_from_k(int k)
 {
-    std::cout << k << std::endl;
+    //std::cout << k << std::endl;
     switch (k)
     {
     case 1:
@@ -319,7 +320,7 @@ std::tuple<int, int, int> ijk(const AbstractWignerRotation &wr)
 {
     int k = wr.get_k();
 
-    std::cout << "ijk" << k << std::endl;
+    if(debug) std::cout << "ijk" << k << std::endl;
     auto [i, j] = ij_from_k(k);
     return {i, j, k};
 }
@@ -1098,12 +1099,15 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
     if (debug)
         std::cout << "two_j" << two_j << " " << two_js[0] << " " << two_js[1] << " " << two_js[2] << " " << two_js[3] << std::endl;
 
+
     // div 2
-    two_js[0] = two_js[0] / 2;
-    two_js[1] = two_js[1] / 2;
-    two_js[2] = two_js[2] / 2;
-    two_js[3] = two_js[3] / 2;
-    // Get indices i, j from k (1-based indexing in result)
+    if(div2){
+        two_js[0] = two_js[0] / 2;
+        two_js[1] = two_js[1] / 2;
+        two_js[2] = two_js[2] / 2;
+        two_js[3] = two_js[3] / 2;
+    }
+        // Get indices i, j from k (1-based indexing in result)
     auto [i, j] = ij_from_k(k);
     // Konvertieren zu 0-basierter Indexierung für Arrays
     int i_idx = i - 1;
@@ -1256,7 +1260,7 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
             if (debug)
                 std::cout << "Vij" << amp << " " << phase_value << amp * phase_value << std::endl;
             //  In aligned_amplitude4dcomp für Vij
-            // complex phase_value = (((two_js[j_idx] - two_m2) % 2 == 0) ? complex(1.0, 1.0) : complex(-1.0, -1.0));
+            // complex phase_value = (((two_js[j_idx] - two_m2) % 2 == 0) ? complex(1, 1) : complex(-1, -1));
             Vij[m1_idx][m2_idx] = amp.real() * phase_value;
             // Vij[m1_idx][m2_idx] = complex(1, 1);
         }
@@ -1513,10 +1517,13 @@ Tensor4Dcomp ThreeBodyDecays::amplitude4dcomp(const DecayChain &dc,
 
     // div 2
     auto two_js = tbs.two_js;
+
+    if(div2){
     two_js[0] = two_js[0] / 2;
     two_js[1] = two_js[1] / 2;
     two_js[2] = two_js[2] / 2;
     two_js[3] = two_js[3] / 2;
+    }
     // std::array<int, 4> two_js = {two_jst[0]*2, two_jst[1]*2, two_jst[2]*2, two_jst[3]*2};
 
     if (debug)
@@ -1821,6 +1828,7 @@ SpinParity::SpinParity(const std::string &jp)
 
     // Parse the spin value (rest of the string)
     std::string spin_str = jp.substr(0, jp.size() - 1);
+    str = spin_str; // Store the original string for parsing
 
     // Check if spin string is empty
     if (spin_str.empty())
@@ -1849,6 +1857,8 @@ SpinParity::SpinParity(const std::string &jp)
             {
                 throw std::invalid_argument("Division by zero");
             }
+
+            // For fractions, double the numerator
             two_j_ = (2 * numerator) / denominator;
         }
         catch (const std::exception &e)
@@ -1858,10 +1868,11 @@ SpinParity::SpinParity(const std::string &jp)
     }
     else
     {
-        // Integer spin
+        // Integer spin - multiply by 2 for doubled representation
         try
         {
-            two_j_ = std::stoi(spin_str);
+            int spin = std::stoi(spin_str);
+            two_j_ = spin * 2; // This doubles the integer spin
         }
         catch (const std::exception &e)
         {
@@ -1876,7 +1887,7 @@ std::vector<std::array<int, 2>> possible_ls(
     const SpinParity &jp)
 {
     std::vector<std::array<int, 2>> two_ls;
-
+    if (debugls) std::cout << "possible_ls: " << jp1.get_two_j() << " " << jp2.get_two_j() << " " << jp.get_two_j() << std::endl;
     // Loop through possible s values with step 2
     for (int two_s = std::abs(jp1.get_two_j() - jp2.get_two_j());
          two_s <= jp1.get_two_j() + jp2.get_two_j();
@@ -1962,9 +1973,10 @@ std::vector<std::array<int, 2>> possible_ls_ij(
         p_j = '+'; // Default value
     }
 
-    // Create SpinParity objects for particles i and j
-    SpinParity jp_i(std::to_string(two_js[i] / 2) + p_i);
-    SpinParity jp_j(std::to_string(two_js[j] / 2) + p_j);
+
+    // Create SpinParity objects for particles i and j div 2
+    SpinParity jp_i(std::to_string(two_js[i]) + "/2" + p_i);
+    SpinParity jp_j(std::to_string(two_js[j]) + "/2" + p_j);
 
     return possible_ls(jp_i, jp_j, jp);
 }
@@ -1995,9 +2007,12 @@ std::vector<std::array<int, 2>> possible_ls_Rk(
         p_k = '+'; // Default value
     }
 
-    // Create SpinParity objects for particle k and the parent
-    SpinParity jp_k(std::to_string(two_js[k] / 2) + p_k);
-    SpinParity jp_0(std::to_string(two_js[3] / 2) + Ps.get_P0());
+    if (debugls) std::cout << "possible_ls_Rk: " << two_js[k] << " " << p_k << two_js[3] << " " << Ps.get_P0() << std::endl;
+
+
+    // Create SpinParity objects for particle k and the parent div 2
+    SpinParity jp_k(std::to_string(two_js[k]) + "/2" + p_k);
+    SpinParity jp_0(std::to_string(two_js[3]) + "/2" + Ps.get_P0());
 
     return possible_ls(jp, jp_k, jp_0);
 }
@@ -2009,24 +2024,23 @@ std::vector<LSCoupling> possible_lsLS(
     const ThreeBodyParities &Ps,
     int k)
 {
-
     // Get the list of possible (l,s) values
     std::vector<std::array<int, 2>> lsv = possible_ls_ij(jp, two_js, Ps, k);
-    if (debug)
-        std::cout << "lsv size: " << lsv.size() << std::endl;
+    if (debugls)
+        std::cout << "lsv size: " << lsv.size() << " with " << two_js[0] << " " << two_js[1] << " " << two_js[2] << " " << two_js[3] << " " << k << std::endl;
     for (const auto &ls : lsv)
     {
-        if (debug)
+        if (debugls)
             std::cout << "  ls: " << ls[0] << ", " << ls[1] << std::endl;
     }
 
     // Get the list of possible (L,S) values
     std::vector<std::array<int, 2>> LSv = possible_ls_Rk(jp, two_js, Ps, k);
-    if (debug)
+    if (debugls)
         std::cout << "LSv size: " << LSv.size() << std::endl;
     for (const auto &LS : LSv)
     {
-        if (debug)
+        if (debugls)
             std::cout << "  LS: " << LS[0] << ", " << LS[1] << std::endl;
     }
     // Create the Cartesian product (like Julia's Iterators.product)
@@ -2052,8 +2066,9 @@ std::shared_ptr<DecayChain> createDecayChainLS(
 {
     // Parse spin-parity
     SpinParity SP(jp);
+    if (debug) std::cout << "Creating DecayChain with spin-parity: " << jp << std::endl;
     int two_j = SP.get_two_j();
-
+    if (debug) std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
     RecouplingLS Hij;
     RecouplingLS HRk;
 
@@ -2219,11 +2234,10 @@ RecouplingLS createRecouplingFunction(
     }
 }
 
-std::shared_ptr<DecayChain> createDecayChainLScoupling(
+std::shared_ptr<DecayChain> createDecayChainCoupling(
     int k,
     std::function<std::complex<double>(double)> Xlineshape,
     const std::string &jp,
-    const ThreeBodyParities &Ps,
     const ThreeBodySystem &tbs,
     RecouplingType HRkType,
     const std::array<int, 2> &HRkParams,
@@ -2234,8 +2248,9 @@ std::shared_ptr<DecayChain> createDecayChainLScoupling(
 {
     // Parse spin-parity
     SpinParity SP(jp);
+    if (debug) std::cout << "Creating DecayChain with spin-parity: " << jp << std::endl;
     int two_j = SP.get_two_j();
-
+    if (debug) std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
     RecouplingLS Hij;
     RecouplingLS HRk;
 
