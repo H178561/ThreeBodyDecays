@@ -533,6 +533,7 @@ public:
     Tensor4D amplitude4d(const DecayChain &dc, const MandelstamTuple &σs, const std::vector<int> &refζs);
     Tensor4Dcomp aligned_amplitude4dcomp(const DecayChain &dc, const MandelstamTuple &σs);
     Tensor4Dcomp amplitude4dcomp(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, std::vector<int> refζ = {-1, -1, -1, -1});
+    double intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, const complex weight = complex(1,1), const std::vector<int> refζs = {-1, -1, -1, -1});
 
     complex amplitude_recoupling(const RecouplingLS &recoupling, const std::array<int, 2> &two_ms, const std::array<int, 3> &two_js);
     double parseFraction(const std::string &str);

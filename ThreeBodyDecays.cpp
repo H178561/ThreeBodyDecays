@@ -1708,6 +1708,33 @@ complex ThreeBodyDecays::amplitude(const DecayChain &dc,
     return 0.0;
 }
 
+
+double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, const complex weight, const std::vector<int> refζs)
+{
+    // Get the 4D amplitude tensor
+    auto amp = amplitude4dcomp(dc, σs, k_amp, refζs);
+
+    // Sum squared amplitudes (similar to Julia's sum(abs2, ...))
+    double total_intensity = 0.0;
+
+    for (const auto &dim1 : amp)
+    {
+        for (const auto &dim2 : dim1)
+        {
+            for (const auto &dim3 : dim2)
+            {
+                for (const auto &val : dim3)
+                {
+                    total_intensity += val.real() * val.real() * weight.real() +
+                                       val.imag() * val.imag() * weight.imag() ;
+                }
+            }
+        }
+    }
+
+    return total_intensity;
+}
+
 // Implementation of cos_zeta for TrivialWignerRotation
 double TrivialWignerRotation::cos_zeta(const std::array<double, 3> &sigma,
                                        const std::array<double, 4> &ms2) const
