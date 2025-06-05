@@ -8,13 +8,12 @@
 
 void ThreeBodyAmplitudeModel::add(std::shared_ptr<DecayChain> chain,
                                   const std::string &label,
-                                  complex coefficient,
-                                const int& k_amp)
+                                  complex coefficient)
 {
     // Generate a default label if none provided
     std::string actual_label = label.empty() ? "chain_" + std::to_string(chains_.size()) : label;
 
-    chains_.emplace_back(chain, actual_label, coefficient, k_amp);
+    chains_.emplace_back(chain, actual_label, coefficient);
 }
 
 void ThreeBodyAmplitudeModel::remove(size_t index)
@@ -57,8 +56,8 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
     ThreeBodyDecays tbd;
 
     // Get dimensions from the first chain
-    auto &[first_chain, first_label, first_coef, kindamp] = chains_[0];
-    auto first_amp = tbd.amplitude4dcomp(*first_chain, σs, kindamp, refζs);
+    auto &[first_chain, first_label, first_coef] = chains_[0];
+    auto first_amp = tbd.amplitude4dcomp(*first_chain, σs, k_amp, refζs);
 
     // Skip computation if there's only one chain
     if (chains_.size() == 1)
@@ -101,10 +100,11 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
                                 std::vector<complex>(first_amp[0][0][0].size(), 0.0))));
 
     // Sum all amplitudes with coefficients (similar to Julia sum)
-    for (const auto &[chain, label, coef, kindamp] : chains_)
+    for (const auto &[chain, label, coef] : chains_)
     {
-        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, kindamp, refζs);
+        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_amp, refζs);
         double coef_mag = std::abs(coef);
+        //std::cout << "Applying coefficient: " << coef << " on first amplitude tensor" << std::endl;
 
         // Add to result
         for (size_t i = 0; i < result.size(); ++i)
@@ -116,7 +116,9 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
                     for (size_t l = 0; l < result[i][j][k].size(); ++l)
                     {
                         //std::cout << i << " " << j << " " << k << " " << l << " " << chain_amp[i][j][k][l] << " " << coef_mag << " " << " endres " << chain_amp[i][j][k][l] * coef_mag << std::endl;
-                        result[i][j][k][l] += chain_amp[i][j][k][l] * coef_mag;
+                        result[i][j][k][l] += chain_amp[i][j][k][l] * coef;
+                        //result[i][j][k][l] += complex(chain_amp[i][j][k][l].real() * coef.real(),chain_amp[i][j][k][l].imag() * coef.imag());
+                        //std::cout << "Adding " << label << " amplitude: " << chain_amp[i][j][k][l] << " with coefficient: " << coef << " to result at index [" << i << "][" << j << "][" << k << "][" << l << "]" << " = " << chain_amp[i][j][k][l] * coef << std::endl;
                     }
                 }
             }
@@ -169,18 +171,9 @@ complex ThreeBodyAmplitudeModel::amplitudes(const MandelstamTuple &σs,
     complex result(0.0, 0.0);
 
     // Sum amplitudes with coefficients (like Julia's sum)
-    for (const auto &[chain, label, coef, kindamp] : chains_)
+    for (const auto &[chain, label, coef] : chains_)
     {
-        if(kindamp == 0)
-        {
-            result += coef * tbd.amplitude(*chain, σs, two_λs, kindamp, refζs);
-        }
-        else
-        {
-            // If k_amp is not 0, we assume it is a specific amplitude type
-            result += coef * tbd.amplitude(*chain, σs, two_λs, k_amp, refζs);
-        }
-
+        result += coef * tbd.amplitude(*chain, σs, two_λs, k_amp, refζs);
     }
 
     return result;
@@ -226,9 +219,10 @@ std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const Mandels
     ThreeBodyDecays tbd;
 
     // Calculate intensity for each component separately
-    for (const auto &[chain, label, coef, kindamp] : chains_)
+    for (const auto &[chain, label, coef] : chains_)
     {
-        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, kindamp, refζs);
+        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_amp, refζs);
+        //std::cout << "Calculating intensity for chain: " << label << " with coefficient: " << coef << std::endl;
 
         // Sum squared amplitudes for this chain
         double chain_intensity = 0.0;
@@ -240,13 +234,46 @@ std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const Mandels
                 {
                     for (const auto &val : dim3)
                     {
-                        chain_intensity += val.real() * val.real() +
-                                           val.imag() * val.imag();
+                        //chain_intensity += (val.real()*val.real() * coef.real()  * coef.real()  +
+                        //                   (val.imag() * val.imag() * coef.imag() * coef.imag();
+
+                        complex ampval = complex(val.real() * coef.real(), val.imag() * coef.imag());
+                        //ampval = val;
+                        ampval = val*coef;
+                        double curintens = std::norm(ampval);
+
+
+                        chain_intensity += curintens;
+
+                        //std::cout << "Adding intensity for chain: " << label << " with coefficient: " << coef
+                        //          << " and value: " << val << " with weighted amp" << val*coef << " gives current intensity: " << curintens
+                        //          << " total: " << chain_intensity << std::endl;
                     }
                 }
             }
         }
 
+        /*
+        double realintensity;
+                for ( int i = 0; i < chain_amp.size(); ++i ) {
+                    for ( int j = 0; j < chain_amp[0].size(); ++j ) {
+                        for ( int k = 0; k < chain_amp[0][0].size(); ++k ) {
+                            for ( int z = 0; z < chain_amp[0][0][0].size(); ++z ) {
+                                //realintensity += A_chain_values[i][j][k][z].real() * A_chain_values[i][j][k][z].real() * weight.real() * weight.real() +
+                                //                + A_chain_values[i][j][k][z].imag() * A_chain_values[i][j][k][z].imag() * weight.imag() * weight.imag();
+                                double amp_intensity = chain_amp[i][j][k][z].real() * chain_amp[i][j][k][z].real() * coef.real() * coef.real() +
+                                                chain_amp[i][j][k][z].imag() * chain_amp[i][j][k][z].imag() * coef.imag() * coef.imag();
+                                //if(deubevt) std::cout << "Amplitude[" << i << "][" << j << "][" << k << "][" << z << "] = " << realintensity << std::endl;
+
+                                realintensity += amp_intensity;
+                                std::cout << label << " Amplitudemodel[" << i << "][" << j << "][" << k << "][" << z << "] = "
+                                          << chain_amp[i][j][k][z] << coef << amp_intensity << std::endl;
+                            }
+                        }
+                    }
+                }*/
+
+        //result.push_back(chain_intensity);
         result.push_back(chain_intensity);
     }
 
@@ -268,9 +295,9 @@ std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(con
 
     // Calculate all amplitudes once
     std::vector<Tensor4Dcomp> amplitudes;
-    for (const auto &[chain, label, coef, kindamp] : chains_)
+    for (const auto &[chain, label, coef] : chains_)
     {
-        amplitudes.push_back(tbd.amplitude4dcomp(*chain, σs, kindamp, refζs));
+        amplitudes.push_back(tbd.amplitude4dcomp(*chain, σs, k_amp, refζs));
     }
 
     // Calculate interference terms

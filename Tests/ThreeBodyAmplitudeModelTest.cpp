@@ -445,7 +445,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, UnpolarizedIntensityJuliaMatch)
     // Calculate amplitude tensor
 
     // Calculate intensity
-    double intensity_value = model.intensity(σs, 0, refζs);
+    double intensity_value = model.intensity(σs, 1, refζs);
 
     // Compare with the expected value from Julia (10.029598796534886)
     std::cout << "C++ unpolarized intensity: " << intensity_value << std::endl;
