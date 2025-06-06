@@ -36,7 +36,7 @@ double phase(int value)
     {
         phase = -1;
     }
-    return (value > 0) ? phase : -phase;
+    return (value > 0) ? -phase : phase;
 }
 
 double phase2(int value)
@@ -242,9 +242,8 @@ double wignerd_doublearg_sign_element(int two_j, int two_λ1, int two_λ2, doubl
     }
     else
     {
-        // Exakt die gleiche Logik wie in der Julia phase()-Funktion
-        int div_result = (two_λ1 - two_λ2) / 2;
-        phase_value = (div_result % 2 == 0) ? 1.0 : -1.0;
+        int abs_diff = std::abs(two_λ1 - two_λ2);
+        phase_value = (abs_diff % 4 == 2) ? -1.0 : 1.0;
     }
     if (debug)
         std::cout << two_j << " " << two_λ1 << " " << two_λ2 << " " << cosθ << " " << phase_value << std::endl;
@@ -1180,7 +1179,8 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
             //  In aligned_amplitude4dcomp für VRk
             double phase_value = phase2(two_js[k_idx] - two_m2);
             double phase_value_old = (((two_js[k_idx] - two_m2) % 2 == 0) ? 1.0 : -1.0);
-
+            
+            //std::cout << (two_js[k_idx] - two_m2) << phase_value << phase_value_old << std::endl;
             if (debug)
                 std::cout << "VRk" << two_js[k_idx] << " " << two_m2 << " " << amp << " " << phase_value << amp * phase_value << std::endl;
             VRk[m1_idx][m2_idx] = amp.real() * phase_value;
@@ -1254,8 +1254,10 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
             if (debug)
                 std::cout << "Vij values" << two_m1 << " " << two_m2 << " " << two_js_Hij[0] << " " << two_js_Hij[1] << " " << two_js_Hij[2] << std::endl;
             complex amp = amplitude_recoupling(dc.Hij, two_ms, two_js_Hij);
-            double phase_value = -phase(two_js[k_idx] - two_m2);
+            double phase_value = phase(two_js[k_idx] - two_m2);
+            //phase_value = -phase2(two_js[k_idx] - two_m2);
             double phase_value_old = (((two_js[k_idx] - two_m2) % 2 == 0) ? 1.0 : -1.0);
+            //std::cout << " Vij " << (two_js[k_idx] - two_m2) << phase_value << phase_value_old << std::endl;
 
             if (debug)
                 std::cout << "Vij" << amp << " " << phase_value << amp * phase_value << std::endl;
@@ -2191,7 +2193,7 @@ RecouplingLS createRecouplingFunction(
             // Exakte Implementierung der Julia-Logik: (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
             if (noRecoupling.get_two_λa() == two_ms[0] && noRecoupling.get_two_λb() == two_ms[1])
             {
-                return 1.0;
+                return -1.0;
             }
             return 0.0;
         };
@@ -2277,7 +2279,7 @@ std::shared_ptr<DecayChain> createDecayChainCoupling(
     SpinParity SP(jp);
     if (debug) std::cout << "Creating DecayChain with spin-parity: " << jp << std::endl;
     int two_j = SP.get_two_j();
-    if (debug) std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
+    //std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
     RecouplingLS Hij;
     RecouplingLS HRk;
 
