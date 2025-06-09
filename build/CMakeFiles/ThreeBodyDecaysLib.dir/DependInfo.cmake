@@ -8,10 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ClebschGordan.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o.d"
-  "/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/OrientationAngles.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o.d"
-  "/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyAmplitudeModel.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o.d"
-  "/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/ThreeBodyDecays.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyDecays.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyDecays.cpp.o.d"
+  "/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/ClebschGordan.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o.d"
+  "/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/OrientationAngles.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o.d"
+  "/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/ThreeBodyAmplitudeModel.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o.d"
+  "/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/ThreeBodyDecays.cpp" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyDecays.cpp.o" "gcc" "CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyDecays.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

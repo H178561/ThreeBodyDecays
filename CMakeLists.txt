@@ -44,9 +44,13 @@ if(GTEST_FOUND)
 
     # Add the CG test if GTest is found
     add_executable(ClebschGordanTest Tests/ClebschGordanTest.cpp)
+    add_executable(JsonModelTest Tests/JsonModelTest.cpp)
+
     target_link_libraries(ClebschGordanTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
     add_test(NAME ClebschGordanTest COMMAND ClebschGordanTest)
 
+    target_link_libraries(JsonModelTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
+    add_test(NAME JsonModelTest COMMAND JsonModelTest)
     # Enable testing
     enable_testing()
     add_test(NAME ThreeBodyDecaysTest COMMAND ThreeBodyDecaysTest)

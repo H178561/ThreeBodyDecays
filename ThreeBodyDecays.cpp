@@ -44,6 +44,12 @@ double phase2(int value)
     return (value % 4 == 2) ? -1. : 1.;
 }
 
+double phaseabs(int value)
+{
+    // Return +1 if value is even, -1 if odd
+    return (std::abs(value % 4) == 2) ? -1. : 1.;
+}
+
 // Helper function for padding indices
 int pad(int index, int size)
 {
@@ -299,7 +305,7 @@ double min_scalar_product(std::vector<double> v1, std::vector<double> v2)
 // Helper function to get indices i and j from k
 std::pair<int, int> ij_from_k(int k)
 {
-    //std::cout << k << std::endl;
+    // std::cout << k << std::endl;
     switch (k)
     {
     case 1:
@@ -319,7 +325,8 @@ std::tuple<int, int, int> ijk(const AbstractWignerRotation &wr)
 {
     int k = wr.get_k();
 
-    if(debug) std::cout << "ijk" << k << std::endl;
+    if (debug)
+        std::cout << "ijk" << k << std::endl;
     auto [i, j] = ij_from_k(k);
     return {i, j, k};
 }
@@ -1098,15 +1105,15 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
     if (debug)
         std::cout << "two_j" << two_j << " " << two_js[0] << " " << two_js[1] << " " << two_js[2] << " " << two_js[3] << std::endl;
 
-
     // div 2
-    if(div2){
+    if (div2)
+    {
         two_js[0] = two_js[0] / 2;
         two_js[1] = two_js[1] / 2;
         two_js[2] = two_js[2] / 2;
         two_js[3] = two_js[3] / 2;
     }
-        // Get indices i, j from k (1-based indexing in result)
+    // Get indices i, j from k (1-based indexing in result)
     auto [i, j] = ij_from_k(k);
     // Konvertieren zu 0-basierter Indexierung für Arrays
     int i_idx = i - 1;
@@ -1161,8 +1168,10 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
     int vrk_dim1 = two_j + 1;
     int vrk_dim2 = two_js[k_idx] + 1;
     // VRk-Matrix initialisieren
+    bool debugvrkvij = false;
     VRk.resize(vrk_dim1, std::vector<double>(vrk_dim2, 0.0));
 
+    std::cout << "ijk" << i << j << k << std::endl;
     for (int m1_idx = 0; m1_idx < vrk_dim1; m1_idx++)
     {
         int two_m1 = -two_j + 2 * m1_idx;
@@ -1178,27 +1187,31 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
             // complex phase_value = (((two_js[k_idx] - two_m2) % 4 == 0) ? complex(1.0, 0.0) : complex(-1.0, 0.0));
             //  In aligned_amplitude4dcomp für VRk
             double phase_value = phase2(two_js[k_idx] - two_m2);
+            // phase_value = phaseabs(two_js[k_idx] - two_m2);
+
             double phase_value_old = (((two_js[k_idx] - two_m2) % 2 == 0) ? 1.0 : -1.0);
-            
-            //std::cout << (two_js[k_idx] - two_m2) << phase_value << phase_value_old << std::endl;
-            if (debug)
-                std::cout << "VRk" << two_js[k_idx] << " " << two_m2 << " " << amp << " " << phase_value << amp * phase_value << std::endl;
+
+            // std::cout << (two_js[k_idx] - two_m2) << phase_value << phase_value_old << std::endl;
+            if (debugvrkvij)
+                std::cout << "VRk" << two_m1 << two_js[k_idx] << two_m2 << " " << amp << " " << phase_value << amp * phase_value << std::endl;
             VRk[m1_idx][m2_idx] = amp.real() * phase_value;
         }
     }
 
     // Nach der Berechnung von VRk
-    if (debug)
-        std::cout << "VRk Matrix berechnet: " << std::endl;
-    for (int i = 0; i < VRk.size(); ++i)
+    if (debugvrkvij)
     {
-        for (int j = 0; j < VRk[0].size(); ++j)
+        std::cout << "VRk Matrix berechnet: " << std::endl;
+        for (int i = 0; i < VRk.size(); ++i)
         {
-            if (debug)
+            for (int j = 0; j < VRk[0].size(); ++j)
+            {
+
                 std::cout << VRk[i][j] << "\t";
-        }
-        if (debug)
+            }
+
             std::cout << "\n";
+        }
     }
 
     /*
@@ -1254,13 +1267,15 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
             if (debug)
                 std::cout << "Vij values" << two_m1 << " " << two_m2 << " " << two_js_Hij[0] << " " << two_js_Hij[1] << " " << two_js_Hij[2] << std::endl;
             complex amp = amplitude_recoupling(dc.Hij, two_ms, two_js_Hij);
-            double phase_value = phase(two_js[k_idx] - two_m2);
-            //phase_value = -phase2(two_js[k_idx] - two_m2);
-            double phase_value_old = (((two_js[k_idx] - two_m2) % 2 == 0) ? 1.0 : -1.0);
-            //std::cout << " Vij " << (two_js[k_idx] - two_m2) << phase_value << phase_value_old << std::endl;
+            double phase_value = phase2(two_js[j_idx] - two_m2);
+            // phase_value = phaseabs(two_js[k_idx] - two_m2);
 
-            if (debug)
-                std::cout << "Vij" << amp << " " << phase_value << amp * phase_value << std::endl;
+            // phase_value = -phase2(two_js[k_idx] - two_m2);
+            double phase_value_old = (((two_js[k_idx] - two_m2) % 2 == 0) ? 1.0 : -1.0);
+            // std::cout << " Vij " << (two_js[k_idx] - two_m2) << phase_value << phase_value_old << std::endl;
+
+            if (debugvrkvij)
+                std::cout << "Vij" << two_m1 << two_js[k_idx] << two_m2 << amp << " " << phase_value << std::endl;
             //  In aligned_amplitude4dcomp für Vij
             // complex phase_value = (((two_js[j_idx] - two_m2) % 2 == 0) ? complex(1, 1) : complex(-1, -1));
             Vij[m1_idx][m2_idx] = amp.real() * phase_value;
@@ -1269,17 +1284,19 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
     }
 
     // Nach der Berechnung von Vij
-    if (debug)
-        std::cout << "Vij Matrix berechnet: " << std::endl;
-    for (int i = 0; i < Vij.size(); ++i)
+    if (debugvrkvij)
     {
-        for (int j = 0; j < Vij[0].size(); ++j)
+        std::cout << "Vij Matrix berechnet: " << std::endl;
+        for (int i = 0; i < Vij.size(); ++i)
         {
-            if (debug)
+            for (int j = 0; j < Vij[0].size(); ++j)
+            {
+
                 std::cout << Vij[i][j] << "\t";
-        }
-        if (debug)
+            }
+
             std::cout << "\n";
+        }
     }
 
     // print Vij
@@ -1520,11 +1537,12 @@ Tensor4Dcomp ThreeBodyDecays::amplitude4dcomp(const DecayChain &dc,
     // div 2
     auto two_js = tbs.two_js;
 
-    if(div2){
-    two_js[0] = two_js[0] / 2;
-    two_js[1] = two_js[1] / 2;
-    two_js[2] = two_js[2] / 2;
-    two_js[3] = two_js[3] / 2;
+    if (div2)
+    {
+        two_js[0] = two_js[0] / 2;
+        two_js[1] = two_js[1] / 2;
+        two_js[2] = two_js[2] / 2;
+        two_js[3] = two_js[3] / 2;
     }
     // std::array<int, 4> two_js = {two_jst[0]*2, two_jst[1]*2, two_jst[2]*2, two_jst[3]*2};
 
@@ -1710,7 +1728,6 @@ complex ThreeBodyDecays::amplitude(const DecayChain &dc,
     return 0.0;
 }
 
-
 double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, const complex weight, const std::vector<int> refζs)
 {
     // Get the 4D amplitude tensor
@@ -1728,7 +1745,7 @@ double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &�
                 for (const auto &val : dim3)
                 {
                     total_intensity += val.real() * val.real() * weight.real() +
-                                       val.imag() * val.imag() * weight.imag() ;
+                                       val.imag() * val.imag() * weight.imag();
                 }
             }
         }
@@ -1916,7 +1933,8 @@ std::vector<std::array<int, 2>> possible_ls(
     const SpinParity &jp)
 {
     std::vector<std::array<int, 2>> two_ls;
-    if (debugls) std::cout << "possible_ls: " << jp1.get_two_j() << " " << jp2.get_two_j() << " " << jp.get_two_j() << std::endl;
+    if (debugls)
+        std::cout << "possible_ls: " << jp1.get_two_j() << " " << jp2.get_two_j() << " " << jp.get_two_j() << std::endl;
     // Loop through possible s values with step 2
     for (int two_s = std::abs(jp1.get_two_j() - jp2.get_two_j());
          two_s <= jp1.get_two_j() + jp2.get_two_j();
@@ -2002,7 +2020,6 @@ std::vector<std::array<int, 2>> possible_ls_ij(
         p_j = '+'; // Default value
     }
 
-
     // Create SpinParity objects for particles i and j div 2
     SpinParity jp_i(std::to_string(two_js[i]) + "/2" + p_i);
     SpinParity jp_j(std::to_string(two_js[j]) + "/2" + p_j);
@@ -2036,8 +2053,8 @@ std::vector<std::array<int, 2>> possible_ls_Rk(
         p_k = '+'; // Default value
     }
 
-    if (debugls) std::cout << "possible_ls_Rk: " << two_js[k] << " " << p_k << two_js[3] << " " << Ps.get_P0() << std::endl;
-
+    if (debugls)
+        std::cout << "possible_ls_Rk: " << two_js[k] << " " << p_k << two_js[3] << " " << Ps.get_P0() << std::endl;
 
     // Create SpinParity objects for particle k and the parent div 2
     SpinParity jp_k(std::to_string(two_js[k]) + "/2" + p_k);
@@ -2095,9 +2112,11 @@ std::shared_ptr<DecayChain> createDecayChainLS(
 {
     // Parse spin-parity
     SpinParity SP(jp);
-    if (debug) std::cout << "Creating DecayChain with spin-parity: " << jp << std::endl;
+    if (debug)
+        std::cout << "Creating DecayChain with spin-parity: " << jp << std::endl;
     int two_j = SP.get_two_j();
-    if (debug) std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
+    if (debug)
+        std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
     RecouplingLS Hij;
     RecouplingLS HRk;
 
@@ -2193,7 +2212,7 @@ RecouplingLS createRecouplingFunction(
             // Exakte Implementierung der Julia-Logik: (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
             if (noRecoupling.get_two_λa() == two_ms[0] && noRecoupling.get_two_λb() == two_ms[1])
             {
-                return -1.0;
+                return 1.0;
             }
             return 0.0;
         };
@@ -2277,9 +2296,10 @@ std::shared_ptr<DecayChain> createDecayChainCoupling(
 {
     // Parse spin-parity
     SpinParity SP(jp);
-    if (debug) std::cout << "Creating DecayChain with spin-parity: " << jp << std::endl;
+    if (debug)
+        std::cout << "Creating DecayChain with spin-parity: " << jp << std::endl;
     int two_j = SP.get_two_j();
-    //std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
+    // std::cout << "Creating DecayChain with k=" << k << ", two_j=" << two_j << std::endl;
     RecouplingLS Hij;
     RecouplingLS HRk;
 
