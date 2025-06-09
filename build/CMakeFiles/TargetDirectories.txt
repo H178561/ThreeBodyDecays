@@ -1,8 +1,0 @@
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/ThreeBodyDecaysLib.dir
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/ThreeBodyDecaysTest.dir
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/ClebschGordanTest.dir
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/JsonModelTest.dir
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/AmplitudeModelExample.dir
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/test.dir
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/edit_cache.dir
-/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/build/CMakeFiles/rebuild_cache.dir
