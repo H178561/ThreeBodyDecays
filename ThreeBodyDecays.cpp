@@ -325,8 +325,8 @@ std::tuple<int, int, int> ijk(const AbstractWignerRotation &wr)
 {
     int k = wr.get_k();
 
-    if (debug)
-        std::cout << "ijk" << k << std::endl;
+    // if (debug)
+    //     std::cout << "ijk" << k << std::endl;
     auto [i, j] = ij_from_k(k);
     return {i, j, k};
 }
@@ -1171,7 +1171,7 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
     bool debugvrkvij = false;
     VRk.resize(vrk_dim1, std::vector<double>(vrk_dim2, 0.0));
 
-    std::cout << "ijk" << i << j << k << std::endl;
+    // std::cout << "ijk" << i << j << k << std::endl;
     for (int m1_idx = 0; m1_idx < vrk_dim1; m1_idx++)
     {
         int two_m1 = -two_j + 2 * m1_idx;
