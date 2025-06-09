@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/hvdsmagt/ThreeBodyDecays.jl/ThreeBodyDecays/Examples/AmplitudeModelExample.cpp" "CMakeFiles/AmplitudeModelExample.dir/Examples/AmplitudeModelExample.cpp.o" "gcc" "CMakeFiles/AmplitudeModelExample.dir/Examples/AmplitudeModelExample.cpp.o.d"
+  "/Users/henryvandersmagt/Master/ThreeBodyDecay/ThreeBodyDecays/Examples/AmplitudeModelExample.cpp" "CMakeFiles/AmplitudeModelExample.dir/Examples/AmplitudeModelExample.cpp.o" "gcc" "CMakeFiles/AmplitudeModelExample.dir/Examples/AmplitudeModelExample.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

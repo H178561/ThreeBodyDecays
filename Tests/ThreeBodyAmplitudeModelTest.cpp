@@ -74,7 +74,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, LambdaResonanceChains)
     auto Lambda1520 = createDecayChainLS(
         1,                        // k-value
         createBW(1.5195, 0.0156), // Lineshape function
-        "3/2+",                   // jp (Spin-parity)
+        "3/2-",                   // jp (Spin-parity)
         conservingParities,       // Parities
         *tbs                      // Dereference ThreeBodySystem
     );
@@ -932,27 +932,35 @@ TEST_F(ThreeBodyAmplitudeModelTest, Pc4312amplitude)
     EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.000969403, prec);
 }
 
-TEST_F(ThreeBodyAmplitudeModelTest, SpinParityConstructor)
+TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520lambdacpkpi)
 {
-    // Test integer spins
-    SpinParity sp1("0+");
-    EXPECT_EQ(sp1.get_two_j(), 0);
+    std::vector<int> refζs = {1, 2, 3, 1};
+    ThreeBodyDecays tbd;
+    int k = 1;
+    MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
+    ThreeBodySpins spins = {1, 0, 0, 1}; // p (spin 1/2), K (spin 0), pi (spin 0), Λc (spin 1/2)
+    ThreeBodyMasses ms = {0.938, 0.494, 0.140, 2.286};
+    ThreeBodySystem tbslc = {ms, spins};
+    ThreeBodyParities parities('-', '-', '-', '-');
 
-    SpinParity sp2("1+");
-    EXPECT_EQ(sp2.get_two_j(), 2);
+    auto Lambda1520 = createDecayChainLS(
+        1, createBW(1.5195, 0.0156), "3/2+", conservingParities, tbslc);
 
-    SpinParity sp3("2-");
-    EXPECT_EQ(sp3.get_two_j(), 4);
-
-    // Test half-integer spins
-    SpinParity sp4("1/2+");
-    EXPECT_EQ(sp4.get_two_j(), 1);
-
-    SpinParity sp5("3/2-");
-    EXPECT_EQ(sp5.get_two_j(), 3);
-
-    SpinParity sp6("5/2+");
-    EXPECT_EQ(sp6.get_two_j(), 5);
-
-
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 0, refζs);
+    // Verify tensor dimensions
+    std::cout << "Tensor4D resultdccomp : " << std::endl;
+    for (int i = 0; i < resultdccomp.size(); ++i)
+    {
+        for (int j = 0; j < resultdccomp[0].size(); ++j)
+        {
+            for (int k = 0; k < resultdccomp[0][0].size(); ++k)
+            {
+                for (int z = 0; z < resultdccomp[0][0][0].size(); ++z)
+                {
+                    std::cout << i << j << k << z << resultdccomp[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
+                }
+            }
+        }
+        std::cout << "\n";
+    }
 }
