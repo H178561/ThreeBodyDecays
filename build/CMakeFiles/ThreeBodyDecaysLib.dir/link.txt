@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libThreeBodyDecaysLib.a CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyDecays.cpp.o CMakeFiles/ThreeBodyDecaysLib.dir/OrientationAngles.cpp.o CMakeFiles/ThreeBodyDecaysLib.dir/ThreeBodyAmplitudeModel.cpp.o CMakeFiles/ThreeBodyDecaysLib.dir/ClebschGordan.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libThreeBodyDecaysLib.a
