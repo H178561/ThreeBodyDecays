@@ -9,23 +9,23 @@ For the usage in EvtGen with json files like in the [amplitude serialisation pro
 
 To build the Model 
 
-´´´
+```
 mkdir build
 cd build
 cmake ..
 make
-´´´
+```
 
 The file contains various G-Tests which can be tested with
 
-'''
+```
 ./ThreeBodyDecaysTest
 ./ClebschGordanTest
 ./JsonModelTest
-'''
+```
 
 There is also an example of the usage in 
 
-'''
+```
 Examples/AmplitudeModelExample
-'''
+```
