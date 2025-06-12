@@ -29,3 +29,10 @@ There is also an example of the usage in
 ```
 Examples/AmplitudeModelExample
 ```
+
+
+## How to use in EvtGen
+
+For the usage in EvtGen the Project has to be called in the EvtGen setup
+
+in 'CmakeList.txt'
