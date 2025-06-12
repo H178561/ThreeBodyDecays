@@ -2209,7 +2209,7 @@ RecouplingLS createRecouplingFunction(
 
         return [noRecoupling](const std::array<int, 2> &two_ms, const std::array<int, 3> &two_js) -> double
         {
-            std::cout << noRecoupling.get_two_λa() << noRecoupling.get_two_λb() << " " << two_ms[0] << two_ms[1] << std::endl; 
+            //std::cout << noRecoupling.get_two_λa() << noRecoupling.get_two_λb() << " " << two_ms[0] << two_ms[1] << std::endl;
 
             // Exakte Implementierung der Julia-Logik: (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
             if (noRecoupling.get_two_λa() == two_ms[0] && noRecoupling.get_two_λb() == two_ms[1])
