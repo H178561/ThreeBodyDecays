@@ -2,8 +2,6 @@
 
 Implementation of the [ThreeBodyDecays.jl](https://github.com/mmikhasenko/ThreeBodyDecays.jl) Julia class in C++ for usage in EvtGen.
 
-For the usage in EvtGen with json files like in the [amplitude serialisation project](https://github.com/RUB-EP1/amplitude-serialization/tree/main) see [EvtThreeBodyDecay](https://github.com/H178561/EvtThreeBodyDecay)
-
 
 ## Build
 
@@ -65,4 +63,8 @@ else()
 endif()
 ```
 
+
+## How to make a new EvtGen Model using ThreeBodyDecays
+
+For the usage in EvtGen with json files like in the [amplitude serialisation project](https://github.com/RUB-EP1/amplitude-serialization/tree/main) see [EvtThreeBodyDecay](https://github.com/H178561/EvtThreeBodyDecay)
 
