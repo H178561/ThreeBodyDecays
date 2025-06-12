@@ -35,4 +35,4 @@ Examples/AmplitudeModelExample
 
 For the usage in EvtGen the Project has to be called in the EvtGen setup
 
-in 'CmakeList.txt'
+in `CmakeList.txt`
