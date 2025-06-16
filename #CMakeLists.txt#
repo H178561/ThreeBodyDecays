@@ -13,13 +13,7 @@ add_library(ThreeBodyDecaysLib
     ThreeBodyDecays.cpp
     OrientationAngles.cpp
     ThreeBodyAmplitudeModel.cpp
-    ClebschGordan.cpp
-    BlattWeisskopf.cpp
-    #Examples/AmplitureModelExample.cpp
-    #Examples/CombinedAmplitureModelExample.cpp
 )
-
-set_target_properties(ThreeBodyDecaysLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 #target_link_libraries(ThreeBodyDecays ThreeBodyDecaysLib)
 
@@ -34,8 +28,6 @@ if(GTEST_FOUND)
     # Test executable
     add_executable(ThreeBodyDecaysTest
         Tests/ThreeBodyDecaysTest.cpp
-        Tests/OrientationAnglesTest.cpp
-        Tests/ThreeBodyAmplitudeModelTest.cpp
     )
     target_link_libraries(ThreeBodyDecaysTest
         ThreeBodyDecaysLib
@@ -43,19 +35,6 @@ if(GTEST_FOUND)
         ${CMAKE_THREAD_LIBS_INIT}
     )
 
-    # Add the CG test if GTest is found
-    add_executable(ClebschGordanTest Tests/ClebschGordanTest.cpp)
-    add_executable(JsonModelTest Tests/JsonModelTest.cpp)
-
-    target_link_libraries(ClebschGordanTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
-    add_test(NAME ClebschGordanTest COMMAND ClebschGordanTest)
-
-    target_link_libraries(JsonModelTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
-    add_test(NAME JsonModelTest COMMAND JsonModelTest)
-
-    ## add Blatt-Weisskopf test
-    add_executable(BlattWeisskopfTest Tests/BlattWeisskopfTest.cpp)
-    target_link_libraries(BlattWeisskopfTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
     # Enable testing
     enable_testing()
     add_test(NAME ThreeBodyDecaysTest COMMAND ThreeBodyDecaysTest)
@@ -64,7 +43,3 @@ if(GTEST_FOUND)
 else()
     message(STATUS "Google Test not found, test target will NOT be built")
 endif()
-
-# Füge das Beispiel hinzu
-add_executable(AmplitudeModelExample Examples/AmplitudeModelExample.cpp)
-target_link_libraries(AmplitudeModelExample ThreeBodyDecaysLib)
