@@ -83,7 +83,7 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
                 {
                     for (auto &val : dim3)
                     {
-                        val *= coef_mag;
+                        val *= coef;
                     }
                 }
             }
