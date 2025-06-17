@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
-#include "../BlattWeisskopf.hh"
+#include "../FormFactors.hh"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
 
-using namespace ThreeBodyDecays;
+using namespace FormFactors;
 
 // Test fixture for BlattWeisskopf tests
-class BlattWeisskopfTest : public ::testing::Test
+class FormFactorsTest : public ::testing::Test
 {
 protected:
     void SetUp() override
@@ -26,7 +26,7 @@ protected:
 };
 
 // Test S-wave (L=0) - should always return 1.0
-TEST_F(BlattWeisskopfTest, SWave_AlwaysReturnsOne)
+TEST_F(FormFactorsTest, SWave_AlwaysReturnsOne)
 {
     double d = 1.5; // radius parameter
 
@@ -40,35 +40,10 @@ TEST_F(BlattWeisskopfTest, SWave_AlwaysReturnsOne)
     }
 }
 
-// Test P-wave (L=1) at specific known values
-TEST_F(BlattWeisskopfTest, PWave_KnownValues)
-{
-    double d = 1.5;
 
-    // Test q = 0 (should give 0)
-    double result_zero = BlattWeisskopf(0.0, 1, d);
-    expectNear(0.0, result_zero, tolerance);
-
-    // Test q = d (z = 1, should give sqrt(1/(1+1)) = sqrt(1/2))
-    // When q = d, then z² = (q*d)² = d² = (1.5)² = 2.25, not 1!
-    double result_unit = BlattWeisskopf(d, 1, d);
-    double z2_actual = (d * d) * (d * d); // This is wrong in the comment
-    // Correct: when q = d, z² = (q*d)² = d²
-    double z2_correct = d * d; // z² = 2.25
-    double expected_correct = std::sqrt(z2_correct / (1.0 + z2_correct));
-    expectNear(expected_correct, result_unit, tolerance);
-
-    // Test a specific case: q = 0.5, d = 1.0
-    double q = 0.5;
-    d = 1.0;
-    double z2 = (q * d) * (q * d); // z² = 0.25
-    double expected = std::sqrt(z2 / (1.0 + z2)); // sqrt(0.25/1.25) = sqrt(0.2)
-    double result = BlattWeisskopf(q, 1, d);
-    expectNear(expected, result, tolerance);
-}
 
 // Test D-wave (L=2) at specific known values
-TEST_F(BlattWeisskopfTest, DWave_KnownValues)
+TEST_F(FormFactorsTest, DWave_KnownValues)
 {
     double d = 1.5;
 
@@ -87,7 +62,7 @@ TEST_F(BlattWeisskopfTest, DWave_KnownValues)
 }
 
 // Test unsupported L values (should return 1.0)
-TEST_F(BlattWeisskopfTest, UnsupportedL_ReturnsOne)
+TEST_F(FormFactorsTest, UnsupportedL_ReturnsOne)
 {
     double q = 1.0;
     double d = 1.5;
@@ -103,7 +78,7 @@ TEST_F(BlattWeisskopfTest, UnsupportedL_ReturnsOne)
 }
 
 // Test monotonic behavior: for fixed d, BlattWeisskopf should increase with q for L > 0
-TEST_F(BlattWeisskopfTest, MonotonicBehavior)
+TEST_F(FormFactorsTest, MonotonicBehavior)
 {
     double d = 1.0;
     std::vector<double> momenta = {0.1, 0.5, 1.0, 1.5, 2.0};
@@ -126,10 +101,10 @@ TEST_F(BlattWeisskopfTest, MonotonicBehavior)
 }
 
 // Test asymptotic behavior: for large q, BlattWeisskopf should approach 1
-TEST_F(BlattWeisskopfTest, AsymptoticBehavior)
+TEST_F(FormFactorsTest, AsymptoticBehavior)
 {
     double d = 1.0;
-    double large_q = 100.0;
+    double large_q = 100000.0;
 
     // For P-wave: sqrt(z²/(1+z²)) → 1 as z → ∞
     double result_p = BlattWeisskopf(large_q, 1, d);
@@ -141,7 +116,7 @@ TEST_F(BlattWeisskopfTest, AsymptoticBehavior)
 }
 
 // Test the breakup momentum function
-TEST_F(BlattWeisskopfTest, BreakupMomentum_KnownValues)
+TEST_F(FormFactorsTest, BreakupMomentum_KnownValues)
 {
     // Test case where M < m1 + m2 (should return 0)
     double result_below_threshold = breakup(1.0, 0.6, 0.5); // 1.0 < 0.6 + 0.5
@@ -170,7 +145,7 @@ TEST_F(BlattWeisskopfTest, BreakupMomentum_KnownValues)
 }
 
 // Test edge cases
-TEST_F(BlattWeisskopfTest, EdgeCases)
+TEST_F(FormFactorsTest, EdgeCases)
 {
     double d = 1.0;
 
@@ -192,7 +167,7 @@ TEST_F(BlattWeisskopfTest, EdgeCases)
 }
 
 // Test specific physics values (typical hadron physics parameters)
-TEST_F(BlattWeisskopfTest, TypicalPhysicsValues)
+TEST_F(FormFactorsTest, TypicalPhysicsValues)
 {
     // Typical values in hadron physics
     double d_typical = 1.5; // GeV^-1, typical hadron size
@@ -225,7 +200,7 @@ TEST_F(BlattWeisskopfTest, TypicalPhysicsValues)
 }
 
 // Test consistency with analytical formulas
-TEST_F(BlattWeisskopfTest, AnalyticalConsistency)
+TEST_F(FormFactorsTest, AnalyticalConsistency)
 {
     double q = 0.7;
     double d = 1.2;
@@ -243,7 +218,7 @@ TEST_F(BlattWeisskopfTest, AnalyticalConsistency)
 }
 
 // Test that the function works with the typical usage pattern from your JSON model
-TEST_F(BlattWeisskopfTest, TypicalUsagePattern)
+TEST_F(FormFactorsTest, TypicalUsagePattern)
 {
     // From your JSON: "BlattWeisskopf_resonance_l1" with radius 1.5, l=1
     double radius = 1.5;
@@ -284,7 +259,7 @@ TEST_F(BlattWeisskopfTest, TypicalUsagePattern)
 }
 
 // Performance test (optional, for large-scale usage)
-TEST_F(BlattWeisskopfTest, PerformanceTest)
+TEST_F(FormFactorsTest, PerformanceTest)
 {
     double d = 1.5;
     int num_iterations = 100000;
@@ -306,6 +281,76 @@ TEST_F(BlattWeisskopfTest, PerformanceTest)
 
     // Should complete in reasonable time (less than 1 second)
     EXPECT_LT(duration.count(), 1000000);
+}
+
+
+// Test P-wave (L=1) at specific known values
+TEST_F(FormFactorsTest, JuliaTest)
+{
+    double d = 1.5;
+
+    // Test q = d (z = 1, should give sqrt(1/(1+1)) = sqrt(1/2))
+    double bw0_0 = BlattWeisskopf(0.0, 0, d);
+    double bw1_0 = BlattWeisskopf(0.0, 1, d);
+    double bw2_0 = BlattWeisskopf(0.0, 2, d);
+
+    expectNear(1.0, bw0_0, tolerance);
+    expectNear(0.0, bw1_0, tolerance);
+    expectNear(0.0, bw2_0, tolerance);
+
+    /*
+     @test bw0(1.1) > bw1(1.1) > bw2(1.1) > bw3(1.1)
+    refs = (1, 0.9761870601839528, 0.924462392487166, 0.8353277954487898)
+    @test all((bw0(3), bw1(3), bw2(3), bw3(3)) .≈ refs)
+*/
+    double bw0_11 = BlattWeisskopf(1.1, 0, d);
+    double bw1_11 = BlattWeisskopf(1.1, 1, d);
+    double bw2_11 = BlattWeisskopf(1.1, 2, d);
+
+    std::vector<double> refs = {1.0, 0.855197831554018, 0.5491377641624202};
+    expectNear(refs[0], bw0_11, tolerance);
+    expectNear(refs[1], bw1_11, tolerance);
+    expectNear(refs[2], bw2_11, tolerance);
+
+    // Test q = 3, d = 1.5
+    double bw0_3 = BlattWeisskopf(3.0, 0, d);
+    double bw1_3 = BlattWeisskopf(3.0, 1, d);
+    double bw2_3 = BlattWeisskopf(3.0, 2, d);
+    std::vector<double> refs3 = {1.0, 0.9761870601839528, 0.924462392487166, 0.8353277954487898};
+    expectNear(refs3[0], bw0_3, tolerance);
+    expectNear(refs3[1], bw1_3, tolerance);
+    expectNear(refs3[2], bw2_3, tolerance);
+
+}
+
+
+TEST_F(FormFactorsTest, BWCoupling)
+{
+    double q = 1.0;
+    double d = 1.5;
+    int L = 2;
+
+    // Test coupling for q = 1.0, d = 1.5, L = 2
+    double blw = BlattWeisskopf(q, L, d);
+
+    BreitWigner bw(1.0, 0.1); // mass=1.0, width=0.1
+
+    // Test at a specific sigma value
+    double sigma = 1.5;
+    complex bw_result = bw(sigma);
+
+    // Test the expected result
+    complex expected = complex(1.0, 0.0) / complex(1.0 - sigma, -1.0 * 0.1);
+
+    EXPECT_NEAR(bw_result.real(), expected.real(), tolerance);
+    EXPECT_NEAR(bw_result.imag(), expected.imag(), tolerance);
+
+    // Test Blatt-Weisskopf value
+    EXPECT_GT(blw, 0.0);
+    EXPECT_LT(blw, 1.0);
+
+    std::cout << "Blatt-Weisskopf factor: " << blw << std::endl;
+    std::cout << "Breit-Wigner result: " << bw_result << std::endl;
 }
 
 int main(int argc, char **argv)

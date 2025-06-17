@@ -14,7 +14,7 @@ add_library(ThreeBodyDecaysLib
     OrientationAngles.cpp
     ThreeBodyAmplitudeModel.cpp
     ClebschGordan.cpp
-    BlattWeisskopf.cpp
+    FormFactors.cpp
     #Examples/AmplitureModelExample.cpp
     #Examples/CombinedAmplitureModelExample.cpp
 )
@@ -54,8 +54,8 @@ if(GTEST_FOUND)
     add_test(NAME JsonModelTest COMMAND JsonModelTest)
 
     ## add Blatt-Weisskopf test
-    add_executable(BlattWeisskopfTest Tests/BlattWeisskopfTest.cpp)
-    target_link_libraries(BlattWeisskopfTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
+    add_executable(FormFactorsTest Tests/FormFactorsTest.cpp)
+    target_link_libraries(FormFactorsTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
     # Enable testing
     enable_testing()
     add_test(NAME ThreeBodyDecaysTest COMMAND ThreeBodyDecaysTest)

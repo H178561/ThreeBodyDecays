@@ -1,15 +1,16 @@
 #include <cmath>
 #include <complex>
-#include "BlattWeisskopf.hh"
+#include "FormFactors.hh"
 
+using complex = std::complex<double>;
 
-namespace ThreeBodyDecays
+namespace FormFactors
 {
 
 double BlattWeisskopf(double q, int L, double d)
 {
     // Calculate z²
-    double z2 = (q * d) * (q * d);
+    double z2 = pow((q * d),2);
 
     // Return appropriate factor based on angular momentum
     switch(L)
@@ -54,6 +55,7 @@ double breakup(double M, double m1, double m2)
     return 0.5 * std::sqrt(lambda) / M;
 }
 
+/*
 double BlattWeisskopfEnhanced(double q, double q0, int L, double d)
 {
     if (q0 <= 0.0) return BlattWeisskopf(q, L, d);
@@ -97,6 +99,22 @@ std::complex<double> RelativisticBreitWigner(
     return 1.0 / (mass * mass - s - 1i * std::sqrt(s) * width_s);
 }
 
+
+
+std::function<std::complex<double>(double)> createEnhancedBreitWigner(
+    double mass,
+    double width,
+    double m1,
+    double m2,
+    int L,
+    double d)
+{
+    return [mass, width, m1, m2, L, d](double s) -> std::complex<double> {
+        return RelativisticBreitWigner(s, mass, width, m1, m2, L, d);
+    };
+}
+
+
 std::complex<double> Flatte(
     double s,
     double mass,
@@ -128,20 +146,7 @@ std::complex<double> Flatte(
     return 1.0 / denominator;
 }
 
-std::function<std::complex<double>(double)> createEnhancedBreitWigner(
-    double mass,
-    double width,
-    double m1,
-    double m2,
-    int L,
-    double d)
-{
-    return [mass, width, m1, m2, L, d](double s) -> std::complex<double> {
-        return RelativisticBreitWigner(s, mass, width, m1, m2, L, d);
-    };
-}
-
-std::function<std::complex<double>(double)> createFlatte(
+std::function<complex(double)> createFlatte(
     double mass,
     double g1, double m1a, double m1b,
     double g2, double m2a, double m2b)
@@ -150,5 +155,6 @@ std::function<std::complex<double>(double)> createFlatte(
         return Flatte(s, mass, g1, m1a, m1b, g2, m2a, m2b);
     };
 }
+*/
 
 }
