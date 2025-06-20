@@ -11,10 +11,7 @@ protected:
     void SetUp() override
     {
         // Common setup for all tests
-        p_p = {13.6499, 11.4971, 26.0864, 31.621};
-        p_K = {36.2116, 30.5006, 68.9512, 83.643};
-        p_pi = {19.252, 16.2157, 37.0456, 44.7882};
-        p_L = {69.1135, 58.2135, 132.083, 160.052};
+
 
         // Setup masses
         ms = {0.938272046, 0.13957018, 0.493677, 2.28646};
@@ -1094,26 +1091,26 @@ TEST_F(JsonModelTest, SumTest)
     */
     // Sum all results
     ThreeBodyAmplitudeModel model;
-    model.add(L15201, "L15201", complex(3.605, 0.544));
-    model.add(L15202, "L15202", complex(-1.970, 18.380));
-    model.add(L16001, "L16001", complex(10.063, -1.216));
-    model.add(L16002, "L16002", complex(-6.987, -4.450));
-    model.add(L16701, "L16701", complex(-0.240, -0.102));
-    model.add(L16702, "L16702", complex(-0.404, 0.715));
-    model.add(L16901, "L16901", complex(-1.590, -0.454));
-    model.add(L16902, "L16902", complex(-11.254, -1.457));
-    model.add(L20001, "L20001", complex(-3.066, -2.684));
-    model.add(L20002, "L20002", complex(-5.667, -5.384));
-    model.add(D12321, "D12321", complex(-10.917, 4.915));
-    model.add(D12322, "D12322", complex(-20.916, 7.293));
-    model.add(D16001, "D16001", complex(10.394, -2.849));
-    model.add(D16002, "D16002", complex(6.135, -0.914));
-    model.add(D17001, "D17001", complex(-29.253, -4.044));
-    model.add(D17002, "D17002", complex(-36.287, -5.935));
-    model.add(K892_1, "K892_1", complex(1.722, -1.481));
-    model.add(K892_2, "K892_2", complex(-1.050, -6.000));
-    model.add(K892_3, "K892_3", complex(1.444, 0.000));
-    model.add(K892_4, "K892_4", complex(-4.537, -4.756));
+    model.add(L15201, "L1520", complex(3.605, 0.544));
+    model.add(L15202, "L1520", complex(-1.970, 18.380));
+    model.add(L16001, "L1600", complex(10.063, -1.216));
+    model.add(L16002, "L1600", complex(-6.987, -4.450));
+    model.add(L16701, "L1670", complex(-0.240, -0.102));
+    model.add(L16702, "L1670", complex(-0.404, 0.715));
+    model.add(L16901, "L1690", complex(-1.590, -0.454));
+    model.add(L16902, "L1690", complex(-11.254, -1.457));
+    model.add(L20001, "L2000", complex(-3.066, -2.684));
+    model.add(L20002, "L2000", complex(-5.667, -5.384));
+    model.add(D12321, "D1232", complex(-10.917, 4.915));
+    model.add(D12322, "D1232", complex(-20.916, 7.293));
+    model.add(D16001, "D1600", complex(10.394, -2.849));
+    model.add(D16002, "D1600", complex(6.135, -0.914));
+    model.add(D17001, "D1700", complex(-29.253, -4.044));
+    model.add(D17002, "D1700", complex(-36.287, -5.935));
+    model.add(K892_1, "K892", complex(1.722, -1.481));
+    model.add(K892_2, "K892", complex(-1.050, -6.000));
+    model.add(K892_3, "K892", complex(1.444, 0.000));
+    model.add(K892_4, "K892", complex(-4.537, -4.756));
 
     Tensor4Dcomp result = model.amplitude4d(σs, 1);
 
