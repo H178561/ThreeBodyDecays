@@ -1127,6 +1127,36 @@ TEST_F(JsonModelTest, SumTest)
     EXPECT_NEAR(result[0][0][0][1].imag(), 21.2232, prec);
     EXPECT_NEAR(result[1][0][0][1].real(), -25.9190, prec);
     EXPECT_NEAR(result[1][0][0][1].imag(), 0.3118, prec);
+
+    double totalintensity = model.intensity(σs, 1);
+
+    auto compintens = model.component_intensities(σs, 1);
+    std::cout << "Component Intensities:" << std::endl;
+    for (int i = 0; i < compintens.size(); ++i)
+    {
+        std::cout << "Component " << i << ": " << compintens[i] << std::endl;
+    }
+
+    std::array<double, 9> intens;
+    double inssum;
+    int j = 0;
+    for (int i = 0; i < 8; ++i)
+    {
+        std::cout << i << j << j + 1 << std::endl;
+        intens[i] = compintens[j] + compintens[j + 1];
+        inssum += intens[i];
+        j += 2;
+    }
+    intens[8] = compintens[16] + compintens[17] + compintens[18] + compintens[19];
+    inssum += intens[8];
+
+    // print intens
+    for (int i = 0; i < intens.size(); ++i)
+    {
+        std::cout << "Component " << i << ": " << intens[i] / totalintensity << std::endl;
+    }
+
+    std::cout << totalintensity << " " << inssum << std::endl;
 }
 
 int main(int argc, char **argv)
