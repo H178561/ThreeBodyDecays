@@ -60,8 +60,6 @@ namespace FormFactors
     */
 }
 
-
-
 // Base class for lineshapes
 class Lineshape
 {
@@ -85,6 +83,44 @@ public:
 private:
     double m_;     // mass
     double gamma_; // width
+};
+
+/*
+function (bw::BreitWigner)(σ::Number)
+    @unpack m, ma, mb, l, d = bw
+    _p0 = breakup(m, ma, mb)
+    FF = BlattWeisskopf{l}(d)
+    gsq = m * bw.Γ / (2_p0) * m / FF(_p0)^2
+    mbw = MultichannelBreitWigner(m, SVector((; gsq, ma, mb, l, d)))
+    mbw(σ)
+end
+*/
+class BreitWignerExtended : public Lineshape
+{
+public:
+    BreitWignerExtended(double mass, double width, double ma, double mb, int l, double d)
+        : m_(mass), gamma_(width), ma_(ma), mb_(mb), l_(l), d_(d)
+    {
+    }
+
+    complex operator()(double sigma) const override
+    {
+        double p0 = FormFactors::breakup(m_, ma_, mb_);
+        double FF = FormFactors::BlattWeisskopf(p0, l_, d_);
+        double gsq = m_ * gamma_ / (2.0 * p0) * m_ / (FF * FF);
+
+        // Multichannel Breit-Wigner formula
+        return complex(1.0, 0.0) /
+               (complex(m_ * m_ - sigma, 0.0) - complex(0.0, m_ * gsq));
+    }
+
+private:
+    double m_;     // mass
+    double gamma_; // width
+    double ma_;    // mass of first channel particle
+    double mb_;    // mass of second channel particle
+    int l_;        // orbital angular momentum
+    double d_;     // Blatt-Weisskopf parameter
 };
 
 // Flatte class
@@ -169,6 +205,5 @@ inline std::function<complex(double)> make_bugg_bw(double mass,
 {
     return BuggBW(mass, width, s0, s1, s2);
 }
-
 
 #endif
