@@ -94,7 +94,46 @@ function (bw::BreitWigner)(σ::Number)
     mbw = MultichannelBreitWigner(m, SVector((; gsq, ma, mb, l, d)))
     mbw(σ)
 end
+
+function MultichannelBreitWigner(m::Real, Γ::Real, ma::Number, mb::Number, l::Int, d::Real)
+    _p0 = breakup(m, ma, mb)
+    FF = BlattWeisskopf{l}(d)
+    gsq = m * Γ / (2_p0) * m / FF(_p0)^2
+    return MultichannelBreitWigner(m, SVector((; gsq, ma, mb, l, d)))
+end
+MultichannelBreitWigner(m::Float64, Γ::Float64) =
+    MultichannelBreitWigner{1}(m, Γ, 0.0, 0.0, 0, 1.0)
+
 */
+
+// Multichannel Breit-Wigner class
+class MultichannelBreitWigner : public Lineshape
+{
+public:
+    MultichannelBreitWigner(double mass, double gsq, double ma, double mb, int l, double d)
+        : m_(mass), gsq_(gsq), ma_(ma), mb_(mb), l_(l), d_(d)
+    {
+    }
+
+    complex operator()(double sigma) const override
+    {
+        double p0 = FormFactors::breakup(m_, ma_, mb_);
+        double FF = FormFactors::BlattWeisskopf(p0, l_, d_);
+        double width = gsq_ * p0 * p0 / (m_ * m_ * FF * FF);
+
+        return complex(1.0, 0.0) / (complex(m_ * m_ - sigma, 0.0) -
+                                    complex(0.0, m_ * width));
+    }
+
+private:
+    double m_;   // mass
+    double gsq_; // squared coupling constant
+    double ma_;  // mass of first channel particle
+    double mb_;  // mass of second channel particle
+    int l_;      // orbital angular momentum
+    double d_;   // Blatt-Weisskopf parameter
+};
+
 class BreitWignerExtended : public Lineshape
 {
 public:
@@ -109,9 +148,9 @@ public:
         double FF = FormFactors::BlattWeisskopf(p0, l_, d_);
         double gsq = m_ * gamma_ / (2.0 * p0) * m_ / (FF * FF);
 
-        // Multichannel Breit-Wigner formula
-        return complex(1.0, 0.0) /
-               (complex(m_ * m_ - sigma, 0.0) - complex(0.0, m_ * gsq));
+        // use of multichannel Breit-Wigner
+        MultichannelBreitWigner mbw(m_, gsq, ma_, mb_, l_, d_);
+        return mbw(sigma);
     }
 
 private:
