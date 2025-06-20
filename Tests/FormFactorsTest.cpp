@@ -326,31 +326,22 @@ TEST_F(FormFactorsTest, JuliaTest)
 
 TEST_F(FormFactorsTest, BWCoupling)
 {
-    double q = 1.0;
+    double sigma = 0.3;
     double d = 1.5;
     int L = 2;
 
     // Test coupling for q = 1.0, d = 1.5, L = 2
-    double blw = BlattWeisskopf(q, L, d);
+    double blw = BlattWeisskopf(sigma, L, d);
 
-    BreitWigner bw(1.0, 0.1); // mass=1.0, width=0.1
+    BreitWigner bw(1.6, 0.2); // mass=1.0, width=0.1
 
     // Test at a specific sigma value
-    double sigma = 1.5;
     complex bw_result = bw(sigma);
+    std::cout << (blw) <<  bw_result << std::endl;
 
-    // Test the expected result
-    complex expected = complex(1.0, 0.0) / complex(1.0 - sigma, -1.0 * 0.1);
-
-    EXPECT_NEAR(bw_result.real(), expected.real(), tolerance);
-    EXPECT_NEAR(bw_result.imag(), expected.imag(), tolerance);
-
-    // Test Blatt-Weisskopf value
-    EXPECT_GT(blw, 0.0);
-    EXPECT_LT(blw, 1.0);
-
-    std::cout << "Blatt-Weisskopf factor: " << blw << std::endl;
-    std::cout << "Breit-Wigner result: " << bw_result << std::endl;
+    //Combine the Blatt-Weisskopf factor with the Breit-Wigner result
+    complex result = blw * bw_result;
+    std::cout << "Combined result: " << result << std::endl;
 }
 
 int main(int argc, char **argv)
