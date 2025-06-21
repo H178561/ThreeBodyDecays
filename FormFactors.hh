@@ -3,6 +3,7 @@
 
 #include <complex>
 #include <functional>
+#include <vector>
 
 using complex = std::complex<double>;
 
@@ -94,6 +95,40 @@ function (bw::BreitWigner)(σ::Number)
     mbw = MultichannelBreitWigner(m, SVector((; gsq, ma, mb, l, d)))
     mbw(σ)
 end
+*/
+
+/*
+
+BW(σ, m, Γ) = 1 / (m^2 - σ - 1im * m * Γ)
+
+# ## MultichannelBreitWigner
+
+@with_kw struct MultichannelBreitWigner{N} <: AbstractFlexFunc
+    m::Float64
+    channels::SVector{N,<:NamedTuple{(:gsq, :ma, :mb, :l, :d)}}
+end
+
+# MultichannelBreitWigner constructor from Vector
+function MultichannelBreitWigner(
+    m::Real,
+    channels::Vector{<:NamedTuple{(:gsq, :ma, :mb, :l, :d)}},
+)
+    N = length(channels)
+    return MultichannelBreitWigner(m, SVector{N}(channels...))
+end
+
+function (bw::MultichannelBreitWigner)(σ::Number)
+    m0 = bw.m
+    mΓ = sum(bw.channels) do channel
+        @unpack gsq, ma, mb, l, d = channel
+        FF = BlattWeisskopf{l}(d)
+        _p = breakup(sqrt(σ), ma, mb)
+        gsq * 2_p / sqrt(σ) * FF(_p)^2
+    end
+    BW(σ, m0, mΓ / m0)
+end
+(bw::MultichannelBreitWigner)(σ::Real) = (bw)(σ + 1im * eps())
+
 
 function MultichannelBreitWigner(m::Real, Γ::Real, ma::Number, mb::Number, l::Int, d::Real)
     _p0 = breakup(m, ma, mb)
@@ -117,9 +152,9 @@ public:
 
     complex operator()(double sigma) const override
     {
-        double p0 = FormFactors::breakup(m_, ma_, mb_);
+        double p0 = FormFactors::breakup(std::sqrt(sigma), ma_, mb_);
         double FF = FormFactors::BlattWeisskopf(p0, l_, d_);
-        double width = gsq_ * p0 * p0 / (m_ * m_ * FF * FF);
+        double width = gsq_ * 2.0 * p0 / (std::sqrt(sigma) * (FF * FF));
 
         return complex(1.0, 0.0) / (complex(m_ * m_ - sigma, 0.0) -
                                     complex(0.0, m_ * width));
@@ -188,8 +223,8 @@ private:
     double m_;  // mass
     double g1_; // coupling to first channel
     double g2_; // coupling to second channel
-    double m1_; // mass of first channel particles
-    double m2_; // mass of second channel particles
+    double m1_; // mass of first channel particle
+    double m2_; // mass of second channel particle
 };
 
 // BuggBW class
@@ -245,4 +280,77 @@ inline std::function<complex(double)> make_bugg_bw(double mass,
     return BuggBW(mass, width, s0, s1, s2);
 }
 
+// Struktur zur Repräsentation eines Kanals
+struct Channel
+{
+    double gsq; // quadrierte Kopplungskonstante
+    double ma;  // Masse des ersten Teilchens
+    double mb;  // Masse des zweiten Teilchens
+    int l;      // Drehimpuls
+    double d;   // Blatt-Weisskopf-Parameter
+};
+
+// Erweiterte MultichannelBreitWigner Klasse für mehrere Kanäle
+class MultichannelBreitWignerMulti : public Lineshape
+{
+public:
+    // Konstruktor mit einem Vektor von Kanälen
+    MultichannelBreitWignerMulti(double mass, const std::vector<Channel> &channels)
+        : m_(mass), channels_(channels)
+    {
+    }
+
+    // Konstruktor für einen einzelnen Kanal (Kompatibilität mit vorhandenem Code)
+    MultichannelBreitWignerMulti(double mass, double gsq, double ma, double mb, int l, double d)
+        : m_(mass)
+    {
+        channels_.push_back({gsq, ma, mb, l, d});
+    }
+
+    complex operator()(double sigma) const override
+    {
+        // Berechnung der laufenden Breite über alle Kanäle
+        double total_width = 0.0;
+
+        for (const auto &channel : channels_)
+        {
+            double p = FormFactors::breakup(std::sqrt(sigma), channel.ma, channel.mb);
+            double FF = FormFactors::BlattWeisskopf(p, channel.l, channel.d);
+
+            // Beitrag dieses Kanals zur Gesamtbreite
+            total_width += channel.gsq * 2.0 * p / std::sqrt(sigma) * (FF * FF);
+        }
+
+        // Breit-Wigner-Formel mit der berechneten Breite
+        return complex(1.0, 0.0) /
+               (complex(m_ * m_ - sigma, 0.0) - complex(0.0, m_ * total_width / m_));
+    }
+
+private:
+    double m_;                      // Masse
+    std::vector<Channel> channels_; // Vektor der Kanäle
+};
+
+// Factory-Funktion für mehrere Kanäle
+inline std::function<complex(double)> make_multichannel_bw(
+    double mass, const std::vector<Channel> &channels)
+{
+    MultichannelBreitWignerMulti mbw(mass, channels);
+    return [mbw](double sigma)
+    { return mbw(sigma); };
+}
+
+// Factory-Funktion für einen einzelnen Kanal
+inline std::function<complex(double)> make_multichannel_bw_single(
+    double mass, double width, double ma, double mb, int l, double d)
+{
+    // Berechnung von gsq wie in der Julia-Implementierung
+    double p0 = FormFactors::breakup(mass, ma, mb);
+    double FF = FormFactors::BlattWeisskopf(p0, l, d);
+    double gsq = mass * width / (2.0 * p0) * mass / (FF * FF);
+
+    MultichannelBreitWignerMulti mbw(mass, gsq, ma, mb, l, d);
+    return [mbw](double sigma)
+    { return mbw(sigma); };
+}
 #endif

@@ -53,6 +53,11 @@ if(GTEST_FOUND)
     target_link_libraries(JsonModelTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
     add_test(NAME JsonModelTest COMMAND JsonModelTest)
 
+    ## add FormFactors test
+    add_executable(BWTest Tests/BWTest.cpp)
+    target_link_libraries(BWTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
+    add_test(NAME BWTest COMMAND BWTest)
+
     ## add Blatt-Weisskopf test
     add_executable(FormFactorsTest Tests/FormFactorsTest.cpp)
     target_link_libraries(FormFactorsTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
