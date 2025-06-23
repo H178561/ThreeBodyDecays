@@ -1,1 +1,7 @@
 build/
+.vscode/
+
+# Add these new patterns
+\#*\#           # Emacs backup files like #CMakeLists.txt#
+.DS_Store       # macOS folder attributes
+._.DS_Store     # macOS folder attributes
