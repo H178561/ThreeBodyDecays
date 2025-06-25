@@ -197,35 +197,7 @@ private:
     double d_;     // Blatt-Weisskopf parameter
 };
 
-// Flatte class
-class Flatte : public Lineshape
-{
-public:
-    Flatte(double mass, double g1, double g2, double m1, double m2) : m_(mass), g1_(g1), g2_(g2), m1_(m1), m2_(m2)
-    {
-    }
 
-    complex operator()(double sigma) const override
-    {
-        // Phase space factors
-        double rho1 = std::sqrt(1.0 - 4.0 * m1_ * m1_ / sigma);
-        double rho2 = std::sqrt(1.0 - 4.0 * m2_ * m2_ / sigma);
-
-        // Running width
-        complex running_width =
-            complex(0.0, m_ * (g1_ * rho1 + g2_ * rho2));
-
-        return complex(1.0, 0.0) /
-               (complex(m_ * m_ - sigma, 0.0) - running_width);
-    }
-
-private:
-    double m_;  // mass
-    double g1_; // coupling to first channel
-    double g2_; // coupling to second channel
-    double m1_; // mass of first channel particle
-    double m2_; // mass of second channel particle
-};
 
 // BuggBW class
 class BuggBW : public Lineshape
@@ -264,14 +236,7 @@ inline std::function<complex(double)> make_breit_wigner(double mass,
     { return bw(sigma); };
 }
 
-inline std::function<complex(double)> make_flatte(double mass, double g1,
-                                                  double g2, double m1,
-                                                  double m2)
-{
-    Flatte f(mass, g1, g2, m1, m2);
-    return [f](double sigma)
-    { return f(sigma); };
-}
+
 
 inline std::function<complex(double)> make_bugg_bw(double mass,
                                                    double width, double s0,
@@ -323,7 +288,7 @@ public:
 
         // Breit-Wigner-Formel mit der berechneten Breite
         return complex(1.0, 0.0) /
-               (complex(m_ * m_ - sigma, 0.0) - complex(0.0, m_ * total_width / m_));
+               (complex(m_ * m_ - sigma, 0.0) - complex(0.0, total_width));
     }
 
 private:
@@ -353,4 +318,40 @@ inline std::function<complex(double)> make_multichannel_bw_single(
     return [mbw](double sigma)
     { return mbw(sigma); };
 }
+
+
+// Flatte class
+class Flatte : public Lineshape
+{
+public:
+    Flatte(double mass, double gsq1, double ma1, double mb1, int l1, double d1,
+           double gsq2, double ma2, double mb2, int l2, double d2)
+        : m_(mass)
+    {
+        // Create two channels with l=0, d=1.0
+        channels_.push_back(Channel{gsq1, ma1, mb1, l1, d1});
+        channels_.push_back(Channel{gsq2, ma2, mb2, l2, d2});
+    }
+
+    complex operator()(double sigma) const override
+    {
+        MultichannelBreitWignerMulti mbw(m_, channels_);
+        return mbw(sigma);
+    }
+
+private:
+    double m_;                      // mass
+    std::vector<Channel> channels_; // vector of channels
+};
+
+
+inline std::function<complex(double)> make_flatte(double mass,
+                                                 double gsq1, double ma1, double mb1, int l1, double d1,
+                                                 double gsq2, double ma2, double mb2, int l2, double d2)
+{
+    Flatte f(mass, gsq1, ma1, mb1, l1, d1, gsq2, ma2, mb2, l2, d2);
+    return [f](double sigma) { return f(sigma); };
+}
+
+
 #endif

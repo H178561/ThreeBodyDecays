@@ -31,43 +31,59 @@ if(GTEST_FOUND)
     # Add pthread for Google Test
     find_package(Threads REQUIRED)
 
-    # Test executable
-    add_executable(ThreeBodyDecaysTest
+    # Define test source files
+    set(TEST_SOURCES
         Tests/ThreeBodyDecaysTest.cpp
         Tests/OrientationAnglesTest.cpp
         Tests/ThreeBodyAmplitudeModelTest.cpp
-    )
-    target_link_libraries(ThreeBodyDecaysTest
-        ThreeBodyDecaysLib
-        ${GTEST_LIBRARIES}
-        ${CMAKE_THREAD_LIBS_INIT}
+        Tests/ClebschGordanTest.cpp
+        Tests/JsonModelTest.cpp
+        Tests/BWTest.cpp
+        Tests/FormFactorsTest.cpp
     )
 
-    # Add the CG test if GTest is found
+    # Individual test executables
+    add_executable(ThreeBodyDecaysTest Tests/ThreeBodyDecaysTest.cpp)
+    target_link_libraries(ThreeBodyDecaysTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
     add_executable(ClebschGordanTest Tests/ClebschGordanTest.cpp)
+    target_link_libraries(ClebschGordanTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
     add_executable(JsonModelTest Tests/JsonModelTest.cpp)
+    target_link_libraries(JsonModelTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-    target_link_libraries(ClebschGordanTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
-    add_test(NAME ClebschGordanTest COMMAND ClebschGordanTest)
-
-    target_link_libraries(JsonModelTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
-    add_test(NAME JsonModelTest COMMAND JsonModelTest)
-
-    ## add FormFactors test
     add_executable(BWTest Tests/BWTest.cpp)
-    target_link_libraries(BWTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
-    add_test(NAME BWTest COMMAND BWTest)
+    target_link_libraries(BWTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-    ## add Blatt-Weisskopf test
     add_executable(FormFactorsTest Tests/FormFactorsTest.cpp)
-    target_link_libraries(FormFactorsTest ${GTEST_LIBRARIES} pthread ThreeBodyDecaysLib)
+    target_link_libraries(FormFactorsTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+    add_executable(OrientationAnglesTest Tests/OrientationAnglesTest.cpp)
+    target_link_libraries(OrientationAnglesTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+    add_executable(ThreeBodyAmplitudeModelTest Tests/ThreeBodyAmplitudeModelTest.cpp)
+    target_link_libraries(ThreeBodyAmplitudeModelTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+    # Combined test executable with a dedicated main function
+    add_executable(RunTests Tests/test_main.cpp ${TEST_SOURCES})
+    target_compile_definitions(RunTests PRIVATE RUNNING_COMBINED_TESTS)
+    target_link_libraries(RunTests ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
     # Enable testing
     enable_testing()
     add_test(NAME ThreeBodyDecaysTest COMMAND ThreeBodyDecaysTest)
+    add_test(NAME ClebschGordanTest COMMAND ClebschGordanTest)
+    add_test(NAME JsonModelTest COMMAND JsonModelTest)
+    add_test(NAME BWTest COMMAND BWTest)
+    add_test(NAME FormFactorsTest COMMAND FormFactorsTest)
+    add_test(NAME BlattWeisskopfTest COMMAND BlattWeisskopfTest)
+    add_test(NAME OrientationAnglesTest COMMAND OrientationAnglesTest)
+    add_test(NAME ThreeBodyAmplitudeModelTest COMMAND ThreeBodyAmplitudeModelTest)
+    add_test(NAME RunAllTests COMMAND RunTests)
 
-    message(STATUS "Google Test found, test target will be built")
+    message(STATUS "Google Test found, test targets will be built")
 else()
-    message(STATUS "Google Test not found, test target will NOT be built")
+    message(STATUS "Google Test not found, test targets will NOT be built")
 endif()
 
 # Füge das Beispiel hinzu

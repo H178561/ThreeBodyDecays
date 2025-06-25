@@ -157,3 +157,11 @@ TEST_F(OrientationAnglesTest, TestHelicityAngles)
     std::cout << "  D: " << four_vectors_rf["D"].mass() << std::endl;
     std::cout << "  Pi: " << four_vectors_rf["Pi"].mass() << std::endl;
 }
+
+#ifndef RUNNING_COMBINED_TESTS
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+#endif

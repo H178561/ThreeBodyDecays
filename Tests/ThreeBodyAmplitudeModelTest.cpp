@@ -964,3 +964,11 @@ TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520lambdacpkpi)
         std::cout << "\n";
     }
 }
+
+#ifndef RUNNING_COMBINED_TESTS
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+#endif

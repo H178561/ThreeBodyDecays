@@ -189,6 +189,8 @@ double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int 
     // Get the 4D amplitude tensor
     auto amp = amplitude4d(σs, k_amp, refζs);
 
+    bool printout = false;
+    if(printout){
     // debug print out amp
     for (const auto &dim1 : amp)
     {
@@ -205,7 +207,7 @@ double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int 
             std::cout << std::endl;
         }
         std::cout << std::endl;
-    }
+    }}
 
     // Sum squared amplitudes (similar to Julia's sum(abs2, ...))
     double total_intensity = 0.0;
@@ -220,7 +222,7 @@ double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int 
                 {
                     double curintens = std::norm(val);
                     total_intensity += curintens;
-                    std::cout << curintens << std::endl;
+                    //std::cout << curintens << std::endl;
                 }
             }
         }

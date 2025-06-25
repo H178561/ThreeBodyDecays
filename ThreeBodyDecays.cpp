@@ -98,50 +98,6 @@ double jacobi_pols(int n, int a, int b, double z)
 {
     return boost::math::jacobi<double>(n, a, b, z);
 }
-/*
-// Jacobi polynomial calculation
-double jacobi_pols(int n, int a, int b, double z)
-{
-    if (n < 0)
-        return 0.0;
-    if (n == 0)
-        return 1.0;
-
-    if (n + a > MAX_FACT || n + b > MAX_FACT)
-    {
-        throw std::runtime_error("Error: j is too high, please check the implementation of jacobi polynomials!");
-    }
-
-    // Special case when z is approximately 1 or -1
-    if (std::abs(z - 1.0) < 1e-10 || std::abs(z + 1.0) < 1e-10)
-    {
-        double sum = 0.0;
-        for (int s = 0; s <= n; ++s)
-        {
-            double sign = (s % 2 == 0) ? 1.0 : -1.0;
-            double logterm = getLogFactorial(n + b) - getLogFactorial(s) - getLogFactorial(n - s) +
-                             getLogFactorial(n + a) - getLogFactorial(n + a - s);
-            double term = sign * std::exp(logterm) * std::pow((1 - z) / 2.0, s) * std::pow((1 + z) / 2.0, n - s);
-            sum += term;
-        }
-        return sum;
-    }
-
-    // General case
-    double ls = std::log((1.0 - z) / 2.0);
-    double lc = std::log((1.0 + z) / 2.0);
-    double res = 0.0;
-
-    for (int s = 0; s <= n; ++s)
-    {
-        double logs = getLogFactorial(n + b) - getLogFactorial(s) - getLogFactorial(n - s) +
-                      getLogFactorial(n + a) - getLogFactorial(n + a - s);
-        double args = s * ls + (n - s) * lc;
-        double sign = (s % 2 == 0) ? 1.0 : -1.0;
-        res += sign * std::exp(logs + args);
-    }
-    return res;
-}*/
 
 // Wigner d-hat function with doubled arguments
 double wignerd_hat_doublearg(int two_j, int two_m1, int two_m2, double z)
@@ -619,65 +575,6 @@ double parseFraction(const std::string &str)
     return std::stod(str);
 }
 
-// Replace the placeholder CG_doublearg function with this implementation
-/*
-complex CG_doublearg(int two_j1, int two_m1, int two_j2, int two_m2, int two_j, int two_m) {
-    // Check if m = m1 + m2 (conservation of angular momentum projection)
-    if (two_m != two_m1 + two_m2) {
-        return complex(0.0, 0.0);
-    }
-
-    // Check triangle inequality for j values
-    if (two_j < std::abs(two_j1 - two_j2) || two_j > two_j1 + two_j2) {
-        return complex(0.0, 0.0);
-    }
-
-    // Convert doubled representation to standard form
-    double j1 = two_j1 / 2.0;
-    double m1 = two_m1 / 2.0;
-    double j2 = two_j2 / 2.0;
-    double m2 = two_m2 / 2.0;
-    double j = two_j / 2.0;
-    double m = two_m / 2.0;
-
-    // Check if m values are within valid range
-    if (std::abs(m1) > j1 || std::abs(m2) > j2 || std::abs(m) > j) {
-        return complex(0.0, 0.0);
-    }
-
-    // Calculate the normalization factor
-    double norm = std::sqrt((2.0 * j + 1.0) *
-                 std::exp(getLogFactorial(j1 + j2 - j) +
-                          getLogFactorial(j + j1 - j2) +
-                          getLogFactorial(j + j2 - j1) -
-                          getLogFactorial(j1 + j2 + j + 1.0)));
-
-    norm *= std::sqrt(std::exp(getLogFactorial(j1 + m1) +
-                              getLogFactorial(j1 - m1) +
-                              getLogFactorial(j2 + m2) +
-                              getLogFactorial(j2 - m2) +
-                              getLogFactorial(j + m) +
-                              getLogFactorial(j - m)));
-
-    // Calculate the sum for the coefficient
-    double sum = 0.0;
-    double max_k = std::min({j1 + j2 - j, j1 - m1, j2 + m2});
-
-    for (double k = 0.0; k <= max_k; k += 1.0) {
-        if (j - j2 + m1 + k >= 0.0 && j - j1 - m2 + k >= 0.0) {
-            double term = std::pow(-1.0, k) / (
-                std::exp(getLogFactorial(k) +
-                       getLogFactorial(j1 + j2 - j - k) +
-                       getLogFactorial(j1 - m1 - k) +
-                       getLogFactorial(j2 + m2 - k) +
-                       getLogFactorial(j - j2 + m1 + k) +
-                       getLogFactorial(j - j1 - m2 + k)));
-            sum += term;
-        }
-    }
-
-    return complex(norm * sum, 0.0);
-}*/
 
 // aligned_amplitude implementation that returns a Tensor4D
 // Korrigierte aligned_amplitude4d-Funktion
@@ -758,31 +655,6 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain &dc, const Mandel
         }
     }
 
-    /*
-    for (int m1_idx = 0; m1_idx < vrk_dim1; m1_idx++) {
-    int two_m1 = -two_j + 2 * m1_idx;
-    for (int m2_idx = 0; m2_idx < vrk_dim2; m2_idx++) {
-        int two_m2 = -two_js[k_idx] + 2 * m2_idx;
-
-        std::array<int, 2> two_ms = {two_m1, two_m2};
-
-        // ALTERNATIVE 1: Verwenden Sie diese Zeile für 'No Recoupling' mit `-2, 0` statt `0, 0`
-        // Diese Bedingung gibt das Julia-Muster zurück
-        bool matches = (two_m2 == 0 && (two_m1 == -2 || two_m1 == 2));
-        complex amp = matches ? complex(1.0, 0.0) : complex(0.0, 0.0);
-        // ALTERNATIVE 2: Oder verwenden Sie RecouplingLS mit geeigneten Parametern
-        // complex amp = ls_coupling(two_js_HRk[1], two_ms[0], two_js_HRk[2],
-        //                             two_ms[1], two_js_HRk[0], 2, 0);
-
-        double phase_value = (((two_js[k_idx] - two_m2) % 4 == 0) ? 1.0 : -1.0);
-        VRk[m1_idx][m2_idx] = real(amp) * phase_value;
-    }
-}*/
-    // VRk-Matrix
-    /*
-    std::cout << "values" << two_j << " " << two_js[0] << " " << two_js[1] << " " << two_js[2] << " " << two_js[3] << std::endl;
-
-    */
     if (debug)
         std::cout << "VRk dimensions: "
                   << VRk.size() << " x "
@@ -820,17 +692,6 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain &dc, const Mandel
         }
     }
 
-    // print Vij
-    /*
-    std::cout<< "Vij dimensions: "
-            << Vij.size() << " x "
-            << (Vij.empty() ? 0 : Vij[0].size()) << std::endl;
-    for (int i = 0; i < Vij.size(); ++i) {
-        for (int j = 0; j < Vij[0].size(); ++j) {
-            std::cout << Vij[i][j] << "\t";  // Tab für schöne Ausrichtung
-        }
-        std::cout << "\n";
-    }*/
 
     // Δ-Verschiebungen berechnen
     int Δ_zk = (two_j - two_js[3] - two_js[k_idx]) / 2;
@@ -942,20 +803,6 @@ Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain &dc, const Mandel
     return F0;
 }
 
-// Helper function to calculate amplitude for recoupling
-/*
-complex ThreeBodyDecays::amplitude_recoupling(
-    const RecouplingLS& recoupling,
-    const std::array<int, 2>& two_ms,
-    const std::array<int, 3>& two_js) {
-
-    // Da RecouplingLS ein std::function-Typ ist, können wir keinen dynamic_cast verwenden
-    // Stattdessen rufen wir die Funktion direkt auf
-    return recoupling(two_ms, two_js);
-}
-    */
-
-// In ThreeBodyDecays.cpp
 complex ThreeBodyDecays::amplitude_recoupling(
     const RecouplingLS &recoupling,
     const std::array<int, 2> &two_ms,
@@ -997,26 +844,6 @@ Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain &dc,
     // Get aligned amplitude
     auto F0 = aligned_amplitude4d(dc, σs);
 
-    // Print the dimensions of F0
-    /*
-    std::cout << "F0 dimensions: "
-            << F0.size() << " x "
-            << (F0.empty() ? 0 : F0[0].size()) << " x "
-            << (F0.empty() || F0[0].empty() ? 0 : F0[0][0].size()) << " x "
-            << (F0.empty() || F0[0].empty() || F0[0][0].empty() ? 0 : F0[0][0][0].size())
-            << std::endl;
-
-    for (int i = 0; i < F0.size(); ++i) {
-        for (int j = 0; j < F0[0].size(); ++j) {
-            for (int k = 0; k < F0[0][0].size(); ++k) {
-                for (int z = 0; z < F0[0][0][0].size(); ++z) {
-                    std::cout << F0[i][j][k][z] << "\t";  // Tab für schöne Ausrichtung
-                }
-            }
-        }
-        std::cout << "\n";
-    }
-    */
 
     // Calculate alignment rotations
     std::vector<Matrix2D> d_ζs(4);
@@ -1215,39 +1042,6 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
         }
     }
 
-    /*
-    for (int m1_idx = 0; m1_idx < vrk_dim1; m1_idx++) {
-    int two_m1 = -two_j + 2 * m1_idx;
-    for (int m2_idx = 0; m2_idx < vrk_dim2; m2_idx++) {
-        int two_m2 = -two_js[k_idx] + 2 * m2_idx;
-
-        std::array<int, 2> two_ms = {two_m1, two_m2};
-
-        // ALTERNATIVE 1: Verwenden Sie diese Zeile für 'No Recoupling' mit `-2, 0` statt `0, 0`
-        // Diese Bedingung gibt das Julia-Muster zurück
-        bool matches = (two_m2 == 0 && (two_m1 == -2 || two_m1 == 2));
-        complex amp = matches ? complex(1.0, 0.0) : complex(0.0, 0.0);
-        // ALTERNATIVE 2: Oder verwenden Sie RecouplingLS mit geeigneten Parametern
-        // complex amp = ls_coupling(two_js_HRk[1], two_ms[0], two_js_HRk[2],
-        //                             two_ms[1], two_js_HRk[0], 2, 0);
-
-        double phase_value = (((two_js[k_idx] - two_m2) % 4 == 0) ? 1.0 : -1.0);
-        VRk[m1_idx][m2_idx] = real(amp) * phase_value;
-    }
-}*/
-    // VRk-Matrix
-    /*
-    std::cout << "values" << two_j << " " << two_js[0] << " " << two_js[1] << " " << two_js[2] << " " << two_js[3] << std::endl;
-    std::cout<< "VRk dimensions: "
-            << VRk.size() << " x "
-            << (VRk.empty() ? 0 : VRk[0].size()) << std::endl;
-    for (int i = 0; i < VRk.size(); ++i) {
-        for (int j = 0; j < VRk[0].size(); ++j) {
-            std::cout << VRk[i][j] << "\t";  // Tab für schöne Ausrichtung
-        }
-        std::cout << "\n";
-    }*/
-
     // Vij-Matrix berechnen
     std::vector<std::vector<double>> Vij;
     int vij_dim1 = two_js[i_idx] + 1;
@@ -1300,17 +1094,7 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
         }
     }
 
-    // print Vij
-    /*
-    std::cout<< "Vij dimensions: "
-            << Vij.size() << " x "
-            << (Vij.empty() ? 0 : Vij[0].size()) << std::endl;
-    for (int i = 0; i < Vij.size(); ++i) {
-        for (int j = 0; j < Vij[0].size(); ++j) {
-            std::cout << Vij[i][j] << "\t";  // Tab für schöne Ausrichtung
-        }
-        std::cout << "\n";
-    }*/
+
 
     // Δ-Verschiebungen berechnen
     int Δ_zk = ((two_j - two_js[3] - two_js[k_idx]) / 2);

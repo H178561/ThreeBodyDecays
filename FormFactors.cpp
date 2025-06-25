@@ -114,47 +114,7 @@ std::function<std::complex<double>(double)> createEnhancedBreitWigner(
     };
 }
 
-
-std::complex<double> Flatte(
-    double s,
-    double mass,
-    double g1, double m1a, double m1b,
-    double g2, double m2a, double m2b)
-{
-    using namespace std::complex_literals;
-
-    // Channel 1 phase space
-    double q1 = breakup(std::sqrt(s), m1a, m1b);
-    std::complex<double> rho1;
-    if (s >= (m1a + m1b) * (m1a + m1b)) {
-        rho1 = 2.0 * q1 / std::sqrt(s);
-    } else {
-        rho1 = -2i * std::sqrt(-q1 * q1) / std::sqrt(s);
-    }
-
-    // Channel 2 phase space
-    double q2 = breakup(std::sqrt(s), m2a, m2b);
-    std::complex<double> rho2;
-    if (s >= (m2a + m2b) * (m2a + m2b)) {
-        rho2 = 2.0 * q2 / std::sqrt(s);
-    } else {
-        rho2 = -2i * std::sqrt(-q2 * q2) / std::sqrt(s);
-    }
-
-    std::complex<double> denominator = mass * mass - s - 1i * (g1 * g1 * rho1 + g2 * g2 * rho2);
-
-    return 1.0 / denominator;
-}
-
-std::function<complex(double)> createFlatte(
-    double mass,
-    double g1, double m1a, double m1b,
-    double g2, double m2a, double m2b)
-{
-    return [mass, g1, m1a, m1b, g2, m2a, m2b](double s) -> std::complex<double> {
-        return Flatte(s, mass, g1, m1a, m1b, g2, m2a, m2b);
-    };
-}
 */
+
 
 }

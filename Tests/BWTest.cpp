@@ -73,8 +73,60 @@ TEST_F(BWTest, testMultichannelBW)
     EXPECT_NEAR(val.imag(), 0.14486, 1e-5);
 }
 
+TEST_F(BWTest, testFlatteLineshape)
+{
+    /*
+
+    "functions": [
+    {
+      "name": "L1405_Flatte",
+      "type": "MultichannelBreitWigner",
+      "x": "m_31_sq",
+      "mass": 1.4051,
+      "channels": [
+        {
+          "gsq": 0.23395150538434703,
+          "ma": 0.938272046,
+          "mb": 0.493677,
+          "l": 0,
+          "d": 0
+        },
+        {
+          "gsq": 0.23395150538434703,
+          "ma": 1.18937,
+          "mb": 0.13957018,
+          "l": 0,
+          "d": 0
+        }
+      ]
+    },
+    */
+    std::cout << "\n=== Flatte Lineshape Test ===" << std::endl;
+
+    // Create a Flatte lineshape function
+    auto flatte = make_flatte(
+        1.4051, // mass
+        0.23395150538434703, 0.938272046, 0.493677, 0, 0, // first channel
+        0.23395150538434703, 1.18937, 0.13957018, 0, 0 // second channel
+    );
+
+    // Test at different invariant masses
+    double test_mass = 3.2;
+
+    std::cout << "\nInvariant Mass (GeV)  |  Value" << std::endl;
+    std::cout << "--------------------|------------" << std::endl;
+
+    // L1405:2 Lineshape(s=3.2): -0.7480602620708737 + 0.22521439829964177im
+    complex val = flatte(test_mass);
+
+    EXPECT_NEAR(val.real(), -0.74806, 1e-5);
+    EXPECT_NEAR(val.imag(), 0.22521, 1e-5);
+}
+
+#ifndef RUNNING_COMBINED_TESTS
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+#endif
