@@ -157,7 +157,7 @@ public:
         double width = gsq_ * 2.0 * p0 / (std::sqrt(sigma) * (FF * FF));
 
         return complex(1.0, 0.0) / (complex(m_ * m_ - sigma, 0.0) -
-                                    complex(0.0, m_ * width));
+                                    complex(0.0, width));
     }
 
 private:
@@ -197,8 +197,6 @@ private:
     double d_;     // Blatt-Weisskopf parameter
 };
 
-
-
 // BuggBW class
 class BuggBW : public Lineshape
 {
@@ -235,8 +233,6 @@ inline std::function<complex(double)> make_breit_wigner(double mass,
     return [bw](double sigma)
     { return bw(sigma); };
 }
-
-
 
 inline std::function<complex(double)> make_bugg_bw(double mass,
                                                    double width, double s0,
@@ -288,7 +284,7 @@ public:
 
         // Breit-Wigner-Formel mit der berechneten Breite
         return complex(1.0, 0.0) /
-               (complex(m_ * m_ - sigma, 0.0) - complex(0.0, total_width));
+               (complex(m_ * m_ - sigma, 0.0) - complex(0.0, m_ * total_width / m_));
     }
 
 private:
@@ -319,7 +315,6 @@ inline std::function<complex(double)> make_multichannel_bw_single(
     { return mbw(sigma); };
 }
 
-
 // Flatte class
 class Flatte : public Lineshape
 {
@@ -344,14 +339,13 @@ private:
     std::vector<Channel> channels_; // vector of channels
 };
 
-
 inline std::function<complex(double)> make_flatte(double mass,
-                                                 double gsq1, double ma1, double mb1, int l1, double d1,
-                                                 double gsq2, double ma2, double mb2, int l2, double d2)
+                                                  double gsq1, double ma1, double mb1, int l1, double d1,
+                                                  double gsq2, double ma2, double mb2, int l2, double d2)
 {
-    Flatte f(mass, gsq1, ma1, mb1, l1, d1, gsq2, ma2, mb2, l2, d2);
-    return [f](double sigma) { return f(sigma); };
+    Flatte f(mass, gsq1 * mass, ma1, mb1, l1, d1, gsq2 * mass, ma2, mb2, l2, d2);
+    return [f](double sigma)
+    { return f(sigma); };
 }
-
 
 #endif
