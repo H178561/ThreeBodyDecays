@@ -21,6 +21,10 @@ The file contains various G-Tests which can be tested with
 ./ClebschGordanTest
 ./JsonModelTest
 ```
+ For running all tests use
+ ```
+./RunTests
+```
 
 There is also an example of the usage in `Examples/AmplitudeModelExample`
 
@@ -63,6 +67,11 @@ else()
 endif()
 ```
 
+At the end of the file one has to add the `ThreeBodyDecaysLib` to one line after `install(`
+
+```
+TARGETS EvtGen EvtGenStatic ThreeBodyDecaysLib
+```
 
 ## How to make a new EvtGen Model using ThreeBodyDecays
 
