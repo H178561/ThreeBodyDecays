@@ -343,7 +343,7 @@ inline std::function<complex(double)> make_flatte(double mass,
                                                   double gsq1, double ma1, double mb1, int l1, double d1,
                                                   double gsq2, double ma2, double mb2, int l2, double d2)
 {
-    Flatte f(mass, gsq1 * mass, ma1, mb1, l1, d1, gsq2 * mass, ma2, mb2, l2, d2);
+    Flatte f(mass, gsq1, ma1, mb1, l1, d1, gsq2, ma2, mb2, l2, d2);
     return [f](double sigma)
     { return f(sigma); };
 }
