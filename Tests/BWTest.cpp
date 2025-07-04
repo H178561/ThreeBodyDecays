@@ -1,4 +1,4 @@
-#include "../FormFactors.hh"
+#include "include/FormFactors.hh"
 #include <gtest/gtest.h>
 
 #include <iostream>
@@ -106,8 +106,8 @@ TEST_F(BWTest, testFlatteLineshape)
     // Create a Flatte lineshape function
     auto flatte = make_flatte(
         1.4051, // mass
-        0.23395150538434703, 0.938272046, 0.493677, 0, 0, // first channel
-        0.23395150538434703, 1.18937, 0.13957018, 0, 0 // second channel
+        0.328725260215546, 0.938272046, 0.493677, 0, 0, // first channel
+        0.328725260215546, 1.18937, 0.13957018, 0, 0 // second channel
     );
 
     // Test at different invariant masses

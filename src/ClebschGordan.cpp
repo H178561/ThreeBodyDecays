@@ -1,4 +1,4 @@
-#include "ClebschGordan.hh"
+#include "include/ClebschGordan.hh"
 
 #include <cmath>
 #include <complex>

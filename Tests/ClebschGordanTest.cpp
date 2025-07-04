@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../ClebschGordan.hh"
+#include "include/ClebschGordan.hh"
 #include <iostream>
 #include <iomanip>
 #include <complex>

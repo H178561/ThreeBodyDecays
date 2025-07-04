@@ -1,4 +1,4 @@
-#include "../ThreeBodyAmplitudeModel.hh"
+#include "include/ThreeBodyAmplitudeModel.hh"
 #include <iostream>
 #include <iomanip>
 

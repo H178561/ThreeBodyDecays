@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include "../ThreeBodyAmplitudeModel.hh"
-#include "../ThreeBodyDecays.hh"
-#include "../ClebschGordan.hh"
+#include "include/ThreeBodyAmplitudeModel.hh"
+#include "include/ThreeBodyDecays.hh"
+#include "include/ClebschGordan.hh"
 #include <iostream>
 #include <iomanip>
 #include <complex>

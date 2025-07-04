@@ -1,7 +1,7 @@
 #ifndef THREEBODYAMPLITUDEMODEL_HH
 #define THREEBODYAMPLITUDEMODEL_HH
 
-#include "ThreeBodyDecays.hh"
+#include "include/ThreeBodyDecays.hh"
 #include <string>
 #include <vector>
 #include <tuple>

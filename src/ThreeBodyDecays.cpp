@@ -1,8 +1,8 @@
-#include "ThreeBodyDecays.hh"
+#include "include/ThreeBodyDecays.hh"
 // #include "ThreeBodyUtilities.hh"
-#include "ClebschGordan.hh"
-#include "FormFactors.hh"
-#include "jacobi.hh"
+#include "include/ClebschGordan.hh"
+#include "include/FormFactors.hh"
+#include "include/jacobi.hh"
 #include <cmath>
 #include <complex>
 #include <fstream>

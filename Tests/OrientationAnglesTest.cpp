@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../OrientationAngles.hh"
+#include "include/OrientationAngles.hh"
 #include <iostream>
 #include <vector>
 #include <tuple>

@@ -10,11 +10,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Add source files
 add_library(ThreeBodyDecaysLib
-    ThreeBodyDecays.cpp
-    OrientationAngles.cpp
-    ThreeBodyAmplitudeModel.cpp
-    ClebschGordan.cpp
-    FormFactors.cpp
+    src/ThreeBodyDecays.cpp
+    src/OrientationAngles.cpp
+    src/ThreeBodyAmplitudeModel.cpp
+    src/ClebschGordan.cpp
+    src/FormFactors.cpp
     #Examples/AmplitureModelExample.cpp
     #Examples/CombinedAmplitureModelExample.cpp
 )

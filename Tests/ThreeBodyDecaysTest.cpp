@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "ThreeBodyDecays.hh"
+#include "include/ThreeBodyDecays.hh"
 #include <iostream>
 #include <iomanip>
 

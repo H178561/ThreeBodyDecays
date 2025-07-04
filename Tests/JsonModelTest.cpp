@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "ThreeBodyDecays.hh"
-#include "ThreeBodyAmplitudeModel.hh"
+#include "include/ThreeBodyDecays.hh"
+#include "include/ThreeBodyAmplitudeModel.hh"
 #include <iostream>
 #include <iomanip>
 

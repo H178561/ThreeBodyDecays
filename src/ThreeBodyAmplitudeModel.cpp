@@ -1,5 +1,5 @@
-#include "ThreeBodyAmplitudeModel.hh"
-#include "ThreeBodyDecays.hh"
+#include "include/ThreeBodyAmplitudeModel.hh"
+#include "include/ThreeBodyDecays.hh"
 #include <stdexcept>
 #include <algorithm>
 #include <numeric>

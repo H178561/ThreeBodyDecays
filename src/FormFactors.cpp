@@ -55,6 +55,66 @@ double breakup(double M, double m1, double m2)
     return 0.5 * std::sqrt(lambda) / M;
 }
 
+/*
+double BlattWeisskopfEnhanced(double q, double q0, int L, double d)
+{
+    if (q0 <= 0.0) return BlattWeisskopf(q, L, d);
+
+    double BL_q = BlattWeisskopf(q, L, d);
+    double BL_q0 = BlattWeisskopf(q0, L, d);
+
+    if (BL_q0 == 0.0) return BL_q;
+
+    return BL_q / BL_q0;
+}
+
+std::complex<double> RelativisticBreitWigner(
+    double s,
+    double mass,
+    double width,
+    double m1,
+    double m2,
+    int L,
+    double d)
+{
+    using namespace std::complex_literals;
+
+    double M = std::sqrt(s);
+    double q = breakup(M, m1, m2);
+    double q0 = breakup(mass, m1, m2);
+
+    if (q0 == 0.0) {
+        // Fallback to simple Breit-Wigner
+        return 1.0 / (mass * mass - s - 1i * mass * width);
+    }
+
+    // Form factor ratio
+    double FF_ratio = BlattWeisskopfEnhanced(q, q0, L, d);
+
+    // Mass-dependent width
+    double rho = q / M;
+    double rho0 = q0 / mass;
+    double width_s = width * (rho / rho0) * FF_ratio * FF_ratio;
+
+    return 1.0 / (mass * mass - s - 1i * std::sqrt(s) * width_s);
+}
+
+
+
+std::function<std::complex<double>(double)> createEnhancedBreitWigner(
+    double mass,
+    double width,
+    double m1,
+    double m2,
+    int L,
+    double d)
+{
+    return [mass, width, m1, m2, L, d](double s) -> std::complex<double> {
+        return RelativisticBreitWigner(s, mass, width, m1, m2, L, d);
+    };
+}
+
+*/
 
 
 }

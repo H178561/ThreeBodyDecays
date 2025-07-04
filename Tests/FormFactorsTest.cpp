@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../FormFactors.hh"
+#include "include/FormFactors.hh"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
