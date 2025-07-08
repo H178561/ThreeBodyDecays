@@ -15,6 +15,9 @@ add_library(ThreeBodyDecaysLib
     src/ThreeBodyAmplitudeModel.cpp
     src/ClebschGordan.cpp
     src/FormFactors.cpp
+    src/WignerFunctions.cpp
+    src/SpinParity.cpp
+    src/WignerRotation.cpp
     #Examples/AmplitureModelExample.cpp
     #Examples/CombinedAmplitureModelExample.cpp
 )
@@ -40,6 +43,7 @@ if(GTEST_FOUND)
         Tests/JsonModelTest.cpp
         Tests/BWTest.cpp
         Tests/FormFactorsTest.cpp
+        Tests/WignerFunctionsTest.cpp
     )
 
     # Individual test executables
@@ -64,6 +68,9 @@ if(GTEST_FOUND)
     add_executable(ThreeBodyAmplitudeModelTest Tests/ThreeBodyAmplitudeModelTest.cpp)
     target_link_libraries(ThreeBodyAmplitudeModelTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
+    add_executable(WignerFunctionsTest Tests/WignerFunctionsTest.cpp)
+    target_link_libraries(WignerFunctionsTest ThreeBodyDecaysLib ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
     # Combined test executable with a dedicated main function
     add_executable(RunTests Tests/test_main.cpp ${TEST_SOURCES})
     target_compile_definitions(RunTests PRIVATE RUNNING_COMBINED_TESTS)
@@ -79,6 +86,7 @@ if(GTEST_FOUND)
     add_test(NAME BlattWeisskopfTest COMMAND BlattWeisskopfTest)
     add_test(NAME OrientationAnglesTest COMMAND OrientationAnglesTest)
     add_test(NAME ThreeBodyAmplitudeModelTest COMMAND ThreeBodyAmplitudeModelTest)
+    add_test(NAME WignerFunctionsTest COMMAND WignerFunctionsTest)
     add_test(NAME RunAllTests COMMAND RunTests)
 
     message(STATUS "Google Test found, test targets will be built")

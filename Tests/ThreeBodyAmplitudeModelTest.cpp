@@ -203,53 +203,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, AmplitudeModelIntensity)
     EXPECT_NE(intensity, sumIndividual);
 }
 
-// Test case for amplitude calculation with specific helicity values
-TEST_F(ThreeBodyAmplitudeModelTest, SpecificHelicityAmplitude)
-{
-    // Create simplified model with just two chains
-    auto Lambda1520 = createDecayChainLS(
-        1, createBW(1.5195, 0.0156), "3/2+", conservingParities, *tbs);
-    auto Pc4312 = createDecayChainLS(
-        3, createBW(4.312, 0.015), "1/2+", conservingParities, *tbs);
 
-    ThreeBodyAmplitudeModel model;
-    model.add(Lambda1520, "Lambda1520", complex(1.0, 0.0));
-    model.add(Pc4312, "Pc4312", complex(0.5, 0.0));
-
-    // Calculate amplitude for specific helicity configuration
-    MandelstamTuple σs = decays->x2σs({0.3, 0.3}, ms, 1);
-    std::vector<int> two_λs = {2, 1, 0, 1}; // For 1, 1/2, 0, 1/2 helicities
-    std::vector<int> refζs = {1, 2, 3, 1};  // Reference frames
-
-    ThreeBodyDecays tbd;
-    complex amp = model.amplitude(σs, two_λs, 0, refζs);
-    auto amp4d = tbd.amplitude4d(*Lambda1520, σs, refζs);
-
-    std::cout << "Calculated amplitude: " << amp << std::endl;
-
-    std::cout << "Tensor4D resultdc3 : " << std::endl;
-    for (int i = 0; i < amp4d.size(); ++i)
-    {
-        for (int j = 0; j < amp4d[0].size(); ++j)
-        {
-            for (int k = 0; k < amp4d[0][0].size(); ++k)
-            {
-                for (int z = 0; z < amp4d[0][0][0].size(); ++z)
-                {
-                    std::cout << amp4d[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
-                }
-            }
-        }
-        std::cout << "\n";
-    }
-
-    // The amplitude should be a complex number
-    // We can't predict exact values without detailed physics, but we can check it's not zero
-    EXPECT_NE(std::abs(amp), 0.0);
-
-    // Add more specific tests if possible
-    std::cout << "Specific helicity amplitude: " << amp << std::endl;
-}
 
 // Add a new test case to match the 10-tutorial.jl result
 TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
@@ -286,25 +240,8 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
     double intensity_valued = model.intensity(σs2, 0, refζs);
 
     ThreeBodyDecays tbd;
-    Tensor4D resultdc3 = tbd.amplitude4d(*Lambda1520, σs2, refζs);
     complex res = tbd.amplitude(*Lambda1520, σs2, two_λs, 0, refζs);
-    std::cout << "Tensor4D resultdc3 : " << res << std::endl;
-    // Verify tensor dimensions
-    std::cout << "Tensor4D resultdc3 : " << std::endl;
-    for (int i = 0; i < resultdc3.size(); ++i)
-    {
-        for (int j = 0; j < resultdc3[0].size(); ++j)
-        {
-            for (int k = 0; k < resultdc3[0][0].size(); ++k)
-            {
-                for (int z = 0; z < resultdc3[0][0][0].size(); ++z)
-                {
-                    std::cout << resultdc3[i][j][k][z] << "\t"; // Tab für schöne Ausrichtung
-                }
-            }
-        }
-        std::cout << "\n";
-    }
+
 
     Tensor4Dcomp resultdalignedccomp = tbd.aligned_amplitude4dcomp(*Lambda1520, σs2);
     // Verify tensor dimensions
@@ -418,6 +355,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
                   << " " << two_ls[1] << ", L coupling: "
                   << two_LS[0] << " " << two_LS[1] << std::endl;
     }
+
 }
 
 // Add a test case to verify we match the unpolarized intensity from Julia

@@ -3,6 +3,10 @@
 #include "include/ClebschGordan.hh"
 #include "include/FormFactors.hh"
 #include "include/jacobi.hh"
+#include "include/WignerFunctions.hh" // Include for Wigner D-functions
+#include "include/SpinParity.hh"      // Include for spin-parity definitions
+#include "include/WignerRotation.hh"  // Include for Wigner rotation operations
+
 #include <cmath>
 #include <complex>
 #include <fstream>
@@ -10,29 +14,55 @@
 #include <iostream>
 #include <stdexcept>
 #include <array>
-#include <unistd.h> // Für getcwd()
+#include <unistd.h> // For getcwd()
 
 using complex = std::complex<double>;
 bool debug = false;
 bool debugls = false;
 bool div2 = false;
 
-// Kallen function implementation
+/**
+ * @brief Calculates the Kallen (triangle) function
+ *
+ * Computes λ(x,y,z) = x² + y² + z² - 2xy - 2yz - 2zx
+ * This function appears in relativistic kinematics for three-body decays.
+ *
+ * @param x First squared mass
+ * @param y Second squared mass
+ * @param z Third squared mass
+ * @return The value of the Kallen function
+ */
 double Kallen(double x, double y, double z)
 {
     return x * x + y * y + z * z - 2 * x * y - 2 * y * z - 2 * z * x;
 }
 
-// Check if two doubles are approximately equal
+/**
+ * @brief Checks if two double values are approximately equal
+ *
+ * @param a First value
+ * @param b Second value
+ * @param epsilon Maximum allowed difference
+ * @return true if values are within epsilon of each other, false otherwise
+ */
 bool approx_equal(double a, double b, double epsilon)
 {
     return std::abs(a - b) < epsilon;
 }
 
+/**
+ * @brief Calculates a phase factor based on integer value
+ *
+ * Returns a phase that depends on the parity of the value:
+ * If |value % 4| == 2, phase is -1, otherwise +1
+ * The sign is inverted if value > 0
+ *
+ * @param value Integer input
+ * @return Phase factor (+1 or -1)
+ */
 double phase(int value)
 {
     int phase = 1;
-    // Return +1 if value is even, -1 if odd
     if (std::abs(value % 4) == 2)
     {
         phase = -1;
@@ -40,18 +70,39 @@ double phase(int value)
     return (value > 0) ? -phase : phase;
 }
 
+/**
+ * @brief Simplified phase factor calculation
+ *
+ * Returns -1 if value % 4 == 2, otherwise returns 1
+ *
+ * @param value Integer input
+ * @return Phase factor (+1 or -1)
+ */
 double phase2(int value)
 {
     return (value % 4 == 2) ? -1. : 1.;
 }
 
+/**
+ * @brief Phase factor based on absolute value
+ *
+ * Returns -1 if |value| % 4 == 2, otherwise returns 1
+ *
+ * @param value Integer input
+ * @return Phase factor (+1 or -1)
+ */
 double phaseabs(int value)
 {
-    // Return +1 if value is even, -1 if odd
     return (std::abs(value % 4) == 2) ? -1. : 1.;
 }
 
-// Helper function for padding indices
+/**
+ * @brief Constrains an index within bounds
+ *
+ * @param index The index to constrain
+ * @param size Upper bound
+ * @return Index clamped to [0, size-1]
+ */
 int pad(int index, int size)
 {
     if (index < 0)
@@ -61,21 +112,22 @@ int pad(int index, int size)
     return index;
 }
 
-// Global array of log factorials (precomputed for performance)
-// std::vector<double> logfact;
+// Maximum factorial value for precomputation
 const int MAX_FACT = 100;
-/*
-// Initialize the log factorial table
-void init_logfact() {
-    logfact.resize(MAX_FACT + 1);
-    logfact[0] = 0.0;
-    for (int i = 1; i <= MAX_FACT; ++i) {
-        logfact[i] = logfact[i-1] + std::log(i);
-    }
-}*/
 
+/**
+ * @brief Returns the logarithm of n factorial
+ *
+ * Uses precomputed values for efficiency. First call initializes
+ * the lookup table using an immediately-invoked lambda.
+ *
+ * @param n Input value
+ * @return log(n!)
+ * @throws std::runtime_error if n is out of range
+ */
 double getLogFactorial(int n)
 {
+    // Static initialization of logarithm factorial table
     static std::vector<double> logfact = []()
     {
         std::vector<double> vec(MAX_FACT + 1);
@@ -94,155 +146,30 @@ double getLogFactorial(int n)
     return logfact[n];
 }
 
+/**
+ * @brief Evaluates Jacobi polynomial at point z
+ *
+ * Computes the Jacobi polynomial P_n^(a,b)(z) which is orthogonal with
+ * respect to the weight function (1-x)^a(1+x)^b on the interval [-1,1]
+ *
+ * @param n Order of the polynomial
+ * @param a First parameter of the Jacobi polynomial
+ * @param b Second parameter of the Jacobi polynomial
+ * @param z Point at which to evaluate the polynomial
+ * @return Value of the Jacobi polynomial
+ */
 double jacobi_pols(int n, int a, int b, double z)
 {
     return boost::math::jacobi<double>(n, a, b, z);
 }
 
-// Wigner d-hat function with doubled arguments
-double wignerd_hat_doublearg(int two_j, int two_m1, int two_m2, double z)
-{
-    // Check valid range of input parameters
-    if (std::abs(two_m1) > two_j || std::abs(two_m2) > two_j)
-    {
-        return 0.0;
-    }
-
-    // Determine sign factor
-    int am1m2 = std::abs(two_m1 - two_m2);
-    int ap1p2 = std::abs(two_m1 + two_m2);
-    double factor = 1.0;
-    if (((am1m2 + two_m1 - two_m2) % 8) == 4)
-    {
-        factor = -1.0;
-    }
-
-    // Compute j_minus_M, j_plus_M, j_minus_N, j_plus_N
-    int two_am1 = std::abs(two_m1);
-    int two_am2 = std::abs(two_m2);
-
-    int two_M, two_N;
-    if (two_am1 > two_am2)
-    {
-        two_M = two_am1;
-        two_N = two_am2;
-    }
-    else
-    {
-        two_M = two_am2;
-        two_N = two_am1;
-    }
-
-    int j_minus_M = (two_j - two_M) / 2;
-    int j_plus_M = (two_j + two_M) / 2;
-    int j_minus_N = (two_j - two_N) / 2;
-    int j_plus_N = (two_j + two_N) / 2;
-
-    // Compute logarithm of gamma ratio
-    double log_gamma_ratio = 0.5 * (getLogFactorial(j_minus_M) +
-                                    getLogFactorial(j_plus_M) -
-                                    getLogFactorial(j_minus_N) -
-                                    getLogFactorial(j_plus_N));
-
-    // Compute the Jacobi polynomial
-    double jacobi_val = jacobi_pols(j_minus_M, am1m2 / 2, ap1p2 / 2, z);
-    double norm_factor = std::pow(0.5, two_M / 2.0); // Oder: 1.0 / std::pow(2.0, two_M / 2.0)
-
-    // Return the final result
-    return factor * std::pow(2.0, -two_M / 2.0) * std::exp(log_gamma_ratio) * jacobi_val;
-}
-
-// Implementation of wignerd_doublearg (as defined earlier)
-double wignerd_doublearg(int two_j, int two_m1, int two_m2, double z)
-{
-
-    // Special cases
-    if (std::abs(z - 1.0) < 1e-10)
-    {
-        return (two_m1 == two_m2) ? 1.0 : 0.0;
-    }
-
-    if (std::abs(z + 1.0) < 1e-10)
-    {
-        if (two_m1 == -two_m2)
-        {
-            return ((two_j - two_m2) % 4 == 0) ? 1.0 : -1.0;
-        }
-        else
-        {
-            return 0.0;
-        }
-    }
-
-    // For a complete implementation, the general case would need to be computed
-    // using either a recursive formula or the Jacobi polynomial approach
-    // This is a placeholder for the actual computation
-    double hat = wignerd_hat_doublearg(two_j, two_m1, two_m2, z);
-    double xi = std::pow(1.0 - z, std::abs(two_m1 - two_m2) / 4.0) *
-                std::pow(1.0 + z, std::abs(two_m1 + two_m2) / 4.0);
-
-    if (debug)
-        std::cout << two_j << " " << two_m1 << " " << two_m2 << " " << z << " " << hat << " " << xi << " res " << hat * xi << std::endl;
-    return hat * xi;
-}
-
-/*
-// Function to compute Wigner-d with sign adjustment for a single element
-double wignerd_doublearg_sign_element(int two_j, int two_λ1, int two_λ2, double cosθ, bool ispositive)
-{
-    int sign = ispositive ? 1 : phase((two_λ1 - two_λ2) / 2);
-    return sign * wignerd_doublearg(two_j, two_λ1, two_λ2, cosθ);
-}*/
-
-double wignerd_doublearg_sign_element(int two_j, int two_λ1, int two_λ2, double cosθ, bool ispositive)
-{
-    // double phase = ispositive ? 1.0 : std::pow(-1.0, (two_λ1 - two_λ2) / 2);
-
-    double phase_value = 0.0;
-    if (ispositive)
-    {
-        phase_value = 1.0;
-    }
-    else
-    {
-        int abs_diff = std::abs(two_λ1 - two_λ2);
-        phase_value = (abs_diff % 4 == 2) ? -1.0 : 1.0;
-    }
-    if (debug)
-        std::cout << two_j << " " << two_λ1 << " " << two_λ2 << " " << cosθ << " " << phase_value << std::endl;
-    return phase_value * wignerd_doublearg(two_j, two_λ1, two_λ2, cosθ);
-}
-
-// Function to compute Wigner-d matrix with sign adjustment
-Matrix2D wignerd_doublearg_sign(int two_j, double cosθ, bool ispositive)
-{
-    // Create a range from -two_j to two_j with step size 2
-    std::vector<int> range;
-    for (int val = -two_j; val <= two_j; val += 2)
-    {
-        range.push_back(val);
-    }
-
-    // Initialize the result matrix
-    size_t size = range.size();
-    Matrix2D result(size, std::vector<double>(size, 0.0));
-
-    // Compute the Wigner-D matrix with sign adjustment
-    for (size_t i = 0; i < size; ++i)
-    {
-        for (size_t j = 0; j < size; ++j)
-        {
-            int two_λ1 = range[i];
-            int two_λ2 = range[j];
-            result[i][j] = wignerd_doublearg_sign_element(two_j, two_λ1, two_λ2, cosθ, ispositive);
-            if (debug)
-                std::cout << i << " " << j << " " << result[i][j] << std::endl;
-        }
-    }
-
-    return result;
-}
-
+/**
+ * @brief Calculates the standard Euclidean scalar product of two vectors
+ *
+ * @param a First vector
+ * @param b Second vector
+ * @return Scalar product of a and b
+ */
 double scalar_product(std::vector<double> a, std::vector<double> b)
 {
     double product = 0;
@@ -253,173 +180,32 @@ double scalar_product(std::vector<double> a, std::vector<double> b)
     return product;
 }
 
-// Minkowski scalar product
+/**
+ * @brief Calculates Minkowski scalar product with metric (+,-,-,-)
+ *
+ * The time component is assumed to be at index 3 of the vectors.
+ *
+ * @param v1 First 4-vector
+ * @param v2 Second 4-vector
+ * @return Minkowski scalar product v1·v2
+ */
 double min_scalar_product(std::vector<double> v1, std::vector<double> v2)
 {
     return v1[3] * v2[3] - (v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]);
 }
 
-// Helper function to get indices i and j from k
-std::pair<int, int> ij_from_k(int k)
-{
-    // std::cout << k << std::endl;
-    switch (k)
-    {
-    case 1:
-        return {2, 3};
-    case 2:
-        return {3, 1};
-    case 3:
-        return {1, 2};
-    default:
-        throw std::invalid_argument(
-            "Invalid value for k. Must be 1, 2, or 3.");
-    }
-}
-
-// Function to compute i, j, k indices from Wigner rotation
-std::tuple<int, int, int> ijk(const AbstractWignerRotation &wr)
-{
-    int k = wr.get_k();
-
-    // if (debug)
-    //     std::cout << "ijk" << k << std::endl;
-    auto [i, j] = ij_from_k(k);
-    return {i, j, k};
-}
-
-// Helper function to determine if a system is sequential
-bool issequential(int i, int j)
-{
-    int diff = j - i;
-    return (diff == 1 || diff == -2);
-}
-
-// Helper function to create Wigner rotation
-std::unique_ptr<AbstractWignerRotation> wr(int system_a, int reference_b,
-                                           int particle_c)
-{
-    if (debug)
-        std::cout << "Creating Wigner rotation for system_a: " << system_a << ", reference_b: " << reference_b << ", particle_c: " << particle_c << std::endl;
-    if (system_a == reference_b)
-    {
-        return std::make_unique<TrivialWignerRotation>(particle_c);
-    }
-
-    bool S = issequential(system_a, reference_b);
-    int A = S ? system_a : reference_b;
-    int B = S ? reference_b : system_a;
-
-    if (particle_c == 0)
-    {
-        return std::make_unique<Arg0WignerRotation>(A, S);
-        // return std::make_unique<Arg0WignerRotation>( particle_c, S );
-    }
-
-    if (particle_c != system_a && particle_c != reference_b)
-    {
-        return std::make_unique<Arg3WignerRotation>(particle_c, S);
-    }
-
-    bool T = (particle_c == A);
-    return std::make_unique<Arg2WignerRotation>(particle_c, !S, T);
-}
-
-// Explicit Wigner rotation functions
-double cosζ21_for1(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(2, 1, 1))(0, σs, ms2);
-}
-
-double cosζ21_for2(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(2, 1, 2))(0, σs, ms2);
-}
-
-double cosζ13_for1(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(1, 3, 1))(0, σs, ms2);
-}
-
-double cosζ13_for3(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(1, 3, 3))(0, σs, ms2);
-}
-
-double cosζ32_for3(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(3, 2, 3))(0, σs, ms2);
-}
-
-double cosζ32_for2(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(3, 2, 2))(0, σs, ms2);
-}
-
-double cosζ12_for3(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(1, 2, 3))(0, σs, ms2);
-}
-
-double cosζ23_for1(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(2, 3, 1))(0, σs, ms2);
-}
-
-double cosζ31_for2(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(3, 1, 2))(0, σs, ms2);
-}
-
-double cosζ12_for0(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(1, 2, 0))(0, σs, ms2);
-}
-
-double cosζ23_for0(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(2, 3, 0))(0, σs, ms2);
-}
-
-double cosζ31_for0(const std::array<double, 3> &σs,
-                   const std::array<double, 4> &ms2)
-{
-    return (*wr(3, 1, 0))(0, σs, ms2);
-}
-
-// Function to compute cosζ for Wigner rotation
-double cosζ(const AbstractWignerRotation &wr, const std::array<double, 3> &sigma,
-            const std::array<double, 4> &ms2)
-{
-    // Get the indices i, j, k from the Wigner rotation
-    auto [i, j, k] = ijk(wr);
-
-    // Calculate the energy and momentum terms
-    double s = ms2[3]; // Parent mass squared
-    double EE4σ = (sigma[0] + ms2[1] - ms2[2]) * (s - sigma[0] - ms2[0]);
-    double pp4σ = std::sqrt(Kallen(sigma[0], ms2[1], ms2[2]) *
-                            Kallen(s, sigma[0], ms2[0]));
-    pp4σ = (pp4σ < 0) ? 0.0 : pp4σ; // Handle numerical errors
-
-    // Calculate the rest term
-    double rest = sigma[1] - ms2[0] - ms2[1];
-
-    // Calculate cosζ using the same formula as Julia
-    return (2 * sigma[0] * rest - EE4σ) / pp4σ;
-}
-
-// Function to compute cosθij
+/**
+ * @brief Computes the cosine of the helicity angle θij
+ *
+ * Calculates the cosine of the angle between particles i and j
+ * in the rest frame of the decay, given Mandelstam variables
+ * and particle masses.
+ *
+ * @param σs Array of Mandelstam variables (s12, s23, s31)
+ * @param msq Array of squared masses (m1², m2², m3², M²)
+ * @param k Index specifying which particle is spectator (1, 2, or 3)
+ * @return Cosine of the helicity angle
+ */
 double ThreeBodyDecays::cosθij(const std::array<double, 3> &σs,
                                const std::array<double, 4> &msq, int k)
 {
@@ -439,29 +225,63 @@ double ThreeBodyDecays::cosθij(const std::array<double, 3> &σs,
     return (2 * σs[k] * rest - EE4σ) / pp4σ;
 }
 
-// Convenience functions for specific angles
+/**
+ * @brief Convenience function to calculate cos(θ23)
+ *
+ * @param σs Mandelstam variables
+ * @param msq Squared masses
+ * @return Cosine of θ23
+ */
 double ThreeBodyDecays::cosθ23(MandelstamTuple σs, ThreeBodyMasses msq)
 {
     return cosθij(σs, msq, 1);
 }
 
+/**
+ * @brief Convenience function to calculate cos(θ31)
+ *
+ * @param σs Mandelstam variables
+ * @param msq Squared masses
+ * @return Cosine of θ31
+ */
 double ThreeBodyDecays::cosθ31(MandelstamTuple σs, ThreeBodyMasses msq)
 {
     return cosθij(σs, msq, 2);
 }
 
+/**
+ * @brief Convenience function to calculate cos(θ12)
+ *
+ * @param σs Mandelstam variables
+ * @param msq Squared masses
+ * @return Cosine of θ12
+ */
 double ThreeBodyDecays::cosθ12(MandelstamTuple σs, ThreeBodyMasses msq)
 {
     return cosθij(σs, msq, 3);
 }
 
-// Utility function to perform modular arithmetic with 1-based indexing
+/**
+ * @brief Performs modular arithmetic with 1-based indexing
+ *
+ * This helper function handles the circular nature of three-body indices.
+ *
+ * @param k Index to transform
+ * @param n Modulus
+ * @return Result of modular arithmetic with 1-based indexing
+ */
 int mod1(int k, int n)
 {
     return ((k - 1) % n + n) % n + 1;
 }
 
-// circleorigin function: reorders the tuple elements based on k
+/**
+ * @brief Reorders tuple elements based on spectator index k
+ *
+ * @param k Spectator particle index (1, 2, or 3)
+ * @param t Original tuple
+ * @return Reordered tuple with elements arranged according to k
+ */
 std::array<double, 3> circleorigin(int k, const std::array<double, 3> &t)
 {
     return {
@@ -471,7 +291,13 @@ std::array<double, 3> circleorigin(int k, const std::array<double, 3> &t)
     };
 }
 
-// Linear interpolation function
+/**
+ * @brief Performs linear interpolation between limits
+ *
+ * @param y Value in range [0,1]
+ * @param limits Pair containing minimum and maximum limits
+ * @return Interpolated value
+ */
 double fitin(double y, const std::pair<double, double> &limits)
 {
     double a = limits.first;
@@ -479,7 +305,13 @@ double fitin(double y, const std::pair<double, double> &limits)
     return a + y * (b - a);
 }
 
-// Calculate limits for a mass configuration
+/**
+ * @brief Calculates kinematic limits for Mandelstam variable σk
+ *
+ * @param ms Array of particle masses
+ * @param k Spectator particle index
+ * @return Pair containing (min, max) allowed values for σk
+ */
 std::pair<double, double> lims(const std::array<double, 4> &ms, int k)
 {
     auto [i, j] = ij_from_k(k);
@@ -493,6 +325,15 @@ std::pair<double, double> lims(const std::array<double, 4> &ms, int k)
     return {min_limit, max_limit};
 }
 
+/**
+ * @brief Calculates σj given σk and cosθ
+ *
+ * @param cos_theta Cosine of the helicity angle
+ * @param σk Mandelstam variable σk
+ * @param ms_squared Squared masses of all particles
+ * @param k Spectator particle index
+ * @return The value of σj
+ */
 double ThreeBodyDecays::σjofk(double cos_theta, double σk,
                               const std::array<double, 4> &ms_squared, int k)
 {
@@ -518,7 +359,16 @@ double ThreeBodyDecays::σjofk(double cos_theta, double σk,
     return σi;
 }
 
-// Convert from random numbers x to Mandelstam variables
+/**
+ * @brief Converts random numbers to physical Mandelstam variables
+ *
+ * This function is useful for Monte Carlo integration over phase space.
+ *
+ * @param x Array of two random numbers in range [0,1]
+ * @param ms Masses of all particles
+ * @param k Spectator particle index
+ * @return Tuple of Mandelstam variables (s12, s23, s31)
+ */
 MandelstamTuple ThreeBodyDecays::x2σs(const std::array<double, 2> &x,
                                       ThreeBodyMasses ms, int k)
 {
@@ -548,6 +398,12 @@ MandelstamTuple ThreeBodyDecays::x2σs(const std::array<double, 2> &x,
     return circleorigin(k, σt);
 }
 
+/**
+ * @brief Parses a complex number from string representation
+ *
+ * @param str String in the format "a+bi" or "a-bi"
+ * @return Complex number
+ */
 complex parseComplex(const std::string &str)
 {
     std::istringstream iss(str);
@@ -561,6 +417,12 @@ complex parseComplex(const std::string &str)
     return complex(real, imag);
 }
 
+/**
+ * @brief Parses a fraction from string representation
+ *
+ * @param str String in the format "a/b" or a decimal number
+ * @return Double value
+ */
 double parseFraction(const std::string &str)
 {
     size_t pos = str.find('/');
@@ -575,234 +437,14 @@ double parseFraction(const std::string &str)
     return std::stod(str);
 }
 
-
-// aligned_amplitude implementation that returns a Tensor4D
-// Korrigierte aligned_amplitude4d-Funktion
-Tensor4D ThreeBodyDecays::aligned_amplitude4d(const DecayChain &dc, const MandelstamTuple &σs)
-{
-    int k = dc.k;
-    const auto &tbs = dc.tbs;
-    int two_j = dc.two_j;
-    const auto &two_js = tbs.two_js;
-
-    // Get indices i, j from k (1-based indexing in result)
-    auto [i, j] = ij_from_k(k);
-    // Konvertieren zu 0-basierter Indexierung für Arrays
-    int i_idx = i - 1;
-    int j_idx = j - 1;
-    int k_idx = k - 1;
-
-    // Überprüfen der Grenzen für sicheren Array-Zugriff
-    if (i_idx < 0 || i_idx >= 3 || j_idx < 0 || j_idx >= 3 || k_idx < 0 || k_idx >= 3)
-    {
-        std::cout << "Invalid indices in aligned_amplitude4d: i="
-                  << i << ", j=" << j << ", k=" << k << std::endl;
-        // Rückgabe eines leeren Tensors bei Fehler
-        return Tensor4D();
-    }
-
-    // Quadrierte Massen berechnen
-    std::array<double, 4> msq = {tbs.ms[0] * tbs.ms[0],
-                                 tbs.ms[1] * tbs.ms[1],
-                                 tbs.ms[2] * tbs.ms[2],
-                                 tbs.ms[3] * tbs.ms[3]};
-
-    // cosθ und Wigner d-Matrix berechnen
-    double cosθ = cosθij(σs, msq, k);
-    // std::cout << "cosθ: " << cosθ << std::endl;
-    Matrix2D d_θ = wignerd_doublearg_sign(two_j, cosθ, true);
-    // std::cout << "cosθ: " << cosθ << std::endl;
-    /*
-    // Wigner d Test ok
-    std::cout << "d_θ dimensions: "
-            << d_θ.size() << " x "
-            << (d_θ.empty() ? 0 : d_θ[0].size()) << std::endl;
-
-    for (int i = 0; i < d_θ.size(); ++i) {
-        for (int j = 0; j < d_θ[0].size(); ++j) {
-            std::cout << d_θ[i][j] << "\t";  // Tab für schöne Ausrichtung
-        }
-        std::cout << "\n";
-    }
-        */
-
-    // Spins
-    std::array<int, 3> two_js_Hij = {two_j, two_js[i_idx], two_js[j_idx]};
-    std::array<int, 3> two_js_HRk = {two_js[3], two_j, two_js[k_idx]};
-    if (debug)
-        std::cout << "two_js_Hij: " << two_js_Hij[0] << " " << two_js_Hij[1] << " " << two_js_Hij[2] << std::endl;
-    if (debug)
-        std::cout << "two_js_HRk: " << two_js_HRk[0] << " " << two_js_HRk[1] << " " << two_js_HRk[2] << std::endl;
-    // VRk-Matrix berechnen
-    std::vector<std::vector<double>> VRk;
-    int vrk_dim1 = two_j + 1;
-    int vrk_dim2 = two_js[k_idx] + 1;
-    // VRk-Matrix initialisieren
-    VRk.resize(vrk_dim1, std::vector<double>(vrk_dim2, 0.0));
-
-    for (int m1_idx = 0; m1_idx < vrk_dim1; m1_idx++)
-    {
-        int two_m1 = -two_j + 2 * m1_idx;
-        for (int m2_idx = 0; m2_idx < vrk_dim2; m2_idx++)
-        {
-            int two_m2 = -two_js[k_idx] + 2 * m2_idx;
-
-            std::array<int, 2> two_ms = {two_m1, two_m2};
-            complex amp = amplitude_recoupling(dc.HRk, two_ms, two_js_HRk);
-            double phase_value = (((two_js[k_idx] - two_m2) % 4 == 0) ? 1.0 : -1.0);
-
-            VRk[m1_idx][m2_idx] = amp.real() * phase_value;
-        }
-    }
-
-    if (debug)
-        std::cout << "VRk dimensions: "
-                  << VRk.size() << " x "
-                  << (VRk.empty() ? 0 : VRk[0].size()) << std::endl;
-    for (int i = 0; i < VRk.size(); ++i)
-    {
-        for (int j = 0; j < VRk[0].size(); ++j)
-        {
-            if (debug)
-                std::cout << VRk[i][j] << "\t"; // Tab für schöne Ausrichtung
-        }
-        if (debug)
-            std::cout << "\n";
-    }
-
-    // Vij-Matrix berechnen
-    std::vector<std::vector<double>> Vij;
-    int vij_dim1 = two_js[i_idx] + 1;
-    int vij_dim2 = two_js[j_idx] + 1;
-
-    // Vij-Matrix initialisieren
-    Vij.resize(vij_dim1, std::vector<double>(vij_dim2, 0.0));
-
-    for (int m1_idx = 0; m1_idx < vij_dim1; m1_idx++)
-    {
-        int two_m1 = -two_js[i_idx] + 2 * m1_idx;
-        for (int m2_idx = 0; m2_idx < vij_dim2; m2_idx++)
-        {
-            int two_m2 = -two_js[j_idx] + 2 * m2_idx;
-
-            std::array<int, 2> two_ms = {two_m1, two_m2};
-            complex amp = amplitude_recoupling(dc.Hij, two_ms, two_js_Hij);
-            double phase_value = phase(two_js[k_idx] - two_m2);
-            Vij[m1_idx][m2_idx] = amp.real() * phase_value;
-        }
-    }
-
-
-    // Δ-Verschiebungen berechnen
-    int Δ_zk = (two_j - two_js[3] - two_js[k_idx]) / 2;
-    int Δ_ij = (two_j - two_js[i_idx] + two_js[j_idx]) / 2;
-
-    // Lineshape berechnen
-    double lineshape = dc.Xlineshape(σs[k_idx]).real();
-
-    // Dimensionen für den Ergebnistensor
-    std::vector<int> dims = {two_js[0] + 1, two_js[1] + 1, two_js[2] + 1, two_js[3] + 1};
-
-    // F0 mit Nullen initialisieren (Ergebnistensor)
-    Tensor4D F0(dims[0], std::vector<std::vector<std::vector<double>>>(
-                             dims[1], std::vector<std::vector<double>>(
-                                          dims[2], std::vector<double>(dims[3], 0.0))));
-
-    // Dimensionen für Berechnungstensor
-    Tensor4D F(dims[i_idx], std::vector<std::vector<std::vector<double>>>(
-                                dims[j_idx], std::vector<std::vector<double>>(
-                                                 dims[k_idx], std::vector<double>(dims[3], 0.0))));
-
-    // Hilfsfunktion zum Begrenzen von Indizes
-    auto pad = [](int idx, int max_size)
-    {
-        return std::max(0, std::min(idx, max_size - 1));
-    };
-
-    // F berechnen (ähnlich @tullio in Julia)
-    for (int _i = 0; _i < dims[i_idx]; _i++)
-    {
-        for (int _j = 0; _j < dims[j_idx]; _j++)
-        {
-            for (int _k = 0; _k < dims[k_idx]; _k++)
-            {
-                for (int _z = 0; _z < dims[3]; _z++)
-                {
-                    int vrk_idx1 = pad(_z + _k + Δ_zk, two_j + 1);
-                    int vrk_idx2 = _k;
-                    int d_idx1 = pad(_z + _k + Δ_zk, two_j + 1);
-                    int d_idx2 = pad(_i - _j + Δ_ij, two_j + 1);
-
-                    // Sicherstellung, dass alle Indizes innerhalb der Grenzen sind
-                    if (vrk_idx1 < (int)VRk.size() && vrk_idx2 < (int)VRk[0].size() &&
-                        d_idx1 < (int)d_θ.size() && d_idx2 < (int)d_θ[0].size() &&
-                        _i < (int)Vij.size() && _j < (int)Vij[0].size())
-                    {
-
-                        F[_i][_j][_k][_z] +=
-                            VRk[vrk_idx1][vrk_idx2] *
-                            d_θ[d_idx1][d_idx2] *
-                            Vij[_i][_j];
-                    }
-                }
-            }
-        }
-    }
-
-    // Normalisierung und Lineshape anwenden
-    double d_norm = std::sqrt(two_j + 1.0);
-    for (auto &dim1 : F)
-    {
-        for (auto &dim2 : dim1)
-        {
-            for (auto &dim3 : dim2)
-            {
-                for (auto &val : dim3)
-                {
-                    val *= d_norm * lineshape;
-                }
-            }
-        }
-    }
-    if (debug)
-        std::cout << d_norm << " " << lineshape << std::endl;
-
-    // Zurück zur ursprünglichen Reihenfolge permutieren
-    for (int _0 = 0; _0 < dims[0]; _0++)
-    {
-        for (int _1 = 0; _1 < dims[1]; _1++)
-        {
-            for (int _2 = 0; _2 < dims[2]; _2++)
-            {
-                for (int _3 = 0; _3 < dims[3]; _3++)
-                {
-                    // Indizes gemäß Permutation zuordnen
-                    int perm_i = (i_idx == 0) ? _0 : (i_idx == 1) ? _1
-                                                 : (i_idx == 2)   ? _2
-                                                                  : _3;
-                    int perm_j = (j_idx == 0) ? _0 : (j_idx == 1) ? _1
-                                                 : (j_idx == 2)   ? _2
-                                                                  : _3;
-                    int perm_k = (k_idx == 0) ? _0 : (k_idx == 1) ? _1
-                                                 : (k_idx == 2)   ? _2
-                                                                  : _3;
-                    int perm_z = 3; // Parent index is always last (3)
-
-                    // Überprüfen der Grenzen für sicheren Array-Zugriff
-                    if (perm_i < dims[i_idx] && perm_j < dims[j_idx] &&
-                        perm_k < dims[k_idx] && _3 < dims[3])
-                    {
-
-                        F0[_0][_1][_2][_3] = F[perm_i][perm_j][perm_k][_3];
-                    }
-                }
-            }
-        }
-    }
-
-    return F0;
-}
-
+/**
+ * @brief Applies a recoupling scheme to calculate amplitude components
+ *
+ * @param recoupling Function defining the recoupling scheme
+ * @param two_ms Array of helicity values (doubled)
+ * @param two_js Array of spin values (doubled)
+ * @return Complex amplitude component
+ */
 complex ThreeBodyDecays::amplitude_recoupling(
     const RecouplingLS &recoupling,
     const std::array<int, 2> &two_ms,
@@ -820,108 +462,18 @@ complex ThreeBodyDecays::amplitude_recoupling(
     return recoupling(two_ms, two_js);
 }
 
-// Implementation of amplitude function that returns a Tensor4D
-Tensor4D ThreeBodyDecays::amplitude4d(const DecayChain &dc,
-                                      const MandelstamTuple &σs,
-                                      const std::vector<int> &refζs)
-{
-    int k = dc.k;
-    const auto &tbs = dc.tbs;
-    int two_j = dc.two_j;
-    const auto &two_js = tbs.two_js;
-    const auto &ms = tbs.ms;
-    // std::array<int, 4> two_js = {two_jst[0]*2, two_jst[1]*2, two_jst[2]*2, two_jst[3]*2};
 
-    if (debug)
-        std::cout << two_js[0] << " " << two_js[1] << " " << two_js[2] << " " << two_js[3] << std::endl;
-
-    // Calculate squared masses
-    std::array<double, 4> msq = {ms[0] * ms[0],
-                                 ms[1] * ms[1],
-                                 ms[2] * ms[2],
-                                 ms[3] * ms[3]};
-
-    // Get aligned amplitude
-    auto F0 = aligned_amplitude4d(dc, σs);
-
-
-    // Calculate alignment rotations
-    std::vector<Matrix2D> d_ζs(4);
-    for (size_t l = 0; l < 4; ++l)
-    {
-        int _two_j = two_js[l];
-        int _refζ = refζs[l];
-        std::unique_ptr<AbstractWignerRotation> _w = wr(k, _refζ, l % 4);
-        double _cosζ = _w->cos_zeta(σs, msq);
-        d_ζs[l] = wignerd_doublearg_sign(_two_j, _cosζ, _w->is_positive());
-    }
-
-    // Alias the d_ζs for clarity
-    const auto &D1 = d_ζs[0];
-    const auto &D2 = d_ζs[1];
-    const auto &D3 = d_ζs[2];
-    const auto &D0 = d_ζs[3];
-
-    // Create a new tensor with the same dimensions as F0
-    std::vector<int> dims;
-    for (int i = 0; i < 4; i++)
-    {
-        dims.push_back(two_js[i] + 1);
-    }
-
-    Tensor4D F(dims[0], std::vector<std::vector<std::vector<double>>>(
-                            dims[1], std::vector<std::vector<double>>(
-                                         dims[2], std::vector<double>(dims[3], 0.0))));
-
-    // Calculate the tensor contraction (equivalent to @tullio in Julia)
-    // @tullio F[_i, _j, _k, _z] = D0[_z, _z′] * F0[_i′, _j′, _k′, _z′] * D1[_i′, _i] * D2[_j′, _j] * D3[_k′, _k]
-    for (int _i = 0; _i < dims[0]; ++_i)
-    {
-        for (int _j = 0; _j < dims[1]; ++_j)
-        {
-            for (int _k = 0; _k < dims[2]; ++_k)
-            {
-                for (int _z = 0; _z < dims[3]; ++_z)
-                {
-                    // Sum over all primed indices
-                    for (int _i_prime = 0; _i_prime < dims[0]; ++_i_prime)
-                    {
-                        if (_i_prime >= (int)D1.size() || _i >= (int)D1[0].size())
-                            continue;
-
-                        for (int _j_prime = 0; _j_prime < dims[1]; ++_j_prime)
-                        {
-                            if (_j_prime >= (int)D2.size() || _j >= (int)D2[0].size())
-                                continue;
-
-                            for (int _k_prime = 0; _k_prime < dims[2]; ++_k_prime)
-                            {
-                                if (_k_prime >= (int)D3.size() || _k >= (int)D3[0].size())
-                                    continue;
-
-                                for (int _z_prime = 0; _z_prime < dims[3]; ++_z_prime)
-                                {
-                                    if (_z_prime >= (int)D0.size() || _z >= (int)D0[0].size())
-                                        continue;
-
-                                    F[_i][_j][_k][_z] +=
-                                        D0[_z][_z_prime] *
-                                        F0[_i_prime][_j_prime][_k_prime][_z_prime] *
-                                        D1[_i_prime][_i] *
-                                        D2[_j_prime][_j] *
-                                        D3[_k_prime][_k];
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return F;
-}
-
+/**
+ * @brief Calculates the aligned 4D amplitude tensor for the decay chain
+ *
+ * This function computes the 4D amplitude tensor for the given decay chain,
+ * applying the necessary Wigner rotations and recouplings. It also handles
+ * the alignment of spins and the calculation of the lineshape.
+ *
+ * @param dc The decay chain information
+ * @param σs The Mandelstam variables
+ * @return The aligned 4D amplitude tensor
+ */
 Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, const MandelstamTuple &σs)
 {
     int k = dc.k;
@@ -1093,8 +645,6 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
             std::cout << "\n";
         }
     }
-
-
 
     // Δ-Verschiebungen berechnen
     int Δ_zk = ((two_j - two_js[3] - two_js[k_idx]) / 2);
@@ -1513,6 +1063,20 @@ complex ThreeBodyDecays::amplitude(const DecayChain &dc,
     return 0.0;
 }
 
+/**
+ * @brief Calculates the total intensity from the decay chain
+ *
+ * Sums the squared amplitudes over all helicity states, weighted by the
+ * given complex weight. This function corresponds to the intensity
+ * calculation in the decay process.
+ *
+ * @param dc The decay chain information
+ * @param σs The Mandelstam variables
+ * @param k_amp The index of the amplitude to calculate
+ * @param weight The weight to apply to the amplitude
+ * @param refζs The reference spin-quantum numbers
+ * @return The total intensity
+ */
 double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, const complex weight, const std::vector<int> refζs)
 {
     // Get the 4D amplitude tensor
@@ -1539,100 +1103,6 @@ double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &�
     return total_intensity;
 }
 
-// Implementation of cos_zeta for TrivialWignerRotation
-double TrivialWignerRotation::cos_zeta(const std::array<double, 3> &sigma,
-                                       const std::array<double, 4> &ms2) const
-{
-    return 1.0; // Trivial rotation always returns 1
-}
-
-// Implementation of cos_zeta for Arg0WignerRotation
-double Arg0WignerRotation::cos_zeta(const std::array<double, 3> &sigma,
-                                    const std::array<double, 4> &ms2) const
-{
-    auto [i, j, k] = ijk(*this);
-    // Keep 1-based indexing like Julia
-    i--;
-    j--;
-    k--; // Convert to 0-based indexing for array access
-
-    double s = ms2[3]; // Parent mass squared
-    double EE4s = (s + ms2[i] - sigma[i]) * (s + ms2[k] - sigma[k]);
-    double pp4s = std::sqrt(Kallen(s, ms2[i], sigma[i]) *
-                            Kallen(s, ms2[k], sigma[k]));
-    pp4s = (pp4s < 0) ? 0.0 : pp4s; // Handle numerical errors
-    double rest = sigma[j] - ms2[i] - ms2[k];
-    if (debug)
-        std::cout << "wr0" << std::endl;
-
-    return (EE4s - 2 * s * rest) / pp4s;
-}
-
-// Implementation of cos_zeta for Arg2WignerRotation
-double Arg2WignerRotation::cos_zeta(const std::array<double, 3> &sigma,
-                                    const std::array<double, 4> &ms2) const
-{
-    auto [i, j, k] = ijk(*this);
-    if (debug)
-        std::cout << "wr2" << std::endl;
-    // Keep 1-based indexing like Julia
-    i--;
-    j--;
-    k--; // Convert to 0-based indexing for array access
-    if (debug)
-        std::cout << i << " " << j << " " << k << std::endl;
-    // Swap i and j if not even (like Julia)
-    if (!is_even())
-    {
-        std::swap(i, j);
-    }
-    if (debug)
-        std::cout << i << " " << j << std::endl;
-
-    // Handle massless case
-    if (std::abs(ms2[k]) < 1e-10)
-    {
-        return 1.0;
-    }
-
-    double s = ms2[3]; // Parent mass squared
-    double EE4mksq = (s + ms2[k] - sigma[k]) * (sigma[i] - ms2[k] - ms2[j]);
-    double pp4mksq = std::sqrt(Kallen(s, ms2[k], sigma[k]) *
-                               Kallen(ms2[k], ms2[j], sigma[i]));
-    pp4mksq = (pp4mksq < 0) ? 0.0 : pp4mksq; // Handle numerical errors
-    double rest = sigma[j] - s - ms2[j];
-    if (debug)
-        std::cout << s << " " << EE4mksq << " " << pp4mksq << " " << rest << " " << (2 * ms2[k] * rest + EE4mksq) / pp4mksq << std::endl;
-    return (2 * ms2[k] * rest + EE4mksq) / pp4mksq;
-}
-
-// Implementation of cos_zeta for Arg3WignerRotation
-double Arg3WignerRotation::cos_zeta(const std::array<double, 3> &sigma,
-                                    const std::array<double, 4> &ms2) const
-{
-    auto [i, j, k] = ijk(*this);
-    if (debug)
-        std::cout << "wr3" << std::endl;
-    // Keep 1-based indexing like Julia
-    i--;
-    j--;
-    k--; // Convert to 0-based indexing for array access
-
-    // Handle massless case
-    if (std::abs(ms2[k]) < 1e-10)
-    {
-        return 1.0;
-    }
-
-    double s = ms2[3]; // Parent mass squared
-    double EE4m1sq = (sigma[i] - ms2[j] - ms2[k]) *
-                     (sigma[j] - ms2[k] - ms2[i]);
-    double pp4m1sq = std::sqrt(Kallen(sigma[i], ms2[j], ms2[k]) *
-                               Kallen(sigma[j], ms2[k], ms2[i]));
-    pp4m1sq = (pp4m1sq < 0) ? 0.0 : pp4m1sq; // Handle numerical errors
-    double rest = ms2[i] + ms2[j] - sigma[k];
-    return (2 * ms2[k] * rest + EE4m1sq) / pp4m1sq;
-}
 
 // Implementierung des Konstruktors für ThreeBodyParities
 ThreeBodyParities::ThreeBodyParities(char P1, char P2, char P3, char P0) : P1_(P1), P2_(P2), P3_(P3), P0_(P0)
@@ -1646,71 +1116,6 @@ char ThreeBodyParities::operator*(const ThreeBodyParities &other) const
     return result;
 }
 
-// Implementation of SpinParity constructor
-SpinParity::SpinParity(const std::string &jp)
-{
-    if (jp.empty())
-    {
-        throw std::invalid_argument("jp string cannot be empty");
-    }
-
-    // Get the parity character (last character)
-    p_ = jp.back();
-
-    // Parse the spin value (rest of the string)
-    std::string spin_str = jp.substr(0, jp.size() - 1);
-    str = spin_str; // Store the original string for parsing
-
-    // Check if spin string is empty
-    if (spin_str.empty())
-    {
-        throw std::invalid_argument("Spin value cannot be empty");
-    }
-
-    // Check if spin is a fraction
-    size_t slash_pos = spin_str.find('/');
-    if (slash_pos != std::string::npos)
-    {
-        // Handle fraction
-        std::string num_str = spin_str.substr(0, slash_pos);
-        std::string denom_str = spin_str.substr(slash_pos + 1);
-
-        if (num_str.empty() || denom_str.empty())
-        {
-            throw std::invalid_argument("Invalid fraction format");
-        }
-
-        try
-        {
-            int numerator = std::stoi(num_str);
-            int denominator = std::stoi(denom_str);
-            if (denominator == 0)
-            {
-                throw std::invalid_argument("Division by zero");
-            }
-
-            // For fractions, double the numerator
-            two_j_ = (2 * numerator) / denominator;
-        }
-        catch (const std::exception &e)
-        {
-            throw std::invalid_argument("Invalid fraction: " + spin_str);
-        }
-    }
-    else
-    {
-        // Integer spin - multiply by 2 for doubled representation
-        try
-        {
-            int spin = std::stoi(spin_str);
-            two_j_ = spin * 2; // This doubles the integer spin
-        }
-        catch (const std::exception &e)
-        {
-            throw std::invalid_argument("Invalid spin: " + spin_str);
-        }
-    }
-}
 
 std::vector<std::array<int, 2>> possible_ls(
     const SpinParity &jp1,
@@ -1942,12 +1347,7 @@ std::shared_ptr<DecayChain> createDecayChainLS(
     );
 }
 
-complex cg_double(int j1, int j2, int j3, int m1, int m2, int m3)
-{
-    // Placeholder for the actual Clebsch-Gordan coefficient calculation
-    // This should be replaced with the actual implementation
-    return complex(0.0, 0.0);
-}
+
 
 // Helper functions
 int one(int /*x*/) { return 1; }
@@ -1980,6 +1380,18 @@ double jls_coupling(int two_j1, int two_λ1, int two_j2, int two_λ2, int two_j,
     return res;
 }
 
+/**
+ * @brief Creates a recoupling function for the given type and parameters
+ *
+ * This function returns a callable recoupling function (e.g., LS, Parity)
+ * based on the specified type and parameters. The recoupling function can
+ * then be used to compute recoupled amplitudes.
+ *
+ * @param type The type of recoupling to perform
+ * @param params The parameters for the recoupling (e.g., L and S values)
+ * @param parityPhase Optional parameter for parity recoupling
+ * @return A recoupling function
+ */
 RecouplingLS createRecouplingFunction(
     RecouplingType type,
     const std::array<int, 2> &params,
@@ -1994,7 +1406,7 @@ RecouplingLS createRecouplingFunction(
 
         return [noRecoupling](const std::array<int, 2> &two_ms, const std::array<int, 3> &two_js) -> double
         {
-            //std::cout << noRecoupling.get_two_λa() << noRecoupling.get_two_λb() << " " << two_ms[0] << two_ms[1] << std::endl;
+            // std::cout << noRecoupling.get_two_λa() << noRecoupling.get_two_λb() << " " << two_ms[0] << two_ms[1] << std::endl;
 
             // Exakte Implementierung der Julia-Logik: (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
             if (noRecoupling.get_two_λa() == two_ms[0] && noRecoupling.get_two_λb() == two_ms[1])
@@ -2018,7 +1430,7 @@ RecouplingLS createRecouplingFunction(
             // Erste Bedingung: cs.two_λa == two_λa and cs.two_λb == two_λb
             if (two_λa == two_ms[0] && two_λb == two_ms[1])
             {
-                return 1.0;//*ηηηphaseisplus;
+                return 1.0; //*ηηηphaseisplus;
             }
 
             // Zweite Bedingung: cs.two_λa == -two_λa and cs.two_λb == -two_λb

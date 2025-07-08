@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "include/FormFactors.hh"
+#include "include/Lineshapes.hh"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
