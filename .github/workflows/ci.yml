@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }} - C++${{ matrix.cpp_standard }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        cpp_standard: [17]
+        build_type: [Release]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ libboost-all-dev
+        # Add any other dependencies your project needs
+
+    - name: Configure CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }}
+
+    - name: Build
+      working-directory: ./build
+      run: make -j$(nproc)
+
+    - name: Run tests
+      working-directory: ./build
+      run: ./RunTests
