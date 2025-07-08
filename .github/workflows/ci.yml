@@ -37,6 +37,29 @@ jobs:
       working-directory: ./build
       run: make -j$(nproc)
 
-    - name: Run tests
+    - name: List build directory
       working-directory: ./build
-      run: ./RunTests
+      run: ls -la
+
+    - name: Run individual tests
+      working-directory: ./build
+      run: |
+        if [ -f "./ThreeBodyDecaysTest" ]; then
+          echo "Running ThreeBodyDecaysTest..."
+          ./ThreeBodyDecaysTest
+        fi
+
+        if [ -f "./ClebschGordanTest" ]; then
+          echo "Running ClebschGordanTest..."
+          ./ClebschGordanTest
+        fi
+
+        if [ -f "./JsonModelTest" ]; then
+          echo "Running JsonModelTest..."
+          ./JsonModelTest
+        fi
+
+        if [ -f "./RunTests" ]; then
+          echo "Running all tests with RunTests..."
+          ./RunTests
+        fi
