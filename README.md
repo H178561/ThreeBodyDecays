@@ -1,11 +1,13 @@
 # ThreeBodyDecays Project
 
+[![CI](https://github.com/H178561/ThreeBodyDecays/actions/workflows/ci.yml/badge.svg)](https://github.com/H178561/ThreeBodyDecays/actions/workflows/ci.yml)
+
 Implementation of the [ThreeBodyDecays.jl](https://github.com/mmikhasenko/ThreeBodyDecays.jl) Julia class in C++ for usage in EvtGen.
 
 
 ## Build
 
-To build the Model 
+To build the Model
 
 ```
 mkdir build
