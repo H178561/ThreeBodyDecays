@@ -714,7 +714,7 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
                             std::cout << "result " << _i << _j << _k << _z << " " << vrk_idx1 << " " << " " << d_idx1 << " " << d_idx2 << " " << res << std::endl;
                         if (debug)
                             std::cout << "VRk " << VRk[vrk_idx1][_k] << "d_θ " << d_θ[d_idx1][d_idx2] << "Vij " << Vij[_i][_j] << std::endl;
-                        // KRITISCH: Exakt die gleiche Berechnung wie in Julia verwenden
+
                         F[_i][_j][_k][_z] +=
                             VRk[vrk_idx1][_k] *
                             d_θ[d_idx1][d_idx2] *

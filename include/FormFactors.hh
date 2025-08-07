@@ -29,6 +29,8 @@ namespace FormFactors
      */
     double breakup(double M, double m1, double m2);
 
+    double MomentumPower(double p, int L);
+
 
 }
 

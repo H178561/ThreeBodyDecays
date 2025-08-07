@@ -138,7 +138,25 @@ public:
      * @return Matrix of interference terms
      */
     std::vector<std::vector<double>> interference_terms(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs = {-1, -1, -1, -1}) const;
-
+    
+    /**
+     * @brief Returns the names of all resonances in the model
+     *
+     * @return Vector of resonance names in the order they were added
+     */
+    std::vector<std::string> getNames() const {
+        std::vector<std::string> names;
+        for (const auto& chain : chains_) {
+            names.push_back(std::get<1>(chain));
+        }
+        return names;
+    }
+    
+    // Alternativ als öffentliches Attribut mit Getter:
+    std::vector<std::string> names() const {
+        return getNames();
+    }
+    
 private:
     /**
      * Stores decay chains with their labels and coefficients.
