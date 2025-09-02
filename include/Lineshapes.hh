@@ -120,6 +120,82 @@ private:
     double s2_; // exponential factor
 };
 
+
+// BreitWignerMinL class - corresponds to Julia BreitWignerMinL
+class BreitWignerMinL : public Lineshape
+{
+public:
+    BreitWignerMinL(double mass, double width, int l, int minL,
+                    double m1, double m2, double mk, double m0,
+                    double dR = 1.5, double dLambdac = 5.0)
+        : m_(mass), gamma0_(width), l_(l), minL_(minL),
+          m1_(m1), m2_(m2), mk_(mk), m0_(m0),
+          dR_(dR), dLambdac_(dLambdac)
+    {
+    }
+
+    complex operator()(double sigma) const override
+    {
+        // Calculate breakup momenta
+        double p = FormFactors::breakup(std::sqrt(sigma), m1_, m2_);
+        double p0 = FormFactors::breakup(m_, m1_, m2_);
+        double q = FormFactors::breakup(m0_, std::sqrt(sigma), mk_);
+        double q0 = FormFactors::breakup(m0_, m_, mk_);
+
+        // Handle edge cases
+        if (p0 <= 0.0 || q0 <= 0.0) {
+            return complex(0.0, 0.0);
+        }
+
+        // Calculate form factors
+        double FF_l_p = FormFactors::BlattWeisskopf(p, l_, dR_);
+        double FF_l_p0 = FormFactors::BlattWeisskopf(p0, l_, dR_);
+        double FF_minL_q = FormFactors::BlattWeisskopf(q, minL_, dLambdac_);
+        double FF_minL_q0 = FormFactors::BlattWeisskopf(q0, minL_, dLambdac_);
+
+        double F2_l = (FF_l_p * FF_l_p) / (FF_l_p0 * FF_l_p0);
+        double F2_minL = (FF_minL_q * FF_minL_q) / (FF_minL_q0 * FF_minL_q0);
+
+        // Calculate running width
+        double p_ratio_power = std::pow(p / p0, 2 * l_ + 1);
+        double gamma = gamma0_ * p_ratio_power * m_ / std::sqrt(sigma) * F2_l;
+
+        // Calculate momentum factors
+        double p_factor = std::pow(p / p0, l_);
+        double q_factor = std::pow(q / q0, minL_);
+
+        // Breit-Wigner denominator
+        complex denominator = complex(m_ * m_ - sigma, -m_ * gamma);
+
+        // Complete amplitude
+        complex bw_part = complex(1.0, 0.0) / denominator;
+        double momentum_ff_part = p_factor * q_factor * std::sqrt(F2_l * F2_minL);
+
+        return bw_part * momentum_ff_part;
+    }
+
+private:
+    double m_;          // mass
+    double gamma0_;     // width at pole
+    int l_;             // orbital angular momentum (decay)
+    int minL_;          // minimal orbital angular momentum (production)
+    double m1_, m2_;    // masses of decay products
+    double mk_;         // mass of spectator particle
+    double m0_;         // mass of parent particle
+    double dR_;         // interaction radius for decay (default 1.5 GeV^-1)
+    double dLambdac_;   // interaction radius for production (default 5.0 GeV^-1)
+};
+
+// Factory function for BreitWignerMinL
+inline std::function<complex(double)> make_breit_wigner_minl(
+    double mass, double width, int l, int minL,
+    double m1, double m2, double mk, double m0,
+    double dR = 1.5, double dLambdac = 5.0)
+{
+    BreitWignerMinL bw(mass, width, l, minL, m1, m2, mk, m0, dR, dLambdac);
+    return [bw](double sigma) { return bw(sigma); };
+}
+
 // Helper functions to create lineshape functions
 inline std::function<complex(double)> make_breit_wigner(double mass,
                                                         double width)
