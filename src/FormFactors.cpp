@@ -72,4 +72,19 @@ double MomentumPower(double p, int L) {
     return std::pow(p, L);
 }
 
+
+double BlattWeisskopfRatio2(double p, double p0, int l, double radius) {
+        double z = (p * radius) * (p * radius);
+        double z0 = (p0 * radius) * (p0 * radius);
+
+        switch(l) {
+            case 0: return 1.0;
+            case 1: return (1 + z0) / (1 + z);
+            case 2: return (9 + 3*z0 + z0*z0) / (9 + 3*z + z*z);
+            // weitere Fälle für höhere l-Werte
+            default:
+                throw std::invalid_argument("Unsupported angular momentum");
+        }
+    }
+
 }

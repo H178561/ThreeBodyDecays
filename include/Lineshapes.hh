@@ -124,6 +124,42 @@ private:
 // BreitWignerMinL class - corresponds to Julia BreitWignerMinL
 class BreitWignerMinL : public Lineshape
 {
+private:
+    // Helper function to calculate F² like in Julia
+    double F2_function(int l, double p, double p0, double d) const {
+        if (l == 0) return 1.0;
+
+        double pR = p * d;
+        double p0R = p0 * d;
+        double pR2 = pR * pR;
+        double p0R2 = p0R * p0R;
+
+        if (l == 1) {
+            return (1.0 + p0R2) / (1.0 + pR2);
+        } else if (l == 2) {
+            return (9.0 + 3.0*p0R2 + p0R2*p0R2) / (9.0 + 3.0*pR2 + pR2*pR2);
+        } else if (l == 3) {
+            double p0R4 = p0R2 * p0R2;
+            double p0R6 = p0R4 * p0R2;
+            double pR4 = pR2 * pR2;
+            double pR6 = pR4 * pR2;
+            return (225.0 + 45.0*p0R2 + 6.0*p0R4 + p0R6) / (225.0 + 45.0*pR2 + 6.0*pR4 + pR6);
+        }
+        return 1.0; // fallback
+    }
+
+    double my_breakup(double s, double m1_sq, double m2_sq) const
+    {
+        if (s < 0.0) return 0.0;
+
+        // Kallen function: λ(s, m1², m2²) = s² + m1⁴ + m2⁴ - 2s*m1² - 2s*m2² - 2m1²*m2²
+        double lambda = s*s + m1_sq*m1_sq + m2_sq*m2_sq - 2.0*s*m1_sq - 2.0*s*m2_sq - 2.0*m1_sq*m2_sq;
+
+        if (lambda < 0.0) return 0.0;
+
+        return std::sqrt(lambda) / (2.0 * std::sqrt(s));
+    }
+
 public:
     BreitWignerMinL(double mass, double width, int l, int minL,
                     double m1, double m2, double mk, double m0,
@@ -137,38 +173,38 @@ public:
     complex operator()(double sigma) const override
     {
         // Calculate breakup momenta
-        double p = FormFactors::breakup(std::sqrt(sigma), m1_, m2_);
+        /*double p = FormFactors::breakup(std::sqrt(sigma), m1_, m2_);
         double p0 = FormFactors::breakup(m_, m1_, m2_);
         double q = FormFactors::breakup(m0_, std::sqrt(sigma), mk_);
         double q0 = FormFactors::breakup(m0_, m_, mk_);
+        */
+        double p = my_breakup(sigma, m1_*m1_, m2_*m2_);      // my_breakup(σ, m1², m2²)
+        double p0 = my_breakup(m_*m_, m1_*m1_, m2_*m2_);     // my_breakup(m², m1², m2²)
+        double q = my_breakup(m0_*m0_, sigma, mk_*mk_);      // my_breakup(m0², σ, mk²)
+        double q0 = my_breakup(m0_*m0_, m_*m_, mk_*mk_);     // my_breakup(m0², m², mk²)
+
 
         // Handle edge cases
         if (p0 <= 0.0 || q0 <= 0.0) {
             return complex(0.0, 0.0);
         }
 
-        // Calculate form factors
-        double FF_l_p = FormFactors::BlattWeisskopf(p, l_, dR_);
-        double FF_l_p0 = FormFactors::BlattWeisskopf(p0, l_, dR_);
-        double FF_minL_q = FormFactors::BlattWeisskopf(q, minL_, dLambdac_);
-        double FF_minL_q0 = FormFactors::BlattWeisskopf(q0, minL_, dLambdac_);
+         // Calculate F² functions (Julia style)
+        double F2_l = F2_function(l_, p, p0, dR_);             // F²(l, p, p0, dR)
+        double F2_minL = F2_function(minL_, q, q0, dLambdac_); // F²(minL, q, q0, dΛc)
 
-        double F2_l = (FF_l_p * FF_l_p) / (FF_l_p0 * FF_l_p0);
-        double F2_minL = (FF_minL_q * FF_minL_q) / (FF_minL_q0 * FF_minL_q0);
-
-        // Calculate running width
+        // Calculate running width: Γ = Γ₀ * (p / p0)^(2l + 1) * m / sqrt(σ) * F²(l, p, p0, dR)
         double p_ratio_power = std::pow(p / p0, 2 * l_ + 1);
         double gamma = gamma0_ * p_ratio_power * m_ / std::sqrt(sigma) * F2_l;
 
-        // Calculate momentum factors
-        double p_factor = std::pow(p / p0, l_);
-        double q_factor = std::pow(q / q0, minL_);
+        // Momentum factors
+        double p_factor = std::pow(p / p0, l_);        // (p / p0)^l
+        double q_factor = std::pow(q / q0, minL_);     // (q / q0)^minL
 
-        // Breit-Wigner denominator
-        complex denominator = complex(m_ * m_ - sigma, -m_ * gamma);
-
-        // Complete amplitude
+        // Julia formula: 1 / (m² - σ - 1im * m * Γ) * (p / p0)^l * (q / q0)^minL * sqrt(F²(l, p, p0, dR) * F²(minL, q, q0, dΛc))
+        complex denominator = complex(m_ * m_ - sigma, -m_ * gamma);  // Note: -1im * m * Γ
         complex bw_part = complex(1.0, 0.0) / denominator;
+
         double momentum_ff_part = p_factor * q_factor * std::sqrt(F2_l * F2_minL);
 
         return bw_part * momentum_ff_part;

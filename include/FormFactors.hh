@@ -32,6 +32,12 @@ namespace FormFactors
     double MomentumPower(double p, int L);
 
 
+
+    // Blatt-Weisskopf form factor ratio squared
+    double BlattWeisskopfRatio2(double p, double p0, int l, double radius);
 }
+
+
+
 
 #endif

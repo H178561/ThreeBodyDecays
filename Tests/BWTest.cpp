@@ -124,6 +124,57 @@ TEST_F(BWTest, testFlatteLineshape)
     EXPECT_NEAR(val.imag(), 0.22521, 1e-5);
 }
 
+
+TEST_F(BWTest, testBreitWignerMinL)
+{
+    /*
+    {
+            "mk": 0.13957018,
+            "m2": 0.938272046,
+            "x": "m_31_sq",
+            "minL": 0,
+            "m1": 0.49367700000000003,
+            "width": 0.2,
+            "l": 1,
+            "name": "L(1600)_BW",
+            "mass": 1.6,
+            "m0": 2.46794,
+            "type": "BreitWignerMinL"
+        },
+
+    -0.8413870668635681 + 1.0288196439598711im
+
+    */
+    std::cout << "\n=== Flatte Lineshape Test ===" << std::endl;
+
+    // Create a Flatte lineshape function
+    auto bwminl = make_breit_wigner_minl(
+        1.6,   // mass
+        0.2,   // width
+        1,     // l
+        0,     // minL
+        0.49367700000000003, // m1
+        0.938272046,         // m2
+        0.13957018,          // mk
+        2.46794,             // m0
+        1.5,                 // dR
+        5.0                  // dLambdac
+    );
+
+    // Test at different invariant masses
+    double test_mass = 3.2;
+
+    std::cout << "\nInvariant Mass (GeV)  |  Value" << std::endl;
+    std::cout << "--------------------|------------" << std::endl;
+
+    // L1405:2 Lineshape(s=3.2): -0.7480602620708737 + 0.22521439829964177im
+    complex val = bwminl(test_mass);
+    std::cout << "BreitWignerMinL(s=3.2): " << val << std::endl;
+    EXPECT_NEAR(val.real(), -0.84138, 1e-5);
+    EXPECT_NEAR(val.imag(), 1.02881, 1e-5);
+}
+
+
 #ifndef RUNNING_COMBINED_TESTS
 int main(int argc, char **argv)
 {
