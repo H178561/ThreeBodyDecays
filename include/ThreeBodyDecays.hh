@@ -12,22 +12,11 @@
 
 #include "SpinParity.hh"     // For spin and parity representation
 #include "WignerRotation.hh" // For Wigner rotation operations
+#include "Structures.hh"
 
 using complex = std::complex<double>;
 // Type definitions for commonly used structures
-using MandelstamTuple = std::array<double, 3>;    // (s12, s23, s31)
-using MassTuple = std::array<double, 4>;          // (m1, m2, m3, M)
-using SpinTuple = std::array<int, 4>;             // (j1, j2, j3, J)
-using RecouplingLS =
-    std::function<complex(const std::array<int, 2> &, const std::array<int, 3> &)>;
-using LineshapeFunction = std::function<complex(double)>;
-using HelicityFunction =
-    std::function<complex(const std::array<int, 2> &, const std::array<int, 3> &)>;
-using ThreeBodyMasses = std::array<double, 4>;
-using ThreeBodySpins = std::array<int, 4>;
-using Matrix2D = std::vector<std::vector<double>>;
-using Tensor4Dcomp = std::vector<std::vector<std::vector<std::vector<complex>>>>;
-using Tensor4D = std::vector<std::vector<std::vector<std::vector<double>>>>;
+
 
 /**
  * @brief Calculates Minkowski scalar product with metric (+,-,-,-)

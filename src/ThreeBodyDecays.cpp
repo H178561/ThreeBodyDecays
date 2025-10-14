@@ -344,15 +344,15 @@ double ThreeBodyDecays::σjofk(double cos_theta, double σk,
 
     double s = ms_squared[3]; // Parent mass squared
 
-    // Calculate energy and momentum terms using the same formula as Julia
+    // Calculate energy and momentum terms
     double EE4σ = (σk + ms_squared[j] - ms_squared[i]) *
                   (σk + s - ms_squared[k]);
     double p2q24σ = Kallen(σk, ms_squared[i], ms_squared[j]) *
                     Kallen(s, σk, ms_squared[k]);
     p2q24σ = (p2q24σ < 0) ? 0.0
-                          : p2q24σ; // Handle numerical errors like Julia
+                          : p2q24σ; // Handle numerical errors
 
-    // Calculate σi using the same formula as Julia
+    // Calculate σi
     double σi = s + ms_squared[j] -
                 (EE4σ - std::sqrt(p2q24σ) * cos_theta) / (2 * σk);
 
@@ -658,20 +658,20 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
     // Lineshape berechnen
     complex lineshape = dc.Xlineshape(σs[k_idx]);
 
-    // Dimensionen für den Ergebnistensor
+    // dimensions for F0 in order (j1, j2, j3, j4)
     std::vector<int> dims = {two_js[0] + 1, two_js[1] + 1, two_js[2] + 1, two_js[3] + 1};
 
-    // F0 mit Nullen initialisieren (Ergebnistensor)
+    // initialise F0 with dimensions (2j1+1, 2j2+1, 2j3+1, 2j4+1)
     Tensor4Dcomp F0(dims[0], std::vector<std::vector<std::vector<complex>>>(
                                  dims[1], std::vector<std::vector<complex>>(
                                               dims[2], std::vector<complex>(dims[3], 0.0))));
 
-    // Dimensionen für Berechnungstensor
+    // dimensions for F in order (i, j, k, 3)
     Tensor4Dcomp F(dims[i_idx], std::vector<std::vector<std::vector<complex>>>(
                                     dims[j_idx], std::vector<std::vector<complex>>(
                                                      dims[k_idx], std::vector<complex>(dims[3], 0.0))));
 
-    // Hilfsfunktion zum Begrenzen von Indizes
+    // Helper function to pad indices
     auto pad = [](int idx, int max_size)
     {
         return std::max(0, std::min(idx, max_size - 1));
@@ -686,7 +686,7 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
                 for (int _z = 0; _z < F[0][0][0].size(); _z++)
                 {
 
-                    // Verwenden Sie genau die gleiche Indexberechnung wie in Julia
+                    // Calculate shifted indices
                     int d2_idx1 = _z + _k + Δ_zk;
                     int d2_idx2 = _i - _j + Δ_ij;
                     int vrk_idx1 = pad(_z + _k + Δ_zk, two_j + 1);
@@ -701,7 +701,7 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
                     if (debug)
                         std::cout << "result " << _i << _j << _k << _z << " " << vrk_idx1 << " " << " " << d_idx1 << " " << d_idx2 << " " << std::endl;
 
-                    // Stellen Sie sicher, dass die Indizes innerhalb der Grenzen sind
+                    // Ensure indices are within bounds
                     if (d_idx1 >= 0 && d_idx2 >= 0 &&
                         vrk_idx1 < VRk.size() && _k < VRk[0].size() &&
                         d_idx1 < d_θ.size() && d_idx2 < d_θ[0].size() &&
@@ -929,13 +929,13 @@ Tensor4Dcomp ThreeBodyDecays::amplitude4dcomp(const DecayChain &dc,
     {
         int _two_j = two_js[l];
         int _refζ = refζs[l];
-        int julia_mod_result = (l + 1) % 4; // Dies funktioniert für l=0,1,2,3
-        if (julia_mod_result == 0)
-            julia_mod_result = 4; // Für den Fall l=3
-        if (julia_mod_result == 4)
-            julia_mod_result = 0; // Für den Fall l=3
+        int mod_result = (l + 1) % 4; // Dies funktioniert für l=0,1,2,3
+        if (mod_result == 0)
+            mod_result = 4; // Für den Fall l=3
+        if (mod_result == 4)
+            mod_result = 0; // Für den Fall l=3
 
-        std::unique_ptr<AbstractWignerRotation> _w = wr(k, _refζ, julia_mod_result);
+        std::unique_ptr<AbstractWignerRotation> _w = wr(k, _refζ, mod_result);
         double _cosζ = _w->cos_zeta(σs, msq);
         if (debug)
             std::cout << _cosζ << std::endl;
@@ -975,7 +975,7 @@ Tensor4Dcomp ThreeBodyDecays::amplitude4dcomp(const DecayChain &dc,
                                 dims[1], std::vector<std::vector<complex>>(
                                              dims[2], std::vector<complex>(dims[3], 0.0))));
 
-    // Calculate the tensor contraction (equivalent to @tullio in Julia)
+    // Calculate the tensor contraction
     // @tullio F[_i, _j, _k, _z] = D0[_z, _z′] * F0[_i′, _j′, _k′, _z′] * D1[_i′, _i] * D2[_j′, _j] * D3[_k′, _k]
     for (int _i = 0; _i < dims[0]; ++_i)
     {
@@ -1045,7 +1045,7 @@ complex ThreeBodyDecays::amplitude(const DecayChain &dc,
     std::vector<int> indices(4);
     for (int i = 0; i < 4; ++i)
     {
-        // Match Julia's div(_two_j + _two_λ, 2) + 1, but adjust for 0-based indexing
+        // div(_two_j + _two_λ, 2) + 1, but adjust for 0-based indexing
         indices[i] = (dc.tbs.two_js[i] + two_λs[i]) / 2;
     }
 
@@ -1082,7 +1082,7 @@ double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &�
     // Get the 4D amplitude tensor
     auto amp = amplitude4dcomp(dc, σs, k_amp, refζs);
 
-    // Sum squared amplitudes (similar to Julia's sum(abs2, ...))
+    // Sum squared amplitudes
     double total_intensity = 0.0;
 
     for (const auto &dim1 : amp)
@@ -1137,7 +1137,7 @@ std::vector<std::array<int, 2>> possible_ls(
              two_l += 2)
         {
 
-            // Check parity condition - match the Julia logic exactly
+            // Check parity condition
             int negative_count = 0;
             if (jp1.get_p() == '-')
                 negative_count++;
@@ -1253,7 +1253,7 @@ std::vector<std::array<int, 2>> possible_ls_Rk(
     return possible_ls(jp, jp_k, jp_0);
 }
 
-// Implementation of possible_lsLS function matching Julia's implementation
+// Implementation of possible_lsLS function
 std::vector<LSCoupling> possible_lsLS(
     const SpinParity &jp,
     const std::array<int, 4> &two_js,
@@ -1279,7 +1279,7 @@ std::vector<LSCoupling> possible_lsLS(
         if (debugls)
             std::cout << "  LS: " << LS[0] << ", " << LS[1] << std::endl;
     }
-    // Create the Cartesian product (like Julia's Iterators.product)
+    // Create the Cartesian product
     std::vector<LSCoupling> result;
     for (const auto &ls : lsv)
     {
@@ -1408,7 +1408,7 @@ RecouplingLS createRecouplingFunction(
         {
             // std::cout << noRecoupling.get_two_λa() << noRecoupling.get_two_λb() << " " << two_ms[0] << two_ms[1] << std::endl;
 
-            // Exakte Implementierung der Julia-Logik: (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
+            //  (cs.two_λa == two_λa) * (cs.two_λb == two_λb)
             if (noRecoupling.get_two_λa() == two_ms[0] && noRecoupling.get_two_λb() == two_ms[1])
             {
                 return 1.0;
@@ -1437,7 +1437,6 @@ RecouplingLS createRecouplingFunction(
             // Dies prüft, ob der Parameter gleich dem negativen des übergebenen Werts ist
             if (two_λa == -two_ms[0] && two_λb == -two_ms[1])
             {
-                // Exakt die Julia-Logik: 2 * ηηηphaseisplus - 1 (= 1 wenn true, -1 wenn false)
                 return 2 * ηηηphaseisplus - 1;
             }
 
@@ -1460,7 +1459,7 @@ RecouplingLS createRecouplingFunction(
             int two_λ1 = two_ms[0];
             int two_λ2 = two_ms[1];
 
-            // Call the jls_coupling function that matches the Julia implementation
+            // Call the jls_coupling function
             double result = jls_coupling(two_j1, two_λ1, two_j2, two_λ2, two_j, two_l, two_s);
             return result;
         };
