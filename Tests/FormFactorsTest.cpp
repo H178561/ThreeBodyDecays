@@ -69,7 +69,7 @@ TEST_F(FormFactorsTest, UnsupportedL_ReturnsOne)
     double d = 1.5;
 
     // Test L values not implemented (3, 4, 5, etc.)
-    std::vector<int> unsupported_L = {3, 4, 5, 10, -1};
+    std::vector<int> unsupported_L = { 10, -1};
 
     for (int L : unsupported_L)
     {

@@ -454,9 +454,9 @@ private:
 
 public:
     Flatte1405(double mass, double width, int l, int minL,
-               double m1, double m2, double mk, double m0)
+               double m1, double m2, double mk, double m0, double gamma1 = 0.0, double gamma2 = 0.0)
         : m_(mass), gamma0_(width), l_(l), minL_(minL),
-          m1_(m1), m2_(m2), mk_(mk), m0_(m0)
+          m1_(m1), m2_(m2), mk_(mk), m0_(m0), gamma1_(gamma1), gamma2_(gamma2)
     {
     }
 
@@ -475,10 +475,18 @@ public:
             return complex(0.0, 0.0);
         }
 
-        // Calculate running widths
-        double gamma1 = gamma0_ * (p / p0) * m_ / std::sqrt(sigma);
-        double gamma2 = gamma0_ * (p_prime / p0_prime) * m_ / std::sqrt(sigma);
-        double gamma = gamma1 + gamma2;
+        double gamma;
+        if(gamma1_ == 0.0 and gamma2_ == 0.0) {
+            // If no gammas provided, use default values from Julia
+            double gamma1 = gamma0_ * (p / p0) * m_ / std::sqrt(sigma);
+            double gamma2 = gamma0_ * (p_prime / p0_prime) * m_ / std::sqrt(sigma);
+            gamma = gamma1 + gamma2;
+        }
+        else {
+            // Use provided gamma values
+            gamma = gamma1_ + gamma2_;
+        }
+        
 
         // Flatte formula: 1 / (m² - σ - 1im * m * Γ)
         complex denominator = complex(m_*m_ - sigma, -m_ * gamma);
@@ -494,14 +502,16 @@ private:
     double m1_, m2_;    // masses of decay products
     double mk_;         // mass of spectator particle
     double m0_;         // mass of parent particle
+    double gamma1_;     // optional width for channel 1
+    double gamma2_;     // optional width for channel 2
 };
 
 // Factory function for Flatte1405
 inline std::function<complex(double)> make_flatte1405(
     double mass, double width, int l, int minL,
-    double m1, double m2, double mk, double m0)
+    double m1, double m2, double mk, double m0, double gamma1 = 0.0, double gamma2 = 0.0)
 {
-    Flatte1405 f(mass, width, l, minL, m1, m2, mk, m0);
+    Flatte1405 f(mass, width, l, minL, m1, m2, mk, m0, gamma1, gamma2);
     return [f](double sigma) { return f(sigma); };
 }
 
