@@ -78,14 +78,12 @@ void ThreeBodyAmplitudeModel::clear()
  * for amplitude calculations in the model.
  *
  * @param σs Mandelstam variables
- * @param k_amp Amplitude type index
- * @param refζs Reference angles for Wigner rotations
+ * @param k_ref Reference index for Wigner rotations
  * @return 4D tensor of complex amplitudes
  * @throws std::runtime_error if the model contains no decay chains
  */
 Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
-                                                  const int &k_amp,
-                                                  const std::vector<int> &refζs) const
+                                                  const int &k_ref) const
 {
     if (chains_.empty())
     {
@@ -96,7 +94,7 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
 
     // Get dimensions from the first chain
     auto &[first_chain, first_label, first_coef] = chains_[0];
-    auto first_amp = tbd.amplitude4dcomp(*first_chain, σs, k_amp, refζs);
+    auto first_amp = tbd.amplitude4dcomp(*first_chain, σs, k_ref);
 
     // Optimization: Skip computation if there's only one chain
     if (chains_.size() == 1)
@@ -141,7 +139,7 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
     // Sum all amplitudes with coefficients (similar to Julia sum)
     for (const auto &[chain, label, coef] : chains_)
     {
-        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_amp, refζs);
+        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_ref);
         double coef_mag = std::abs(coef);
 
         // Add to result
@@ -168,16 +166,14 @@ Tensor4Dcomp ThreeBodyAmplitudeModel::amplitude4d(const MandelstamTuple &σs,
  *
  * @param σs Mandelstam variables
  * @param two_λs Doubled helicity values for all particles
- * @param k_amp Amplitude type index
- * @param refζs Reference angles for Wigner rotations
+ * @param k_ref Reference index for Wigner rotations
  * @return Complex amplitude
  */
 complex ThreeBodyAmplitudeModel::amplitude(const MandelstamTuple &σs,
                                            const std::vector<int> &two_λs,
-                                           const int &k_amp,
-                                           const std::vector<int> &refζs) const
+                                           const int &k_ref) const
 {
-    Tensor4Dcomp F0 = amplitude4d(σs, k_amp, refζs);
+    Tensor4Dcomp F0 = amplitude4d(σs, k_ref);
 
     // Calculate indices from helicity values
     std::vector<int> indices(4);
@@ -210,15 +206,13 @@ complex ThreeBodyAmplitudeModel::amplitude(const MandelstamTuple &σs,
  *
  * @param σs Mandelstam variables
  * @param two_λs Doubled helicity values for all particles
- * @param k_amp Amplitude type index
- * @param refζs Reference angles for Wigner rotations
+ * @param k_ref Reference index for Wigner rotations
  * @return Complex amplitude
  * @throws std::runtime_error if the model contains no decay chains
  */
 complex ThreeBodyAmplitudeModel::amplitudes(const MandelstamTuple &σs,
                                             const std::vector<int> &two_λs,
-                                            const int &k_amp,
-                                            const std::vector<int> &refζs) const
+                                            const int &k_ref) const
 {
     if (chains_.empty())
     {
@@ -231,7 +225,7 @@ complex ThreeBodyAmplitudeModel::amplitudes(const MandelstamTuple &σs,
     // Sum amplitudes with coefficients (like Julia's sum)
     for (const auto &[chain, label, coef] : chains_)
     {
-        result += coef * tbd.amplitude(*chain, σs, two_λs, k_amp, refζs);
+        result += coef * tbd.amplitude(*chain, σs, two_λs, k_ref);
     }
 
     return result;
@@ -244,11 +238,10 @@ complex ThreeBodyAmplitudeModel::amplitudes(const MandelstamTuple &σs,
  * of the combined amplitude, representing the probability density.
  *
  * @param σs Mandelstam variables
- * @param k_amp Amplitude type index
- * @param refζs Reference angles for Wigner rotations
+ * @param k_ref Reference index for Wigner rotations
  * @return Total intensity (probability density)
  */
-double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs) const
+double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int &k_ref) const
 {
     if (chains_.empty())
     {
@@ -256,7 +249,7 @@ double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int 
     }
 
     // Get the 4D amplitude tensor
-    auto amp = amplitude4d(σs, k_amp, refζs);
+    auto amp = amplitude4d(σs, k_ref);
 
     bool printout = false;
     if(printout){
@@ -307,11 +300,10 @@ double ThreeBodyAmplitudeModel::intensity(const MandelstamTuple &σs, const int 
  * relative contributions of different resonances.
  *
  * @param σs Mandelstam variables
- * @param k_amp Amplitude type index
- * @param refζs Reference angles for Wigner rotations
+ * @param k_ref Reference index for Wigner rotations
  * @return Vector of individual intensities, one for each chain
  */
-std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs) const
+std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const MandelstamTuple &σs, const int &k_ref) const
 {
     std::vector<double> result;
     result.reserve(chains_.size());
@@ -322,7 +314,7 @@ std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const Mandels
     // Calculate intensity for each component separately
     for (const auto &[chain, label, coef] : chains_)
     {
-        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_amp, refζs);
+        auto chain_amp = tbd.amplitude4dcomp(*chain, σs, k_ref);
 
         // Sum squared amplitudes for this chain
         double chain_intensity = 0.0;
@@ -356,11 +348,10 @@ std::vector<double> ThreeBodyAmplitudeModel::component_intensities(const Mandels
  * Diagonal elements (i,i) represent the intensity of chain i alone.
  *
  * @param σs Mandelstam variables
- * @param k_amp Amplitude type index
- * @param refζs Reference angles for Wigner rotations
+ * @param k_ref Reference index for Wigner rotations
  * @return Matrix of interference terms
  */
-std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs) const
+std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(const MandelstamTuple &σs, const int &k_ref) const
 {
     size_t n = chains_.size();
     std::vector<std::vector<double>> result(n, std::vector<double>(n, 0.0));
@@ -377,7 +368,7 @@ std::vector<std::vector<double>> ThreeBodyAmplitudeModel::interference_terms(con
     std::vector<Tensor4Dcomp> amplitudes;
     for (const auto &[chain, label, coef] : chains_)
     {
-        amplitudes.push_back(tbd.amplitude4dcomp(*chain, σs, k_amp, refζs));
+        amplitudes.push_back(tbd.amplitude4dcomp(*chain, σs, k_ref));
     }
 
     // Calculate interference terms

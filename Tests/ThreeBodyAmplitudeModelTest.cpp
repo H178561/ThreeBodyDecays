@@ -230,17 +230,16 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
 
     // Use the same helicity configuration
     std::vector<int> two_λs = {2, 1, 0, 1}; // Doubled representation
-    std::vector<int> refζs = {1, 2, 3, 1};  // Reference frames
 
     // Calculate amplitude
-    complex amp = model.amplitude(σs2, two_λs, 0, refζs);
-    std::cout << "amp " << amp << std::endl;
-    Tensor4Dcomp amp2 = model.amplitude4d(σs2, 0, refζs);
+    complex amp = model.amplitude(σs2, two_λs, 1);
+    Tensor4Dcomp amp2 = model.amplitude4d(σs2, 1);
 
-    double intensity_valued = model.intensity(σs2, 0, refζs);
+
+    double intensity_valued = model.intensity(σs2, 1);
 
     ThreeBodyDecays tbd;
-    complex res = tbd.amplitude(*Lambda1520, σs2, two_λs, 0, refζs);
+    complex res = tbd.amplitude(*Lambda1520, σs2, two_λs, 1);
 
 
     Tensor4Dcomp resultdalignedccomp = tbd.aligned_amplitude4dcomp(*Lambda1520, σs2);
@@ -261,11 +260,10 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
         std::cout << "\n";
     }
 
-    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 0, refζs);
-    // Tensor4Dcomp resultl1690 = tbd.amplitude4dcomp(*Lambda1690, σs2, refζs);
-    // Tensor4Dcomp resultpc4312 = tbd.amplitude4dcomp(*Pc4312, σs2, refζs);
-    Tensor4Dcomp resultl1690 = tbd.amplitude4dcomp(*Lambda1690, σs2, 0, refζs);
-    Tensor4Dcomp resultpc4312 = tbd.amplitude4dcomp(*Pc4312, σs2, 0, refζs);
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 1);
+
+    Tensor4Dcomp resultl1690 = tbd.amplitude4dcomp(*Lambda1690, σs2, 1);
+    Tensor4Dcomp resultpc4312 = tbd.amplitude4dcomp(*Pc4312, σs2, 1);
     // Verify tensor dimensions
     std::cout << "\nTensor4D Lambda1520 : " << std::endl;
     for (int i = 0; i < resultdccomp.size(); ++i)
@@ -332,12 +330,12 @@ TEST_F(ThreeBodyAmplitudeModelTest, MatchJuliaTutorialResult)
 
     // Print result for comparison
     std::cout << "C++ amplitude: " << amp << std::endl;
-    std::cout << "Julia amplitude (expected): 0.00498673748367451 + 0.0004851614900810134im" << std::endl;
+    std::cout << "Julia amplitude (expected): 0.00276588 + 0.000205176im" << std::endl;
     std::cout << "C++ intensity: " << intensity_valued << std::endl;
     std::cout << "Julia intensity (expected): 2.5191201498154108" << std::endl;
 
     // Compare with expected Julia result
-    complex expected(0.00498673748367451, 0.0004851614900810134);
+    complex expected(0.00276588, 0.000205176);
     expectNearComplex(expected, amp, 0.0001); // Allow for small numerical differences
 
     auto cg = clebschgordan(2, 1, 0, 1, 2, 1);
@@ -378,12 +376,11 @@ TEST_F(ThreeBodyAmplitudeModelTest, UnpolarizedIntensityJuliaMatch)
     // Use the standard test point
     MandelstamTuple σs = {4.501751135564419, 21.495750373843414, 16.258552559492166};
 
-    std::vector<int> refζs = {1, 2, 3, 1};
 
     // Calculate amplitude tensor
 
     // Calculate intensity
-    double intensity_value = model.intensity(σs, 1, refζs);
+    double intensity_value = model.intensity(σs, 1);
 
     // Compare with the expected value from Julia (10.029598796534886)
     std::cout << "C++ unpolarized intensity: " << intensity_value << std::endl;
@@ -488,7 +485,6 @@ TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520aligned_amplitude)
 }
 TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520amplitude)
 {
-    std::vector<int> refζs = {1, 2, 3, 1};
     ThreeBodyDecays tbd;
     int k = 1;
     MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
@@ -496,7 +492,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520amplitude)
     auto Lambda1520 = createDecayChainLS(
         1, createBW(1.5195, 0.0156), "3/2+", conservingParities, *tbs);
 
-    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 0, refζs);
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 1);
     // Verify tensor dimensions
     std::cout << "Tensor4D resultdccomp : " << std::endl;
     for (int i = 0; i < resultdccomp.size(); ++i)
@@ -516,43 +512,34 @@ TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520amplitude)
 
     /*
     Tensor4D resultdccomp :
-    1111 Λ1520 amplitude: -0.004505248601342691 + 4.870022881828725e-5im
-1112 Λ1520 amplitude: -0.03738349707522119 + 0.0004041030856873157im
-1211 Λ1520 amplitude: -0.030172068189441334 + 0.0003261499541465571im
-1212 Λ1520 amplitude: -0.18150395401937452 + 0.001961996967166934im
-2111 Λ1520 amplitude: 0.052868248572712745 - 0.0005714880643758189im
-2112 Λ1520 amplitude: 0.2566853533985421 - 0.002774682720302358im
-2211 Λ1520 amplitude: 0.2566853533985421 - 0.002774682720302358im
-2212 Λ1520 amplitude: -0.052868248572712745 + 0.0005714880643758189im
-3111 Λ1520 amplitude: -0.18150395401937452 + 0.001961996967166934im
-3112 Λ1520 amplitude: 0.030172068189441334 - 0.0003261499541465571im
-3211 Λ1520 amplitude: 0.03738349707522119 - 0.0004041030856873157im
-3212 Λ1520 amplitude: -0.004505248601342691 + 4.870022881828725e-5im */
+    0000(-0.001669,1.80413e-05)     0001(-0.0202768,0.000219185)    0100(-0.0304609,0.000329272)    0101(-0.184201,0.00199115)
+    1000(0.0286757,-0.000309975)    1001(0.2605,-0.00281592)        1100(0.2605,-0.00281592)        1101(-0.0286757,0.000309975)
+    2000(-0.184201,0.00199115)      2001(0.0304609,-0.000329272)    2100(0.0202768,-0.000219185)    2101(-0.001669,1.80413e-05) */
 
-    EXPECT_NEAR(resultdccomp[0][0][0][0].real(), -0.004505, 1e-5);
-    EXPECT_NEAR(resultdccomp[0][0][0][0].imag(), 4.87002e-05, 1e-5);
-    EXPECT_NEAR(resultdccomp[0][0][0][1].real(), -0.037383, 1e-5);
-    EXPECT_NEAR(resultdccomp[0][0][0][1].imag(), 0.000404103, 1e-5);
-    EXPECT_NEAR(resultdccomp[0][1][0][0].real(), -0.030172, 1e-5);
-    EXPECT_NEAR(resultdccomp[0][1][0][0].imag(), 0.000326149, 1e-5);
-    EXPECT_NEAR(resultdccomp[0][1][0][1].real(), -0.181504, 1e-5);
-    EXPECT_NEAR(resultdccomp[0][1][0][1].imag(), 0.001962, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][0][0][0].real(), 0.052868, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][0][0][0].imag(), -0.000571488, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][0][0][1].real(), 0.256685, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][0][0][1].imag(), -0.00277468, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][1][0][0].real(), 0.256685, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][1][0][0].imag(), -0.00277468, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][1][0][1].real(), -0.052868, 1e-5);
-    EXPECT_NEAR(resultdccomp[1][1][0][1].imag(), 0.000571488, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][0][0][0].real(), -0.181504, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][0][0][0].imag(), 0.001962, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][0][0][1].real(), 0.030172, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][0][0][1].imag(), -0.000326149, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][1][0][0].real(), 0.037383, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][1][0][0].imag(), -0.000404103, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][1][0][1].real(), -0.004505, 1e-5);
-    EXPECT_NEAR(resultdccomp[2][1][0][1].imag(), 4.87002e-05, 1e-5);
+    EXPECT_NEAR(resultdccomp[0][0][0][0].real(), -0.001669, 1e-6);
+    EXPECT_NEAR(resultdccomp[0][0][0][0].imag(), 1.80413e-05, 1e-8);
+    EXPECT_NEAR(resultdccomp[0][0][0][1].real(), -0.0202768, 1e-6);
+    EXPECT_NEAR(resultdccomp[0][0][0][1].imag(), 0.000219185, 1e-8);
+    EXPECT_NEAR(resultdccomp[0][1][0][0].real(), -0.0304609, 1e-6);
+    EXPECT_NEAR(resultdccomp[0][1][0][0].imag(), 0.000329272, 1e-8);
+    EXPECT_NEAR(resultdccomp[0][1][0][1].real(), -0.184201, 1e-6);
+    EXPECT_NEAR(resultdccomp[0][1][0][1].imag(), 0.00199115, 1e-8);
+    EXPECT_NEAR(resultdccomp[1][0][0][0].real(), 0.0286757, 1e-6);
+    EXPECT_NEAR(resultdccomp[1][0][0][0].imag(), -0.000309975, 1e-8);
+    EXPECT_NEAR(resultdccomp[1][0][0][1].real(), 0.2605, 1e-6);
+    EXPECT_NEAR(resultdccomp[1][0][0][1].imag(), -0.00281592, 1e-8);
+    EXPECT_NEAR(resultdccomp[1][1][0][0].real(), 0.2605, 1e-6);
+    EXPECT_NEAR(resultdccomp[1][1][0][0].imag(), -0.00281592, 1e-8);
+    EXPECT_NEAR(resultdccomp[1][1][0][1].real(), -0.0286757, 1e-6);
+    EXPECT_NEAR(resultdccomp[1][1][0][1].imag(), 0.000309975, 1e-8);
+    EXPECT_NEAR(resultdccomp[2][0][0][0].real(), -0.184201, 1e-6);
+    EXPECT_NEAR(resultdccomp[2][0][0][0].imag(), 0.00199115, 1e-8);
+    EXPECT_NEAR(resultdccomp[2][0][0][1].real(), 0.0304609, 1e-6);
+    EXPECT_NEAR(resultdccomp[2][0][0][1].imag(), -0.000329272, 1e-8);
+    EXPECT_NEAR(resultdccomp[2][1][0][0].real(), 0.0202768, 1e-6);
+    EXPECT_NEAR(resultdccomp[2][1][0][0].imag(), -0.000219185, 1e-8);
+    EXPECT_NEAR(resultdccomp[2][1][0][1].real(), -0.001669, 1e-6);
+    EXPECT_NEAR(resultdccomp[2][1][0][1].imag(), 1.8041314291331854e-05, 1e-8);
     // Print result for comparison
 }
 
@@ -638,14 +625,13 @@ TEST_F(ThreeBodyAmplitudeModelTest, Lambda1690amplitude)
 {
     // Test the Clebsch-Gordan coefficient calculation
     ThreeBodyDecays tbd;
-    std::vector<int> refζs = {1, 2, 3, 1};
     int k = 1;
     MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
     ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
     auto Lambda1690 = createDecayChainLS(
         1, createBW(1.685, 0.050), "1/2+", conservingParities, *tbs);
 
-    Tensor4Dcomp resultdalignedccomp = tbd.amplitude4dcomp(*Lambda1690, σs2, 0, refζs);
+    Tensor4Dcomp resultdalignedccomp = tbd.amplitude4dcomp(*Lambda1690, σs2, 1);
     // Verify tensor dimensions
 
     std::cout << "amplitude dimensions: "
@@ -672,43 +658,34 @@ TEST_F(ThreeBodyAmplitudeModelTest, Lambda1690amplitude)
     }
 
     /*
-    0000 Λ1690 amplitude: 0.0 + 0.0im
-    0001 Λ1690 amplitude: 0.013418926938380392 - 0.0006800161335056153im
-    0100 Λ1690 amplitude: 0.0 + 0.0im
-    0101 Λ1690 amplitude: 0.3461233466166077 - 0.017540110395046056im
-    1000 Λ1690 amplitude: 0.009488614234375609 - 0.0004808440193180771im
-    1001 Λ1690 amplitude: 0.24474616551958514 - 0.012402731003097718im
-    1100 Λ1690 amplitude: 0.24474616551958514 - 0.012402731003097718im
-    1101 Λ1690 amplitude: -0.009488614234375609 + 0.0004808440193180771im
-    2000 Λ1690 amplitude: 0.3461233466166077 - 0.017540110395046056im
-    2001 Λ1690 amplitude: 0.0 + 0.0im
-    2100 Λ1690 amplitude: -0.013418926938380392 + 0.0006800161335056153im
-    2101 Λ1690 amplitude: 0.0 + 0.0im
+    0000(0,0)       0001(-0.0189505,0.000960331)    0100(0,0)       0101(0.345865,-0.017527)
+1000(-0.0134,0.000679057)       1001(0.244563,-0.0123935)       1100(0.244563,-0.0123935)       1101(0.0134,-0.000679057)
+2000(0.345865,-0.017527)        2001(0,0)       2100(0.0189505,-0.000960331)    2101(0,0)
     */
 
     double prec = 1e-6;
     EXPECT_NEAR(resultdalignedccomp[0][0][0][0].real(), 0.0, prec);
     EXPECT_NEAR(resultdalignedccomp[0][0][0][0].imag(), 0.0, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), 0.0134189, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), -0.000680016, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), -0.0189505, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), 0.000960331, prec);
     EXPECT_NEAR(resultdalignedccomp[0][1][0][0].real(), 0.0, prec);
     EXPECT_NEAR(resultdalignedccomp[0][1][0][0].imag(), 0.0, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), 0.346123, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), -0.0175401, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), 0.00948861, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), -0.000480844, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.244746, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), -0.0124027, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.244746, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), -0.0124027, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), -0.00948861, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), 0.000480844, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), 0.346123, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), -0.0175401, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), 0.345865, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), -0.017527, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), -0.0134, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), 0.000679057, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.244563, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), -0.0123935, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.244563, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), -0.0123935, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), 0.0134, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), -0.000679057, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), 0.345865, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), -0.017527, prec);
     EXPECT_NEAR(resultdalignedccomp[2][0][0][1].real(), 0.0, prec);
     EXPECT_NEAR(resultdalignedccomp[2][0][0][1].imag(), 0.0, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), -0.0134189, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), 0.000680016, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), 0.0189505, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), -0.000960331, prec);
     EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.0, prec);
     EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.0, prec);
 }
@@ -795,14 +772,13 @@ TEST_F(ThreeBodyAmplitudeModelTest, Pc4312amplitude)
 {
     // Test the Clebsch-Gordan coefficient calculation
     ThreeBodyDecays tbd;
-    std::vector<int> refζs = {1, 2, 3, 1};
     int k = 1;
     MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
     ThreeBodySpins spins = {2, 1, 0, 1}; // J/ψ (spin 1), p (spin 1/2), K (spin 0), Λb (spin 1/2)
     auto Pc4312 = createDecayChainLS(
         3, createBW(4.312, 0.015), "1/2+", conservingParities, *tbs);
 
-    Tensor4Dcomp resultdalignedccomp = tbd.amplitude4dcomp(*Pc4312, σs2, 0, refζs);
+    Tensor4Dcomp resultdalignedccomp = tbd.amplitude4dcomp(*Pc4312, σs2, 1);
     // Verify tensor dimensions
 
     std::cout << "amplitude dimensions: "
@@ -829,50 +805,40 @@ TEST_F(ThreeBodyAmplitudeModelTest, Pc4312amplitude)
     }
 
     /*
-    0000 Pc4312 amplitude: 0.03499308671589973 + 0.000969402581111097im
-    0001 Pc4312 amplitude: -0.020706036681630652 - 0.0005736128843596291im
-    0100 Pc4312 amplitude: 0.2097534985277497 + 0.005810735832500719im
-    0101 Pc4312 amplitude: -0.12411490503472947 - 0.003438316552976656im
-    1000 Pc4312 amplitude: -0.13367674223749584 - 0.0037032051505382487im
-    1001 Pc4312 amplitude: 0.11250633990784316 + 0.003116728089279148im
-    1100 Pc4312 amplitude: 0.11250633990784314 + 0.0031167280892791475im
-    1101 Pc4312 amplitude: 0.13367674223749584 + 0.003703205150538248im
-    2000 Pc4312 amplitude: -0.12411490503472947 - 0.003438316552976656im
-    2001 Pc4312 amplitude: -0.20975349852774966 - 0.005810735832500719im
-    2100 Pc4312 amplitude: 0.020706036681630666 + 0.0005736128843596288im
-    2101 Pc4312 amplitude: 0.03499308671589972 + 0.0009694025811110974im
+    0000(0.0152597,0.000422735)     0001(-0.00902943,-0.00025014)   0100(0.212104,0.00587586)       0101(-0.125506,-0.00347685)
+1000(-0.143596,-0.00397798)     1001(0.0995363,0.00275742)      1100(0.0995363,0.00275742)      1101(0.143596,0.00397798)
+2000(-0.125506,-0.00347685)     2001(-0.212104,-0.00587586)     2100(0.00902943,0.00025014)     2101(0.0152597,0.000422735)
     */
 
     double prec = 1e-6;
-    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].real(), 0.034993, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].imag(), 0.000969402, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), -0.020706, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), -0.000573613, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].real(), 0.209753, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].imag(), 0.00581074, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), -0.124115, prec);
-    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), -0.00343832, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), -0.133677, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), -0.00370321, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.112506, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), 0.00311673, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.112506, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), 0.00311673, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), 0.133677, prec);
-    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), 0.00370321, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), -0.124115, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), -0.00343832, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].real(), -0.209753, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].imag(), -0.00581074, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), 0.020706, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), 0.000573613, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.034993, prec);
-    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.000969403, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].real(), 0.0152597, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][0].imag(), 0.000422735, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].real(), -0.00902943, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][0][0][1].imag(), -0.00025014, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].real(), 0.212104, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][0].imag(), 0.00587586, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].real(), -0.125506, prec);
+    EXPECT_NEAR(resultdalignedccomp[0][1][0][1].imag(), -0.00347685, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].real(), -0.143596, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][0].imag(), -0.00397798, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].real(), 0.0995363, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][0][0][1].imag(), 0.00275742, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].real(), 0.0995363, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][0].imag(), 0.00275742, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].real(), 0.143596, prec);
+    EXPECT_NEAR(resultdalignedccomp[1][1][0][1].imag(), 0.00397798, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].real(), -0.125506, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][0].imag(), -0.00347685, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].real(), -0.212104, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][0][0][1].imag(), -0.00587586, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].real(), 0.00902943, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][0].imag(), 0.00025014, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].real(), 0.0152597, prec);
+    EXPECT_NEAR(resultdalignedccomp[2][1][0][1].imag(), 0.000422735, prec);
 }
 
 TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520lambdacpkpi)
 {
-    std::vector<int> refζs = {1, 2, 3, 1};
     ThreeBodyDecays tbd;
     int k = 1;
     MandelstamTuple σs2 = {4.501751135564419, 21.495750373843414, 16.258552559492166};
@@ -884,7 +850,7 @@ TEST_F(ThreeBodyAmplitudeModelTest, Lambda1520lambdacpkpi)
     auto Lambda1520 = createDecayChainLS(
         1, createBW(1.5195, 0.0156), "3/2+", conservingParities, tbslc);
 
-    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 0, refζs);
+    Tensor4Dcomp resultdccomp = tbd.amplitude4dcomp(*Lambda1520, σs2, 1);
     // Verify tensor dimensions
     std::cout << "Tensor4D resultdccomp : " << std::endl;
     for (int i = 0; i < resultdccomp.size(); ++i)

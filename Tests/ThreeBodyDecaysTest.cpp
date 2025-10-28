@@ -144,12 +144,9 @@ TEST_F(ThreeBodyDecaysTest, DecayChainNoRecoupling)
         , RecouplingType::NoRecoupling, {0, 0}, false // NoRecoupling for Hij
     );
 
-    // Reference values for decay chain
-    std::vector<int> refζs = {1, 2, 3, 1};
-
     // Calculate amplitude tensor
     //Tensor4D result4d = decays.aligned_amplitude4d(*dc, σs);
-    Tensor4Dcomp result4dcomp = decays.amplitude4dcomp(*dc, σs, 0, refζs);
+    Tensor4Dcomp result4dcomp = decays.amplitude4dcomp(*dc, σs, 1);
 
 
 
@@ -194,12 +191,9 @@ TEST_F(ThreeBodyDecaysTest, DecayChainParityRecoupling)
 
     );
 
-    // Reference values
-    std::vector<int> refζs = {1, 2, 3, 1};
 
     // Calculate amplitude tensor
-    //Tensor4D resultdc2 = decays.amplitude4d(*dc2, σs, refζs);
-    Tensor4Dcomp resultdc2comp = decays.amplitude4dcomp(*dc2, σs, 0, refζs);
+    Tensor4Dcomp resultdc2comp = decays.amplitude4dcomp(*dc2, σs, 1);
 
 
 
@@ -245,12 +239,9 @@ TEST_F(ThreeBodyDecaysTest, DecayChainDoubleParityRecoupling)
         RecouplingType::ParityRecoupling, {2, 0}, false // ParityRecoupling for Hij
     );
 
-    // Reference values
-    std::vector<int> refζs = {3, 3, 3, 3};
 
     // Calculate amplitude tensor
-    //Tensor4D resultdc3 = decays.amplitude4d(*dc3, σs, refζs);
-    Tensor4Dcomp resultdc3comp = decays.amplitude4dcomp(*dc3, σs, 1, refζs);
+    Tensor4Dcomp resultdc3comp = decays.amplitude4dcomp(*dc3, σs, 3);
 
     /*
     [-0.05102783214351294; 0.0; 0.025004659171792013;;;; 0.0; 0.0; 0.0;;;; -0.025004659171792013; 0.0; 0.05102783214351294]

@@ -104,9 +104,9 @@ int main()
 
     // Calculate amplitude for specific helicity configuration
     std::vector<int> two_λs = {1, 1, 1, 1}; // For 1/2 helicity we use 1 in doubled representation
-    std::vector<int> refζs = {1, 2, 3, 1};  // Reference frames
+    int k_ref = 1;               // Reference index for Wigner rotations
 
-    complex amp = model.amplitude(σs, two_λs, refζs);
+    complex amp = model.amplitude(σs, two_λs, k_ref);
     std::cout << "Amplitude for specific helicities: "
               << std::real(amp) << " + " << std::imag(amp) << "i" << std::endl;
 

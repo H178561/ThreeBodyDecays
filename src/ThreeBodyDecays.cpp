@@ -830,8 +830,7 @@ Tensor4Dcomp ThreeBodyDecays::aligned_amplitude4dcomp(const DecayChain &dc, cons
 // Implementation of amplitude function that returns a Tensor4D
 Tensor4Dcomp ThreeBodyDecays::amplitude4dcomp(const DecayChain &dc,
                                               const MandelstamTuple &σs,
-                                              const int &k_amp,
-                                              std::vector<int> refζ)
+                                              const int &k_ref)
 {
     int k = dc.k;
     const auto &tbs = dc.tbs;
@@ -839,35 +838,7 @@ Tensor4Dcomp ThreeBodyDecays::amplitude4dcomp(const DecayChain &dc,
     // const auto &two_js = tbs.two_js;
     const auto &ms = tbs.ms;
 
-    if (refζ == std::vector<int>{-1, -1, -1, -1})
-    {
-        // if (k_amp == 0)
-        //{
-        //  Setze die Referenz-Spin-Quantenzahlen auf 0
-        //    refζ = {0, 0, 0, 0};
-        //}
-        if (k_amp == 1)
-        {
-            // Setze die Referenz-Spin-Quantenzahlen auf 1
-            refζ = {1, 1, 1, 1};
-        }
-        else if (k_amp == 2)
-        {
-            // Setze die Referenz-Spin-Quantenzahlen auf 2
-            refζ = {2, 2, 2, 2};
-        }
-        else if (k_amp == 3)
-        {
-            // Setze die Referenz-Spin-Quantenzahlen auf 3
-            refζ = {3, 3, 3, 3};
-        }
-        else
-        {
-            std::cout << "Invalid k_amp value: " << k_amp << std::endl;
-            return Tensor4Dcomp();
-        }
-    }
-    const std::vector<int> refζs = refζ;
+    std::vector<int> refζs = {k_ref, k_ref, k_ref, k_ref};
 
     // div 2
     auto two_js = tbs.two_js;
@@ -1035,11 +1006,10 @@ Tensor4Dcomp ThreeBodyDecays::amplitude4dcomp(const DecayChain &dc,
 complex ThreeBodyDecays::amplitude(const DecayChain &dc,
                                    const MandelstamTuple &σs,
                                    const std::vector<int> &two_λs,
-                                   const int &k_amp,
-                                   const std::vector<int> &refζs)
+                                   const int &k_ref)
 {
     // Get full 4D tensor of amplitudes for all helicity combinations
-    Tensor4Dcomp F0 = amplitude4dcomp(dc, σs, k_amp, refζs);
+    Tensor4Dcomp F0 = amplitude4dcomp(dc, σs, k_ref);
 
     // Calculate indices from helicity values
     std::vector<int> indices(4);
@@ -1072,15 +1042,14 @@ complex ThreeBodyDecays::amplitude(const DecayChain &dc,
  *
  * @param dc The decay chain information
  * @param σs The Mandelstam variables
- * @param k_amp The index of the amplitude to calculate
+ * @param k_ref The reference index for Wigner rotations
  * @param weight The weight to apply to the amplitude
- * @param refζs The reference spin-quantum numbers
  * @return The total intensity
  */
-double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, const complex weight, const std::vector<int> refζs)
+double ThreeBodyDecays::intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_ref, const complex weight)
 {
     // Get the 4D amplitude tensor
-    auto amp = amplitude4dcomp(dc, σs, k_amp, refζs);
+    auto amp = amplitude4dcomp(dc, σs, k_ref);
 
     // Sum squared amplitudes
     double total_intensity = 0.0;

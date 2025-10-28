@@ -423,11 +423,10 @@ public:
      * @param dc Decay chain
      * @param σs Mandelstam variables
      * @param two_λs Doubled helicity values for all particles
-     * @param k_amp Amplitude type index
-     * @param refζs Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return Complex amplitude
      */
-    complex amplitude(const DecayChain &dc, const MandelstamTuple &σs, const std::vector<int> &two_λs, const int &k_amp, const std::vector<int> &refζs = {-1, -1, -1, -1});
+    complex amplitude(const DecayChain &dc, const MandelstamTuple &σs, const std::vector<int> &two_λs, const int &k_ref);
 
     /**
      * @brief Calculates 4D tensor of aligned amplitudes
@@ -443,23 +442,21 @@ public:
      *
      * @param dc Decay chain
      * @param σs Mandelstam variables
-     * @param k_amp Amplitude type index
-     * @param refζ Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return 4D tensor of complex amplitudes
      */
-    Tensor4Dcomp amplitude4dcomp(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, std::vector<int> refζ = {-1, -1, -1, -1});
+    Tensor4Dcomp amplitude4dcomp(const DecayChain &dc, const MandelstamTuple &σs, const int &k_ref);
 
     /**
      * @brief Calculates total decay intensity
      *
      * @param dc Decay chain
      * @param σs Mandelstam variables
-     * @param k_amp Amplitude type index
+     * @param k_ref Reference index for Wigner rotations
      * @param weight Complex weight for the amplitude
-     * @param refζs Reference angles for Wigner rotations
      * @return Total intensity (proportional to decay rate)
      */
-    double intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_amp, const complex weight = complex(1,1), const std::vector<int> refζs = {-1, -1, -1, -1});
+    double intensity(const DecayChain &dc, const MandelstamTuple &σs, const int &k_ref, const complex weight = complex(1,1));
 
     /**
      * @brief Applies recoupling scheme to calculate amplitude components

@@ -62,13 +62,11 @@ public:
      * all decay chains, weighted by their coefficients.
      *
      * @param σs Mandelstam variables
-     * @param k_amp Amplitude type index
-     * @param refζs Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return 4D tensor of complex amplitudes
      */
     Tensor4Dcomp amplitude4d(const MandelstamTuple &σs,
-                             const int &k_amp,
-                             const std::vector<int> &refζs = {-1, -1, -1, -1}) const;
+                             const int &k_ref) const;
 
     /**
      * @brief Calculates the combined amplitude for specific helicity values
@@ -77,28 +75,24 @@ public:
      *
      * @param σs Mandelstam variables
      * @param two_λs Doubled helicity values for all particles
-     * @param k_amp Amplitude type index
-     * @param refζs Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return Complex amplitude
      */
     complex amplitudes(const MandelstamTuple &σs,
                        const std::vector<int> &two_λs,
-                       const int &k_amp,
-                       const std::vector<int> &refζs = {-1, -1, -1, -1}) const;
+                       const int &k_ref) const;
 
     /**
      * @brief Calculates the combined amplitude for specific helicity values
      *
      * @param σs Mandelstam variables
      * @param two_λs Doubled helicity values for all particles
-     * @param k_amp Amplitude type index
-     * @param refζs Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return Complex amplitude
      */
     complex amplitude(const MandelstamTuple &σs,
                       const std::vector<int> &two_λs,
-                      const int &k_amp,
-                      const std::vector<int> &refζs = {-1, -1, -1, -1}) const;
+                      const int &k_ref) const;
 
     /**
      * @brief Calculates the total decay intensity
@@ -107,11 +101,10 @@ public:
      * of the combined amplitude, representing the probability density.
      *
      * @param σs Mandelstam variables
-     * @param k_amp Amplitude type index
-     * @param refζs Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return Total intensity (probability density)
      */
-    double intensity(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs = {-1, -1, -1, -1}) const;
+    double intensity(const MandelstamTuple &σs, const int &k_ref) const;
 
     /**
      * @brief Calculates individual intensity contributions from each chain
@@ -120,11 +113,10 @@ public:
      * without interference effects.
      *
      * @param σs Mandelstam variables
-     * @param k_amp Amplitude type index
-     * @param refζs Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return Vector of individual intensities, one for each chain
      */
-    std::vector<double> component_intensities(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs = {-1, -1, -1, -1}) const;
+    std::vector<double> component_intensities(const MandelstamTuple &σs, const int &k_ref) const;
 
     /**
      * @brief Calculates interference terms between all chain pairs
@@ -133,11 +125,10 @@ public:
      * contribution between chains i and j to the total intensity.
      *
      * @param σs Mandelstam variables
-     * @param k_amp Amplitude type index
-     * @param refζs Reference angles for Wigner rotations
+     * @param k_ref Reference index for Wigner rotations
      * @return Matrix of interference terms
      */
-    std::vector<std::vector<double>> interference_terms(const MandelstamTuple &σs, const int &k_amp, const std::vector<int> refζs = {-1, -1, -1, -1}) const;
+    std::vector<std::vector<double>> interference_terms(const MandelstamTuple &σs, const int &k_ref) const;
     
     /**
      * @brief Returns the names of all resonances in the model
